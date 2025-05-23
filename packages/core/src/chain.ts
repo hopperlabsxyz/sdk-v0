@@ -16,6 +16,8 @@ export enum ChainId {
   PlumeMainnet = 98866,
   CampMainnet = 123420001114,
   BerachainMainnet = 80094,
+  MantleMainnet = 5000,
+  AvalancheMainnet = 43114,
 }
 
 export interface ChainMetadata {
@@ -166,6 +168,20 @@ export namespace ChainUtils {
       nativeCurrency: { name: "Bera", symbol: "BERA", decimals: 18 },
       explorerUrl: "https://berascan.com/",
       identifier: "berachain",
+    },
+    [ChainId.MantleMainnet]: {
+      name: "Mantle",
+      id: ChainId.MantleMainnet,
+      nativeCurrency: { name: "Mantle", symbol: "MNT", decimals: 18 },
+      explorerUrl: "https://mantlescan.xyz/",
+      identifier: "mantle",
+    },
+    [ChainId.AvalancheMainnet]: {
+      name: "Avalanche",
+      id: ChainId.AvalancheMainnet,
+      nativeCurrency: { name: "Avalanche", symbol: "AVAX", decimals: 18 },
+      explorerUrl: "https://snowscan.xyz/",
+      identifier: "avalanche",
     }
   } as const
 }
