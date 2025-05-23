@@ -180,7 +180,7 @@ export namespace ChainUtils {
       name: "Avalanche",
       id: ChainId.AvalancheMainnet,
       nativeCurrency: { name: "Avalanche", symbol: "AVAX", decimals: 18 },
-      explorerUrl: "https://snowscan.xyz/",
+      explorerUrl: "https://snowtrace.io",
       identifier: "avalanche",
     }
   } as const
