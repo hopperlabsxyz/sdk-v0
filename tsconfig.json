@@ -39,7 +39,10 @@
   ],
   "references": [
     {
-      "path": "./packages/core"
+      "path": "./packages/v0-core"
+    },
+    {
+      "path": "./packages/v0-viem"
     }
   ]
 }

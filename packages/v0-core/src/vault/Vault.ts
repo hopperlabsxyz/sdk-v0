@@ -1,6 +1,7 @@
 import { type IToken, Token } from "../token/Token";
 import type { Address } from "../types";
 
+
 export enum Version {
   v0_5_0 = "v0_5_0",
   v0_4_0 = "v0_4_0",
@@ -8,6 +9,7 @@ export enum Version {
   v0_2_0 = "v0_2_0",
   v0_1_0 = "v0_1_0"
 }
+
 export const LATEST_VERSION = Version.v0_5_0;
 
 export type VersionOrLatest = Version | "latest";
@@ -31,7 +33,7 @@ export interface IVault extends IToken {
 }
 
 export class Vault extends Token implements IVault {
-  public readonly asset;
+  public readonly asset: Address;
 
   public readonly safe: Address;
 

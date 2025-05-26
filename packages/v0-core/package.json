@@ -1,5 +1,5 @@
 {
-  "name": "@sdk-v0/core",
+  "name": "@sdk-v0/v0-core",
   "version": "0.0.1",
   "type": "module",
   "module": "src/index.ts",
