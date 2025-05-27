@@ -1,6 +1,6 @@
 {
-  "name": "@sdk-v0/v0-viem",
-  "version": "0.0.1",
+  "name": "@hopperlabsxyz/v0-viem",
+  "version": "0.0.1-alpha",
   "type": "module",
   "module": "src/index.ts",
   "main": "dist/index.js",
@@ -24,5 +24,6 @@
   },
   "dependencies": {
     "viem": "^2.30.0"
-  }
+  },
+  "private": false
 }
