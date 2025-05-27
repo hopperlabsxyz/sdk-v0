@@ -1,6 +1,6 @@
 {
   "name": "@hopperlabsxyz/v0-viem",
-  "version": "0.0.2-alpha",
+  "version": "0.0.1-alpha",
   "type": "module",
   "module": "src/index.ts",
   "main": "dist/index.js",
