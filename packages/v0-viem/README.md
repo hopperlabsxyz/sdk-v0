@@ -1,0 +1,44 @@
+# v0-viem SDK
+
+## How to install
+
+First, create a github token with read packages permissions and export it to your env variables
+
+```bash
+export NODE_AUTH_TOKEN='your github token'
+```
+
+Now you can install the library
+
+```
+npm install @hopperlabsxyz/v0-viem:latest
+```
+
+```ts
+import { fetchVault } from "@hopperlabsxyz/v0-viem";
+import { createPublicClient, http } from 'viem';
+import { mainnet } from 'viem/chains';
+
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+});
+
+const vault = await fetchVault('0x...', client)
+```
+
+## Local development:
+
+To install dependencies:
+
+```bash
+bun install
+```
+
+To run:
+
+```bash
+bun run index.ts
+```
+
+This project was created using `bun init` in bun v1.2.9. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
