@@ -1,22 +1,23 @@
-import { decodeFunctionResult, encodeFunctionData, parseAbi, type Address, type Client, type PublicClient } from "viem";
+import { decodeFunctionResult, encodeFunctionData, type Address, type Client } from "viem";
 import { code, abi } from "../queries/GetVault"
 import { call } from "viem/actions";
+import type { FetchParameters } from "../types";
 
 export async function fetchVault(
   address: Address,
   client: Client,
+  parameters: FetchParameters = {}
 ) {
 
   const res = await call(client, {
+    ...parameters,
     to: address,
-    data: encodeFunctionData({ abi, functionName: 'query', args: [address] }),
-    // data: encodeFunctionData({ abi: viewAbi, functionName: 'pendingSilo' }),
+    data: encodeFunctionData({ abi, functionName: 'query' }),
     stateOverride: [{
       address,
       code
     }]
   })
-  console.log(res);
 
   if (res.data) {
     return decodeFunctionResult({

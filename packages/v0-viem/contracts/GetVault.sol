@@ -2,18 +2,12 @@
 pragma solidity ^0.8.0;
 
 import {Helper, Rates} from "./Helpers.sol";
-import {IERC20} from "./interfaces/IERC20.sol";
-
-struct VaultConfig {
-    address asset;
-    string name;
-    string symbol;
-    uint256 decimals;
-    uint256 decimalsOffset;
-}
 
 struct VaultResponse {
-    // VaultConfig config;
+    address asset;
+    uint8 underlyingDecimals;
+    string name;
+    string symbol;
     address owner;
     address pendingOwner;
     address whitelistManager;
@@ -27,26 +21,48 @@ struct VaultResponse {
     uint256 cooldown;
     Rates rates;
     Rates oldRates;
-    // string version;
-}
-
-interface IVault is IERC20 {
-    function asset() external view returns (address);
-
-    function version() external view returns (string memory);
+    uint256 totalAssets;
+    uint256 newTotalAssets;
+    uint40 depositEpochId;
+    uint40 depositSettleId;
+    uint40 lastDepositEpochIdSettled;
+    uint40 redeemEpochId;
+    uint40 redeemSettleId;
+    uint40 lastRedeemEpochIdSettled;
+    address pendingSilo;
+    address wrappedNativeToken;
+    uint8 decimals;
+    uint8 decimalsOffset;
+    // New variables introduce with v0.5.0
+    uint128 totalAssetsExpiration;
+    uint128 totalAssetsLifespan;
 }
 
 contract GetVault is Helper {
-    function query(
-        IVault vault
-    ) external view returns (VaultResponse memory res) {
-        // res.config = VaultConfig({
-        //     asset: vault.asset(),
-        //     symbol: vault.symbol(),
-        //     name: vault.name(),
-        //     decimals: vault.decimals(),
-        //     decimalsOffset: 0 // TODO:
-        // });
+    function query() external view returns (VaultResponse memory res) {
+        ERC20Storage storage $erc20 = getERC20Storage();
+        res.symbol = $erc20.symbol;
+        res.name = $erc20.name;
+
+        ERC4626Storage storage $erc4626 = getERC4626Storage();
+        res.asset = $erc4626.asset;
+        res.underlyingDecimals = $erc4626.underlyingDecimals;
+
+        ERC7540Storage storage $erc7540 = getERC7540Storage();
+        res.totalAssets = $erc7540.totalAssets;
+        res.newTotalAssets = $erc7540.newTotalAssets;
+        res.depositEpochId = $erc7540.depositEpochId;
+        res.depositSettleId = $erc7540.depositSettleId;
+        res.lastDepositEpochIdSettled = $erc7540.lastDepositEpochIdSettled;
+        res.redeemEpochId = $erc7540.redeemEpochId;
+        res.redeemSettleId = $erc7540.redeemSettleId;
+        res.lastRedeemEpochIdSettled = $erc7540.lastRedeemEpochIdSettled;
+        res.pendingSilo = $erc7540.pendingSilo;
+        res.wrappedNativeToken = $erc7540.wrappedNativeToken;
+        res.decimals = $erc7540.decimals;
+        res.decimalsOffset = $erc7540.decimalsOffset;
+        res.totalAssetsExpiration = $erc7540.totalAssetsExpiration;
+        res.totalAssetsLifespan = $erc7540.totalAssetsLifespan;
 
         OwnableStorage storage $ownable = getOwnableStorage();
         res.owner = $ownable.owner;
@@ -69,11 +85,5 @@ contract GetVault is Helper {
         res.cooldown = $feeManager.cooldown;
         res.rates = $feeManager.rates;
         res.oldRates = $feeManager.oldRates;
-
-        // try vault.version() returns (string memory version) {
-        //     res.version = version;
-        // } catch (bytes memory) {
-        //     res.version = "unknown"; // most likely v0.2.0 or v0.1.0
-        // }
     }
 }
