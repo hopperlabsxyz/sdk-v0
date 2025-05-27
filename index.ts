@@ -7,5 +7,5 @@ const client = createPublicClient({
   transport: http(),
 });
 
-const vault = await fetchVault('0x07ed467acd4ffd13023046968b0859781cb90d9b', client)
+const vault = await fetchVault('0x7895a046b26cc07272b022a0c9bafc046e6f6396', client)
 console.log(vault);
