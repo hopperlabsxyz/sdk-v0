@@ -4,23 +4,13 @@ pragma solidity ^0.8.0;
 import {Helper, Rates} from "./Helpers.sol";
 
 struct VaultResponse {
-    address asset;
-    uint8 underlyingDecimals;
+    // ERC20 storage
     string name;
     string symbol;
-    address owner;
-    address pendingOwner;
-    address whitelistManager;
-    address feeReceiver;
-    address safe;
-    address feeRegistry;
-    address valuationManager;
-    uint256 newRatesTimestamp;
-    uint256 lastFeeTime;
-    uint256 highWaterMark;
-    uint256 cooldown;
-    Rates rates;
-    Rates oldRates;
+    // ERC4626 storage
+    address asset;
+    uint8 underlyingDecimals;
+    // ERC7540 storage
     uint256 totalAssets;
     uint256 newTotalAssets;
     uint40 depositEpochId;
@@ -33,16 +23,36 @@ struct VaultResponse {
     address wrappedNativeToken;
     uint8 decimals;
     uint8 decimalsOffset;
-    // New variables introduce with v0.5.0
     uint128 totalAssetsExpiration;
     uint128 totalAssetsLifespan;
+    // FeeManager storage
+    address feeRegistry;
+    uint256 newRatesTimestamp;
+    uint256 lastFeeTime;
+    uint256 highWaterMark;
+    uint256 cooldown;
+    Rates rates;
+    Rates oldRates;
+    // Ownable storage
+    address owner;
+    // Ownable2Step storage
+    address pendingOwner;
+    // Roles storage
+    address whitelistManager;
+    address feeReceiver;
+    address safe;
+    address valuationManager;
+    // Vault storage
+    Helper.State state;
+    // Whitelistable storage
+    bool isWhitelistActivated;
 }
 
 contract GetVault is Helper {
     function query() external view returns (VaultResponse memory res) {
         ERC20Storage storage $erc20 = getERC20Storage();
-        res.symbol = $erc20.symbol;
         res.name = $erc20.name;
+        res.symbol = $erc20.symbol;
 
         ERC4626Storage storage $erc4626 = getERC4626Storage();
         res.asset = $erc4626.asset;
@@ -64,6 +74,15 @@ contract GetVault is Helper {
         res.totalAssetsExpiration = $erc7540.totalAssetsExpiration;
         res.totalAssetsLifespan = $erc7540.totalAssetsLifespan;
 
+        FeeManagerStorage storage $feeManager = getFeeManagerStorage();
+        res.feeRegistry = $feeManager.feeRegistry;
+        res.newRatesTimestamp = $feeManager.newRatesTimestamp;
+        res.lastFeeTime = $feeManager.lastFeeTime;
+        res.highWaterMark = $feeManager.highWaterMark;
+        res.cooldown = $feeManager.cooldown;
+        res.rates = $feeManager.rates;
+        res.oldRates = $feeManager.oldRates;
+
         OwnableStorage storage $ownable = getOwnableStorage();
         res.owner = $ownable.owner;
 
@@ -77,13 +96,11 @@ contract GetVault is Helper {
         res.feeRegistry = $roles.feeRegistry;
         res.valuationManager = $roles.valuationManager;
 
-        FeeManagerStorage storage $feeManager = getFeeManagerStorage();
-        res.feeRegistry = $feeManager.feeRegistry;
-        res.newRatesTimestamp = $feeManager.newRatesTimestamp;
-        res.lastFeeTime = $feeManager.lastFeeTime;
-        res.highWaterMark = $feeManager.highWaterMark;
-        res.cooldown = $feeManager.cooldown;
-        res.rates = $feeManager.rates;
-        res.oldRates = $feeManager.oldRates;
+        VaultStorage storage $vault = getVaultStorage();
+        res.state = $vault.state;
+
+        WhitelistableStorage
+            storage $whitelistManager = getWhitelistableStorage();
+        res.isWhitelistActivated = $whitelistManager.isActivated;
     }
 }

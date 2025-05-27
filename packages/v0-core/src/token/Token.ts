@@ -11,6 +11,8 @@ export interface IToken {
   price?: BigIntish;
 }
 
+export class Test { }
+
 export class Token implements IToken {
   static native(chainId: ChainId) {
     const currency = ChainUtils.CHAIN_METADATA[chainId].nativeCurrency;

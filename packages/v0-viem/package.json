@@ -17,13 +17,14 @@
     "dev": "bun run --watch src/index.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@hopperlabsxyz/v0-core": "workspace:^",
+    "typescript": "^5",
+    "viem": "^2.0.0"
   },
   "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "viem": "^2.30.0"
+    "@hopperlabsxyz/v0-core": "workspace:^",
+    "viem": "^2.0.0"
   },
   "private": false
 }

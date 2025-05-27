@@ -17,6 +17,7 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@sdk-v0/core": "workspace:*"
+    "@hopperlabsxyz/v0-core": "workspace:*",
+    "@hopperlabsxyz/v0-viem": "workspace:*"
   }
 }
