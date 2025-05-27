@@ -8,11 +8,21 @@ First, create a github token with read packages permissions and export it to you
 export NODE_AUTH_TOKEN='your github token'
 ```
 
+Then add a `.npmrc` file to your project whith the following infos:
+
+```bash
+@hopperlabsxyz:registry=https://npm.pkg.github.com/
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+```
+
+
 Now you can install the library
 
 ```
-npm install @hopperlabsxyz/v0-viem:latest
+npm install @hopperlabsxyz/v0-viem
 ```
+
+## Template Example
 
 ```ts
 import { fetchVault } from "@hopperlabsxyz/v0-viem";
@@ -25,7 +35,9 @@ const client = createPublicClient({
 });
 
 const vault = await fetchVault('0x...', client)
+console.log(vault)
 ```
+
 
 ## Local development:
 

@@ -1,4 +1,4 @@
-# v0-viem SDK
+# v0-core SDK
 
 ## How to install
 
@@ -6,6 +6,13 @@ First, create a github token with read packages permissions and export it to you
 
 ```bash
 export NODE_AUTH_TOKEN='your github token'
+```
+
+Then add a `.npmrc` file to your project whith the following infos:
+
+```bash
+@hopperlabsxyz:registry=https://npm.pkg.github.com/
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
 ```
 
 Now you can install the library
