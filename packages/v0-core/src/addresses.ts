@@ -16,7 +16,14 @@ export const addresses = {
     beaconProxyFactory: "0x58a7729125acA9e5E9C687018E66bfDd5b2D4490",
     feeRegistry: "0x6dA4D1859bA1d02D095D2246142CdAd52233e27C",
     [Version.v0_5_0]: "0xE50554ec802375C9c3F9c087a8a7bb8C26d3DEDf",
-    wrappedNative: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1 "
+    wrappedNative: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1 ",
+    /**
+    * @dev Events not indexed
+    */
+    dev: {
+      beaconProxyFactory: "0x29f3dba953C57814A5579e08462724B9C760333e",
+      feeRegistry: "0x45BA44B8899D39abdc383a25bB17fcD18240c6Bc",
+    }
   },
   [ChainId.BaseMainnet]: {
     beaconProxyFactory: "0xC953Fd298FdfA8Ed0D38ee73772D3e21Bf19c61b",
@@ -24,7 +31,7 @@ export const addresses = {
     [Version.v0_5_0]: "0xE50554ec802375C9c3F9c087a8a7bb8C26d3DEDf",
     wrappedNative: "0x4200000000000000000000000000000000000006"
   },
-  [ChainId.Unichain]: {
+  [ChainId.UnichainMainnet]: {
     beaconProxyFactory: "0xaba1A2e157Dae248f8630cA550bd826725Ff745c",
     feeRegistry: "0x652716FaD571f04D26a3c8fFd9E593F17123Ab20",
     [Version.v0_5_0]: "0xE50554ec802375C9c3F9c087a8a7bb8C26d3DEDf",
