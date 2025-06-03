@@ -8,7 +8,7 @@ export enum ChainId {
   FraxtalMainnet = 252,
   ScrollMainnet = 534352,
   InkMainnet = 57073,
-  Unichain = 130,
+  UnichainMainnet = 130,
   SonicMainnet = 146,
   HemiMainnet = 43111,
   ModeMainnet = 34443,
@@ -113,9 +113,9 @@ export namespace ChainUtils {
       explorerUrl: "https://explorer.inkonchain.com",
       identifier: "ink",
     },
-    [ChainId.Unichain]: {
+    [ChainId.UnichainMainnet]: {
       name: "Unichain",
-      id: ChainId.Unichain,
+      id: ChainId.UnichainMainnet,
       nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
       explorerUrl: "https://uniscan.xyz",
       identifier: "unichain",
