@@ -1,5 +1,7 @@
+import { type RoundingDirection } from "../math";
 import { type IToken, Token } from "../token/Token";
 import { type Address } from "../types";
+import { VaultUtils } from "./VaultUtils";
 
 export enum Version {
   v0_5_0 = "v0.5.0",
@@ -177,5 +179,13 @@ export class Vault extends Token implements IVault {
     this.state = state;
     this.isWhitelistActivated = isWhitelistActivated;
     this.version = version;
+  }
+
+  public convertToAssets(shares: bigint, rounding?: RoundingDirection) {
+    return VaultUtils.convertToAssets(shares, { totalAssets: this.totalAssets, totalSupply: this.totalSupply, decimalsOffset: this.decimalsOffset }, rounding);
+  }
+
+  public convertToShares(assets: bigint, rounding?: RoundingDirection) {
+    return VaultUtils.convertToShares(assets, { totalAssets: this.totalAssets, totalSupply: this.totalSupply, decimalsOffset: this.decimalsOffset }, rounding);
   }
 }

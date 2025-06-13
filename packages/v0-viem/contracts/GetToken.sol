@@ -9,6 +9,7 @@ struct TokenResponse {
     string symbol;
     bool hasName;
     string name;
+    uint256 totalSupply;
 }
 
 contract GetToken {
@@ -28,5 +29,7 @@ contract GetToken {
         try token.decimals() returns (uint8 decimals) {
             res.decimals = decimals;
         } catch {}
+
+        res.totalSupply = token.totalSupply();
     }
 }

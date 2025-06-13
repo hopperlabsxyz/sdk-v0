@@ -7,6 +7,7 @@ struct VaultResponse {
     // ERC20 storage
     string name;
     string symbol;
+    uint256 totalSupply;
     // ERC4626 storage
     address asset;
     uint8 underlyingDecimals;
@@ -52,6 +53,7 @@ contract GetVault is Helper {
         ERC20Storage storage $erc20 = getERC20Storage();
         res.name = $erc20.name;
         res.symbol = $erc20.symbol;
+        res.totalSupply = $erc20.totalSupply;
 
         ERC4626Storage storage $erc4626 = getERC4626Storage();
         res.asset = $erc4626.asset;

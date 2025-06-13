@@ -48,7 +48,8 @@ const tacUSN = new Vault({
   valuationManager: '0xF53eAeB7e6f15CBb6dB990eaf2A26702e1D986d8',
   state: 0,
   isWhitelistActivated: false,
-  version: Version.v0_4_0
+  version: Version.v0_4_0,
+  totalSupply: 0n
 })
 
 describe("augment/Vault", () => {
