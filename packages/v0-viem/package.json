@@ -13,14 +13,16 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && bun build ./src/index.ts --outdir ./dist --target node --format esm",
-    "test": "bun test",
+    "test": "vitest",
     "dev": "bun run --watch src/index.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest",
     "@hopperlabsxyz/v0-core": "workspace:^",
+    "@morpho-org/test": "^2.1.4",
+    "@types/bun": "latest",
     "typescript": "^5",
-    "viem": "^2.0.0"
+    "viem": "^2.0.0",
+    "vitest": "^3.2.3"
   },
   "peerDependencies": {
     "@hopperlabsxyz/v0-core": "workspace:^",

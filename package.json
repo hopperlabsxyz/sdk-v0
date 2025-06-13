@@ -8,7 +8,6 @@
   "scripts": {
     "build": "bun run build:packages",
     "build:packages": "bun run --cwd packages/v0-core build && bun run --cwd packages/v0-viem build",
-    "test": "bun test",
     "dev": "bun run --watch index.ts",
     "clean": "rm -rf packages/*/dist"
   },

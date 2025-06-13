@@ -25,8 +25,8 @@ export function initializeEncodedCall(vault: Vault): Hex {
         valuationManager: vault.valuationManager,
         admin: vault.owner,
         feeReceiver: vault.feeReceiver,
-        managementRate: vault.rates.managementRate,
-        performanceRate: vault.rates.performanceRate,
+        managementRate: vault.feeRates.managementRate,
+        performanceRate: vault.feeRates.performanceRate,
         enableWhitelist: vault.isWhitelistActivated,
         rateUpdateCooldown: vault.cooldown,
       }

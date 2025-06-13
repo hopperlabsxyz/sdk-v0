@@ -1,5 +1,3 @@
-import { NATIVE_ADDRESS } from "../addresses";
-import { type ChainId, ChainUtils } from "../chain";
 import { MathLib, type RoundingDirection } from "../math/index";
 import type { Address, BigIntish } from "../types";
 
@@ -9,17 +7,12 @@ export interface IToken {
   symbol?: string;
   decimals?: BigIntish;
   price?: BigIntish;
+  totalSupply: bigint;
 }
 
 export class Test { }
 
 export class Token implements IToken {
-  static native(chainId: ChainId) {
-    const currency = ChainUtils.CHAIN_METADATA[chainId].nativeCurrency;
-
-    return new Token({ ...currency, address: NATIVE_ADDRESS });
-  }
-
   /**
    * The token's address.
    */
@@ -41,21 +34,29 @@ export class Token implements IToken {
   public readonly decimals: number;
 
   /**
+    * The vault's total supply of shares.
+    */
+  public totalSupply: bigint;
+
+  /**
    * Price of the token in USD (scaled by WAD).
    */
   public price?: bigint;
+
 
   constructor({
     address,
     name,
     symbol,
     decimals = 0,
-    price
+    totalSupply,
+    price,
   }: IToken) {
     this.address = address;
     this.name = name;
     this.symbol = symbol;
     this.decimals = Number(decimals);
+    this.totalSupply = BigInt(totalSupply);
 
     if (price != null) this.price = BigInt(price);
   }
