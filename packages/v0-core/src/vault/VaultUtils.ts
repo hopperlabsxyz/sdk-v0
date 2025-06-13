@@ -4,6 +4,8 @@ import type { BigIntish } from "../types.js";
 export namespace VaultUtils {
   export const VIRTUAL_ASSETS = 1n;
 
+  export const ONE_SHARE = 10n ** 18n;
+
   export function decimalsOffset(decimals: BigIntish) {
     return MathLib.zeroFloorSub(18n, decimals);
   }
