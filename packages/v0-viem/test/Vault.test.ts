@@ -1,4 +1,3 @@
-// import { createViemTest } from ".../../../../../jfrancai/morpho/sdks/packages/test/lib/esm/bun/";
 import { createViemTest } from "@morpho-org/test/vitest";
 import { mainnet } from "viem/chains";
 import { describe, expect } from "vitest";
@@ -40,8 +39,7 @@ const tacUSN = new Vault({
   lastFeeTime: 0n,
   highWaterMark: 1000000n,
   cooldown: 0n,
-  rates: { managementRate: 50, performanceRate: 1000 },
-  oldRates: { managementRate: 0, performanceRate: 0 },
+  feeRates: { managementRate: 50, performanceRate: 1000 },
   owner: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
   pendingOwner: '0x0000000000000000000000000000000000000000',
   whitelistManager: '0x0000000000000000000000000000000000000000',

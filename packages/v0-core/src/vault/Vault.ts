@@ -1,6 +1,5 @@
 import { type IToken, Token } from "../token/Token";
-import type { Address } from "../types";
-
+import { type Address } from "../types";
 
 export enum Version {
   v0_5_0 = "v0.5.0",
@@ -8,12 +7,6 @@ export enum Version {
   v0_3_0 = "v0.3.0",
   v0_2_0 = "v0.2.0",
   v0_1_0 = "v0.1.0"
-}
-
-export enum State {
-  Open,
-  Closing,
-  Closed
 }
 
 export const LATEST_VERSION = Version.v0_5_0;
@@ -24,6 +17,12 @@ export function resolveVersion(version: VersionOrLatest): Version {
   return version === "latest" ? LATEST_VERSION : version;
 }
 
+
+export enum State {
+  Open,
+  Closing,
+  Closed
+}
 export interface Rates {
   managementRate: number;
   performanceRate: number;
@@ -43,8 +42,7 @@ export interface IVault extends IToken {
   lastFeeTime: bigint;
   highWaterMark: bigint;
   cooldown: bigint;
-  rates: Rates
-  oldRates: Rates;
+  feeRates: Rates
   totalAssets: bigint;
   newTotalAssets: bigint;
   depositEpochId: number;
@@ -90,8 +88,7 @@ export class Vault extends Token implements IVault {
   public readonly lastFeeTime: bigint;
   public readonly highWaterMark: bigint;
   public readonly cooldown: bigint;
-  public readonly rates: Rates;
-  public readonly oldRates: Rates;
+  public readonly feeRates: Rates;
 
   // Ownable storage
   public readonly owner: Address;
@@ -136,8 +133,7 @@ export class Vault extends Token implements IVault {
     lastFeeTime,
     highWaterMark,
     cooldown,
-    rates,
-    oldRates,
+    feeRates,
     owner,
     pendingOwner,
     whitelistManager,
@@ -171,8 +167,7 @@ export class Vault extends Token implements IVault {
     this.lastFeeTime = lastFeeTime;
     this.highWaterMark = highWaterMark;
     this.cooldown = cooldown;
-    this.rates = rates;
-    this.oldRates = oldRates;
+    this.feeRates = feeRates;
     this.owner = owner;
     this.pendingOwner = pendingOwner;
     this.whitelistManager = whitelistManager;

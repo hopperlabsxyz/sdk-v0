@@ -31,8 +31,7 @@ struct VaultResponse {
     uint256 lastFeeTime;
     uint256 highWaterMark;
     uint256 cooldown;
-    Rates rates;
-    Rates oldRates;
+    Rates feeRates;
     // Ownable storage
     address owner;
     // Ownable2Step storage
@@ -80,9 +79,11 @@ contract GetVault is Helper {
         res.lastFeeTime = $feeManager.lastFeeTime;
         res.highWaterMark = $feeManager.highWaterMark;
         res.cooldown = $feeManager.cooldown;
-        res.rates = $feeManager.rates;
-        res.oldRates = $feeManager.oldRates;
-
+        if ($feeManager.newRatesTimestamp <= block.timestamp) {
+            res.feeRates = $feeManager.rates;
+        } else {
+            res.feeRates = $feeManager.oldRates;
+        }
         OwnableStorage storage $ownable = getOwnableStorage();
         res.owner = $ownable.owner;
 
