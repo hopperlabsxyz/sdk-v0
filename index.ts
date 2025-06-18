@@ -1,5 +1,5 @@
-import { addresses, ChainId } from "@hopperlabsxyz/v0-core";
-import { Vault } from "@hopperlabsxyz/v0-viem";
+import { addresses, ChainId } from "@lagoon-protocol/v0-core";
+import { Vault } from "@lagoon-protocol/v0-viem";
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 

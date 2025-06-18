@@ -2,7 +2,7 @@ import { createViemTest } from "@morpho-org/test/vitest";
 import { mainnet } from "viem/chains";
 import { describe, expect } from "vitest";
 import { Vault } from "../src/augment/Vault";
-import { addresses, ChainId, Version } from "@hopperlabsxyz/v0-core";
+import { addresses, ChainId, Version } from "@lagoon-protocol/v0-core";
 
 
 const UINT256_MAX = 2n ** 256n - 1n;

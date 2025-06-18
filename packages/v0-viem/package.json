@@ -1,10 +1,17 @@
 {
-  "name": "@hopperlabsxyz/v0-viem",
-  "version": "0.0.2-alpha",
+  "name": "@lagoon-protocol/v0-viem",
+  "description": "Viem based package that defines Lagoon utilities for vault core classes",
+  "version": "0.1.0",
+  "license": "MIT",
   "type": "module",
   "module": "src/index.ts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "../../LICENSE"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -17,7 +24,7 @@
     "dev": "bun run --watch src/index.ts"
   },
   "devDependencies": {
-    "@hopperlabsxyz/v0-core": "workspace:^",
+    "@lagoon-protocol/v0-core": "workspace:^",
     "@morpho-org/test": "^2.1.4",
     "@types/bun": "latest",
     "typescript": "^5",
@@ -25,8 +32,13 @@
     "vitest": "^3.2.3"
   },
   "peerDependencies": {
-    "@hopperlabsxyz/v0-core": "workspace:^",
+    "@lagoon-protocol/v0-core": "workspace:^",
     "viem": "^2.0.0"
   },
-  "private": false
+  "private": false,
+  "publishConfig": {
+    "tag": "next",
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts"
+  }
 }

@@ -1,7 +1,7 @@
 import { test, describe, expect } from "bun:test";
 import { Vault } from "../src/Vault";
-import { VaultUtils } from "@hopperlabsxyz/v0-core";
-import { addresses, ChainId, Version } from "@hopperlabsxyz/v0-core";
+import { VaultUtils } from "@lagoon-protocol/v0-core";
+import { addresses, ChainId, Version } from "@lagoon-protocol/v0-core";
 
 
 const UINT256_MAX = 2n ** 256n - 1n;

@@ -1,10 +1,17 @@
 {
-  "name": "@hopperlabsxyz/v0-core",
-  "version": "0.0.2-alpha",
+  "name": "@lagoon-protocol/v0-core",
+  "description": "Framework-agnostic package that defines Lagoon related entity classes (such as Vault)",
+  "version": "0.1.0",
+  "license": "MIT",
   "type": "module",
   "module": "src/index.ts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "../../LICENSE"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -22,5 +29,10 @@
   "peerDependencies": {
     "typescript": "^5"
   },
-  "private": false
+  "private": false,
+  "publishConfig": {
+    "tag": "next",
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts"
+  }
 }
