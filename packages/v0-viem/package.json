@@ -1,10 +1,17 @@
 {
   "name": "@lagoon-protocol/v0-viem",
-  "version": "0.0.2-alpha",
+  "description": "Viem based package that defines Lagoon utilities for vault core classes",
+  "version": "0.1.0",
+  "license": "MIT",
   "type": "module",
   "module": "src/index.ts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "../../LICENSE"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -28,5 +35,10 @@
     "@lagoon-protocol/v0-core": "workspace:^",
     "viem": "^2.0.0"
   },
-  "private": false
+  "private": false,
+  "publishConfig": {
+    "tag": "next",
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts"
+  }
 }
