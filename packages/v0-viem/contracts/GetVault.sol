@@ -7,6 +7,7 @@ struct VaultResponse {
     // ERC20 storage
     string name;
     string symbol;
+    uint256 totalSupply;
     // ERC4626 storage
     address asset;
     uint8 underlyingDecimals;
@@ -31,8 +32,7 @@ struct VaultResponse {
     uint256 lastFeeTime;
     uint256 highWaterMark;
     uint256 cooldown;
-    Rates rates;
-    Rates oldRates;
+    Rates feeRates;
     // Ownable storage
     address owner;
     // Ownable2Step storage
@@ -53,6 +53,7 @@ contract GetVault is Helper {
         ERC20Storage storage $erc20 = getERC20Storage();
         res.name = $erc20.name;
         res.symbol = $erc20.symbol;
+        res.totalSupply = $erc20.totalSupply;
 
         ERC4626Storage storage $erc4626 = getERC4626Storage();
         res.asset = $erc4626.asset;
@@ -80,9 +81,11 @@ contract GetVault is Helper {
         res.lastFeeTime = $feeManager.lastFeeTime;
         res.highWaterMark = $feeManager.highWaterMark;
         res.cooldown = $feeManager.cooldown;
-        res.rates = $feeManager.rates;
-        res.oldRates = $feeManager.oldRates;
-
+        if ($feeManager.newRatesTimestamp <= block.timestamp) {
+            res.feeRates = $feeManager.rates;
+        } else {
+            res.feeRates = $feeManager.oldRates;
+        }
         OwnableStorage storage $ownable = getOwnableStorage();
         res.owner = $ownable.owner;
 
