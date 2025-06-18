@@ -16,7 +16,7 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@hopperlabsxyz/v0-core": "workspace:*",
-    "@hopperlabsxyz/v0-viem": "workspace:*"
+    "@lagoon-protocol/v0-core": "workspace:*",
+    "@lagoon-protocol/v0-viem": "workspace:*"
   }
 }

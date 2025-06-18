@@ -6,11 +6,11 @@ A collection of Software Development Kits to ease interactions with Lagoon Vault
 
 ### Viem
 
-[**`@hopperlabsxyz/v0-viem`**](./packages/v0-viem/): Viem-based utilities for Lagoon Vault interactions. This package provides helper functions for fetching vault data and performing vault operations, extending the core functionality from [v0-core](./packages/v0-core/).
+[**`@lagoon-protocol/v0-viem`**](./packages/v0-viem/): Viem-based utilities for Lagoon Vault interactions. This package provides helper functions for fetching vault data and performing vault operations, extending the core functionality from [v0-core](./packages/v0-core/).
 
 ### Core
 
-[**`@hopperlabsxyz/v0-core`**](./packages/v0-core/): This package provides library-agnostic components and tools to simplify interaction with the Lagoon smart contract ecosystem.
+[**`@lagoon-protocol/v0-core`**](./packages/v0-core/): This package provides library-agnostic components and tools to simplify interaction with the Lagoon smart contract ecosystem.
 
 ## License
 

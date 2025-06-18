@@ -1,4 +1,4 @@
-import type { Vault } from "@hopperlabsxyz/v0-core";
+import type { Vault } from "@lagoon-protocol/v0-core";
 import { encodeAbiParameters, encodeFunctionData, parseAbiParameter, parseAbiParameters, type Address, type Hex } from "viem";
 
 /**

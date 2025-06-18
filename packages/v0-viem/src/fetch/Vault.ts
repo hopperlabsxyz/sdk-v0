@@ -1,4 +1,4 @@
-import { Vault, Version } from "@hopperlabsxyz/v0-core";
+import { Vault, Version } from "@lagoon-protocol/v0-core";
 import { decodeFunctionResult, encodeFunctionData, parseAbi, type Address, type Client } from "viem";
 import { code, abi } from "../queries/GetVault"
 import { call, readContract } from "viem/actions";

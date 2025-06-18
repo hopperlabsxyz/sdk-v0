@@ -1,21 +1,21 @@
-# @hopperlabsxyz/v0-viem
+# @lagoon-protocol/v0-viem
 
-Viem based extension of `@hopperlabsxyz/v0-core`, inspired by [@morpho-org/blue-sdk-viem](https://github.com/morpho-org/sdks/tree/main/packages/blue-sdk-viem) architecture:
+Viem based extension of `@lagoon-protocol/v0-core`, inspired by [@morpho-org/blue-sdk-viem](https://github.com/morpho-org/sdks/tree/main/packages/blue-sdk-viem) architecture:
 
 ## How to install
 
 ```bash
-npm install @hopperlabsxyz/v0-viem
+npm install @lagoon-protocol/v0-viem
 ```
 
 ```bash
-bun install @hopperlabsxyz/v0-viem
+bun install @lagoon-protocol/v0-viem
 ```
 
 ## How to use
 
 ```typescript
-import { Vault } from "@hopperlabsxyz/v0-viem/augment/Vault";
+import { Vault } from "@lagoon-protocol/v0-viem/augment/Vault";
 
 const vault = await Vault.fetch(
   "0x7895A046b26CC07272B022a0C9BAFC046E6F6396",

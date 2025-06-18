@@ -26,7 +26,7 @@
     // Monorepo support
     "baseUrl": ".",
     "paths": {
-      "@hopperlabsxyz/*": [
+      "@lagoon-protocol/*": [
         "packages/*/src"
       ]
     }

@@ -1,4 +1,4 @@
-# @hopperlabsxyz/v0-core
+# @lagoon-protocol/v0-core
 
 Framework-agnostic package that defines Lagoon vault entity classes, inspired by [@morpho-org/blue-sdk](https://github.com/morpho-org/sdks/tree/main/packages/blue-sdk) architecture:
 
@@ -9,19 +9,19 @@ Framework-agnostic package that defines Lagoon vault entity classes, inspired by
 ## How to install
 
 ```bash
-npm install @hopperlabsxyz/v0-core
+npm install @lagoon-protocol/v0-core
 ```
 
 ```bash
-bun install @hopperlabsxyz/v0-core
+bun install @lagoon-protocol/v0-core
 ```
 
 ## How to use
 
 ```typescript
-import { Vault, Token } from '@hopperlabsxyz/v0-core';
-import { VaultUtils } from "@hopperlabsxyz/v0-core";
-import { addresses, ChainId, Version } from "@hopperlabsxyz/v0-core";
+import { Vault, Token } from '@lagoon-protocol/v0-core';
+import { VaultUtils } from "@lagoon-protocol/v0-core";
+import { addresses, ChainId, Version } from "@lagoon-protocol/v0-core";
 
 const UINT256_MAX = 2n ** 256n - 1n;
 

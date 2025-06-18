@@ -1,10 +1,10 @@
-import { Vault } from "@hopperlabsxyz/v0-core";
+import { Vault } from "@lagoon-protocol/v0-core";
 
 import { fetchVault } from "../fetch";
 import { initializeEncodedCall, siloConstructorEncodedCall, beaconProxyConstructorEncodedCall } from "../encode/Vault";
 import type { Address } from "viem";
 
-declare module "@hopperlabsxyz/v0-core" {
+declare module "@lagoon-protocol/v0-core" {
   namespace Vault {
     let fetch: typeof fetchVault;
 
