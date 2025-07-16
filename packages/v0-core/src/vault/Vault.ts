@@ -181,11 +181,15 @@ export class Vault extends Token implements IVault {
     this.version = version;
   }
 
-  public convertToAssets(shares: bigint, rounding?: RoundingDirection) {
+  public convertToAssets(shares: bigint, rounding?: RoundingDirection): bigint {
     return VaultUtils.convertToAssets(shares, { totalAssets: this.totalAssets, totalSupply: this.totalSupply, decimalsOffset: this.decimalsOffset }, rounding);
   }
 
-  public convertToShares(assets: bigint, rounding?: RoundingDirection) {
+  public convertToShares(assets: bigint, rounding?: RoundingDirection): bigint {
     return VaultUtils.convertToShares(assets, { totalAssets: this.totalAssets, totalSupply: this.totalSupply, decimalsOffset: this.decimalsOffset }, rounding);
+  }
+
+  public calculateTotalAssetsAtHWM(): bigint {
+    return VaultUtils.calculateShareValue(this.highWaterMark, { supplyShares: this.totalSupply, decimals: this.decimals })
   }
 }
