@@ -1,4 +1,4 @@
-import { Vault, Version } from "@lagoon-protocol/v0-core";
+import { Vault } from "@lagoon-protocol/v0-core";
 import { decodeFunctionResult, encodeFunctionData, parseAbi, type Address, type Client } from "viem";
 import { code, abi } from "../queries/GetVault"
 import { call, readContract } from "viem/actions";
@@ -35,7 +35,7 @@ export async function fetchVault(
   if (res.data) {
     return new Vault({
       address,
-      version: version as Version,
+      version,
       ...decodeFunctionResult({
         abi,
         functionName: 'query',

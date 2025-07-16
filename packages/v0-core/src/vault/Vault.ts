@@ -19,6 +19,18 @@ export function resolveVersion(version: VersionOrLatest): Version {
   return version === "latest" ? LATEST_VERSION : version;
 }
 
+export function isValidVersion(version: string): version is Version {
+  switch (version) {
+    case Version.v0_5_0:
+    case Version.v0_4_0:
+    case Version.v0_3_0:
+    case Version.v0_2_0:
+    case Version.v0_1_0:
+      return true;
+    default:
+      return false;
+  }
+}
 
 export enum State {
   Open,
@@ -61,7 +73,7 @@ export interface IVault extends IToken {
   totalAssetsLifespan: bigint;
   state: State,
   isWhitelistActivated: boolean,
-  version: Version
+  version: Version | string
 }
 
 export class Vault extends Token implements IVault {
@@ -226,7 +238,7 @@ export class Vault extends Token implements IVault {
   public readonly isWhitelistActivated: boolean;
 
   /// Bytecoded ///
-  public readonly version: Version;
+  public readonly version: Version | string;
 
 
   constructor({
@@ -263,7 +275,6 @@ export class Vault extends Token implements IVault {
     ...config
   }: IVault) {
     super({ ...config, decimals: 18 });
-
     this.asset = asset;
     this.underlyingDecimals = underlyingDecimals;
     this.totalAssets = totalAssets;
