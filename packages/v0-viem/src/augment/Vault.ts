@@ -12,6 +12,8 @@ declare module "@lagoon-protocol/v0-core" {
 
     let getSafeBalance: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchBalanceOf>;
 
+    let getSiloBalances: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchBalanceOf>;
+
     /**
      * Encodes the initialization call for a vault.
      *
@@ -40,6 +42,8 @@ declare module "@lagoon-protocol/v0-core" {
   interface Vault {
     getSafeBalance(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchBalanceOf>;
 
+    getSiloBalances(client: Client, parameters?: FetchParameters): Promise<{ shares: bigint | undefined, assets: bigint | undefined }>;
+
     /**
      * Encodes the initialization call for a vault.
      *
@@ -66,10 +70,19 @@ declare module "@lagoon-protocol/v0-core" {
 
 Vault.fetch = fetchVault;
 
-Vault.prototype.getSafeBalance = async function (
-  client: Client,
-  parameters: FetchParameters = {}
-) { return fetchBalanceOf({ address: this.asset }, this.address, client, parameters) };
+Vault.prototype.getSafeBalance =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchBalanceOf({ address: this.asset }, this.address, client, parameters)
+  };
+
+Vault.prototype.getSiloBalances =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    const [shares, assets] = await Promise.all([
+      await fetchBalanceOf({ address: this.address }, this.pendingSilo, client, parameters),
+      await fetchBalanceOf({ address: this.asset }, this.pendingSilo, client, parameters)
+    ])
+    return { shares, assets }
+  }
 
 Vault.initializeEncoded = initializeEncodedCall
 Vault.prototype.initializeEncoded = function () { return initializeEncodedCall(this) }

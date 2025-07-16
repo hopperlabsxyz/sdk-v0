@@ -7,7 +7,7 @@ export async function fetchBalanceOf(
   account: Address,
   client: Client,
   parameters: FetchParameters = {}
-) {
+): Promise<bigint | undefined> {
   try {
     return readContract(client, {
       ...parameters,

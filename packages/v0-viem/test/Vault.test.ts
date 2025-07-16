@@ -52,6 +52,7 @@ const tacUSN = new Vault({
   totalSupply: 0n
 })
 
+
 describe("augment/Vault", () => {
   test("should fetch vault data", async ({ client }) => {
     const expectedValue = tacUSN;
@@ -60,8 +61,16 @@ describe("augment/Vault", () => {
   });
 
   test("should fetch vault safe balance", async ({ client }) => {
-    const expectedValue = 0n;
-    const value = await tacUSN.getSafeBalance(client);
+    const expectedValue = 5698935886487280250n;
+    const flagship9sEth = await Vault.fetch("0x07ed467acd4ffd13023046968b0859781cb90d9b", client);
+    const value = await flagship9sEth?.getSafeBalance(client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test("should fetch pendingSilo assets/shares balances", async ({ client }) => {
+    const expectedValue = { assets: 200000000000000n, shares: 1145310963429674161n };
+    const flagship9sEth = await Vault.fetch("0x07ed467acd4ffd13023046968b0859781cb90d9b", client);
+    const value = await flagship9sEth?.getSiloBalances(client);
     expect(value).toStrictEqual(expectedValue);
   });
 
