@@ -1,5 +1,5 @@
 import { Vault } from "@lagoon-protocol/v0-core";
-import { decodeFunctionResult, encodeFunctionData, parseAbi, type Address, type Client } from "viem";
+import { decodeFunctionResult, encodeFunctionData, erc20Abi, parseAbi, type Address, type Client } from "viem";
 import { code, abi } from "../queries/GetVault"
 import { call, readContract } from "viem/actions";
 import type { FetchParameters } from "../types";

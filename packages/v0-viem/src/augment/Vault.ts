@@ -1,12 +1,16 @@
 import { Vault } from "@lagoon-protocol/v0-core";
 
-import { fetchVault } from "../fetch";
+import { fetchBalanceOf, fetchVault } from "../fetch";
 import { initializeEncodedCall, siloConstructorEncodedCall, beaconProxyConstructorEncodedCall } from "../encode/Vault";
-import type { Address } from "viem";
+import type { Address, Client } from "viem";
+import type { FetchParameters } from "../types";
+
 
 declare module "@lagoon-protocol/v0-core" {
   namespace Vault {
     let fetch: typeof fetchVault;
+
+    let getSafeBalance: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchBalanceOf>;
 
     /**
      * Encodes the initialization call for a vault.
@@ -34,6 +38,8 @@ declare module "@lagoon-protocol/v0-core" {
     let beaconProxyConstructorEncoded: typeof beaconProxyConstructorEncodedCall;
   }
   interface Vault {
+    getSafeBalance(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchBalanceOf>;
+
     /**
      * Encodes the initialization call for a vault.
      *
@@ -59,6 +65,11 @@ declare module "@lagoon-protocol/v0-core" {
 }
 
 Vault.fetch = fetchVault;
+
+Vault.prototype.getSafeBalance = async function (
+  client: Client,
+  parameters: FetchParameters = {}
+) { return fetchBalanceOf({ address: this.asset }, this.address, client, parameters) };
 
 Vault.initializeEncoded = initializeEncodedCall
 Vault.prototype.initializeEncoded = function () { return initializeEncodedCall(this) }
