@@ -1,6 +1,6 @@
-import { Vault } from "@lagoon-protocol/v0-core";
-import { decodeFunctionResult, encodeFunctionData, erc20Abi, parseAbi, type Address, type Client } from "viem";
-import { code, abi } from "../queries/GetVault"
+import { Vault, type SettleData } from "@lagoon-protocol/v0-core";
+import { decodeFunctionResult, encodeFunctionData, parseAbi, type Address, type Client } from "viem";
+import { GetVault, GetSettleData } from "../queries"
 import { call, readContract } from "viem/actions";
 import type { FetchParameters } from "../types";
 
@@ -13,10 +13,13 @@ export async function fetchVault(
     call(client, {
       ...parameters,
       to: address,
-      data: encodeFunctionData({ abi, functionName: 'query' }),
+      data: encodeFunctionData({
+        abi: GetVault.abi,
+        functionName: 'query'
+      }),
       stateOverride: [{
         address,
-        code
+        code: GetVault.code
       }]
     }),
     (async () => {
@@ -37,10 +40,41 @@ export async function fetchVault(
       address,
       version,
       ...decodeFunctionResult({
-        abi,
+        abi: GetVault.abi,
         functionName: 'query',
         data: res.data, // raw hex data returned from the call
       })
     });
+  }
+}
+
+export async function fetchSettleData(
+  { address }: { address: Address },
+  settleId: number,
+  client: Client,
+  parameters: FetchParameters = {}
+): Promise<SettleData | undefined> {
+  const res = await call(client, {
+    ...parameters,
+    to: address,
+    data: encodeFunctionData({
+      abi: GetSettleData.abi,
+      functionName: 'query',
+      args: [settleId]
+    }),
+    stateOverride: [{
+      address,
+      code: GetSettleData.code
+    }]
+  })
+
+  if (res.data) {
+    return {
+      ...decodeFunctionResult({
+        abi: GetSettleData.abi,
+        functionName: 'query',
+        data: res.data, // raw hex data returned from the call
+      })
+    };
   }
 }

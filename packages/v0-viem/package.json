@@ -26,7 +26,7 @@
     "build:cjs": " bun build ./src/index.ts --target node --format cjs --outfile ./dist/cjs/index.cjs",
     "build:esm": " bun build ./src/index.ts --target node --format esm --outfile ./dist/esm/index.js",
     "clean": "rm -rf dist",
-    "test": "vitest",
+    "test": "vitest --pool=forks --poolOptions.forks.singleFork=true",
     "dev": "bun run --watch src/index.ts"
   },
   "devDependencies": {
