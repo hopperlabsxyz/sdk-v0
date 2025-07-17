@@ -1,6 +1,6 @@
 import { Vault } from "@lagoon-protocol/v0-core";
 
-import { fetchBalanceOf, fetchVault } from "../fetch";
+import { fetchBalanceOf, fetchSettleData, fetchVault } from "../fetch";
 import { initializeEncodedCall, siloConstructorEncodedCall, beaconProxyConstructorEncodedCall } from "../encode/Vault";
 import type { Address, Client } from "viem";
 import type { FetchParameters } from "../types";
@@ -11,8 +11,6 @@ declare module "@lagoon-protocol/v0-core" {
     let fetch: typeof fetchVault;
 
     let getSafeBalance: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchBalanceOf>;
-
-    let getSiloBalances: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchBalanceOf>;
 
     /**
      * Encodes the initialization call for a vault.
@@ -43,6 +41,11 @@ declare module "@lagoon-protocol/v0-core" {
     getSafeBalance(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchBalanceOf>;
 
     getSiloBalances(client: Client, parameters?: FetchParameters): Promise<{ shares: bigint | undefined, assets: bigint | undefined }>;
+
+    getAssetsDepositedIfSettled: (client: Client, parameters?: FetchParameters) => Promise<bigint>;
+
+    getSharesRedeemedIfSettled: (client: Client, parameters?: FetchParameters) => Promise<bigint>;
+
 
     /**
      * Encodes the initialization call for a vault.
@@ -78,10 +81,32 @@ Vault.prototype.getSafeBalance =
 Vault.prototype.getSiloBalances =
   async function (client: Client, parameters: FetchParameters = {}) {
     const [shares, assets] = await Promise.all([
-      await fetchBalanceOf({ address: this.address }, this.pendingSilo, client, parameters),
-      await fetchBalanceOf({ address: this.asset }, this.pendingSilo, client, parameters)
+      fetchBalanceOf(this, this.pendingSilo, client, parameters),
+      fetchBalanceOf({ address: this.asset }, this.pendingSilo, client, parameters)
     ])
     return { shares, assets }
+  }
+
+Vault.prototype.getAssetsDepositedIfSettled =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    const [settleData, pendingSiloAssets] = await Promise.all([
+      fetchSettleData(this, this.depositSettleId, client, { ...parameters, revalidate: true }),
+      fetchBalanceOf({ address: this.asset }, this.pendingSilo, client, parameters)
+    ])
+    if (!settleData || !pendingSiloAssets) return 0n;
+    if (settleData.pendingAssets === 0n) return pendingSiloAssets;
+    return settleData.pendingAssets;
+  }
+
+Vault.prototype.getSharesRedeemedIfSettled =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    const [settleData, pendingSiloShares] = await Promise.all([
+      fetchSettleData(this, this.depositSettleId, client, { ...parameters, revalidate: true }),
+      fetchBalanceOf(this, this.pendingSilo, client, parameters),
+    ])
+    if (!settleData || !pendingSiloShares) return 0n;
+    if (settleData.pendingShares === 0n) return pendingSiloShares;
+    return settleData.pendingShares;
   }
 
 Vault.initializeEncoded = initializeEncodedCall
