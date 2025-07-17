@@ -52,10 +52,13 @@ export async function fetchSettleData(
   { address }: { address: Address },
   settleId: number,
   client: Client,
-  parameters: FetchParameters = {}
+  parameters: FetchParameters & { revalidate?: boolean } = { revalidate: false }
 ): Promise<SettleData | undefined> {
-  const { data: settleData } = await tryCatch((async () => SettleData.get(settleId))())
-  if (settleData) return settleData
+  if (parameters.revalidate === false) {
+    const { data: settleData } = await tryCatch((async () => SettleData.get(settleId))())
+    if (settleData) return settleData
+  }
+  delete parameters.revalidate;
 
   const res = await call(client, {
     ...parameters,
