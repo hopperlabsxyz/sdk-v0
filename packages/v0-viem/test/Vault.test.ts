@@ -2,7 +2,7 @@ import { describe, expect } from "vitest";
 import { Vault } from "../src/augment/Vault";
 import { addresses, ChainId, SettleData, Version } from "@lagoon-protocol/v0-core";
 import { fetchSettleData } from "../src/fetch";
-import { test, test2 } from "./setup";
+import { test, test2, test3 } from "./setup";
 
 const UINT256_MAX = 2n ** 256n - 1n;
 
@@ -100,6 +100,19 @@ describe("augment/Vault", () => {
     expect(value).toStrictEqual(expectedValue);
   });
 
+  test2("should fetch 0 assets to unwind", async ({ client }) => {
+    const expectedValue = 0n;
+    const flagship9sEth = await Vault.fetch("0x07ed467acd4ffd13023046968b0859781cb90d9b", client);
+    const value = await flagship9sEth?.getAssetsToUnwind(client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test3("should fetch some assets to unwind", async ({ client }) => {
+    const expectedValue = 1161562817536403779579n;
+    const flagship9sEth = await Vault.fetch("0x07ed467acd4ffd13023046968b0859781cb90d9b", client);
+    const value = await flagship9sEth?.getAssetsToUnwind(client);
+    expect(value).toStrictEqual(expectedValue);
+  });
 });
 
 describe("fetch/fetchSettleData", () => {

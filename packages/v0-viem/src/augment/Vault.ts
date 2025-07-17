@@ -46,6 +46,7 @@ declare module "@lagoon-protocol/v0-core" {
 
     getSharesRedeemedIfSettled: (client: Client, parameters?: FetchParameters) => Promise<bigint>;
 
+    getAssetsToUnwind: (client: Client, parameters?: FetchParameters) => Promise<bigint>;
 
     /**
      * Encodes the initialization call for a vault.
@@ -101,12 +102,22 @@ Vault.prototype.getAssetsDepositedIfSettled =
 Vault.prototype.getSharesRedeemedIfSettled =
   async function (client: Client, parameters: FetchParameters = {}) {
     const [settleData, pendingSiloShares] = await Promise.all([
-      fetchSettleData(this, this.depositSettleId, client, { ...parameters, revalidate: true }),
+      fetchSettleData(this, this.redeemSettleId, client, { ...parameters, revalidate: true }),
       fetchBalanceOf(this, this.pendingSilo, client, parameters),
     ])
     if (!settleData || !pendingSiloShares) return 0n;
     if (settleData.pendingShares === 0n) return pendingSiloShares;
     return settleData.pendingShares;
+  }
+
+Vault.prototype.getAssetsToUnwind =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    const [sharesToRedeem, assetsPendingDeposit, safeAssetBalance] = await Promise.all([
+      this.getSharesRedeemedIfSettled(client, parameters),
+      this.getAssetsDepositedIfSettled(client, parameters),
+      this.getSafeBalance(client, parameters)
+    ])
+    return this.calculateAssetsToUnwind(sharesToRedeem, assetsPendingDeposit, safeAssetBalance ?? 0n)
   }
 
 Vault.initializeEncoded = initializeEncodedCall

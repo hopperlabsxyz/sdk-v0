@@ -7,12 +7,15 @@ import { mainnet } from "viem/chains";
 export const test = createViemTest(mainnet, {
   forkUrl: process.env.MAINNET_RPC_URL,
   forkBlockNumber: 22_253_107,
-  port: 8545
 });
 
 export const test2 = createViemTest(mainnet, {
   forkUrl: process.env.MAINNET_RPC_URL,
   forkBlockNumber: 22_925_689,
-  port: 8546
+});
+
+export const test3 = createViemTest(mainnet, {
+  forkUrl: process.env.MAINNET_RPC_URL,
+  forkBlockNumber: 22_868_385,
 });
 
