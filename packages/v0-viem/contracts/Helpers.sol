@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import {ERC20} from "./helpers/ERC20.sol";
 import {ERC4626} from "./helpers/ERC4626.sol";
-import {ERC7540} from "./helpers/ERC7540.sol";
+import {ERC7540, SettleData, EpochData} from "./helpers/ERC7540.sol";
 import {FeeManager} from "./helpers/FeeManager.sol";
 import {Ownable} from "./helpers/Ownable.sol";
 import {Ownable2Step} from "./helpers/Ownable2StepUpgradeable.sol";
