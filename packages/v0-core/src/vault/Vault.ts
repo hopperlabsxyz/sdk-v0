@@ -37,6 +37,7 @@ export enum State {
   Closing,
   Closed
 }
+
 export interface Rates {
   managementRate: number;
   performanceRate: number;

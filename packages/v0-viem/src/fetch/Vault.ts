@@ -1,4 +1,4 @@
-import { Vault, type SettleData } from "@lagoon-protocol/v0-core";
+import { Vault, SettleData, tryCatch } from "@lagoon-protocol/v0-core";
 import { decodeFunctionResult, encodeFunctionData, parseAbi, type Address, type Client } from "viem";
 import { GetVault, GetSettleData } from "../queries"
 import { call, readContract } from "viem/actions";
@@ -54,6 +54,9 @@ export async function fetchSettleData(
   client: Client,
   parameters: FetchParameters = {}
 ): Promise<SettleData | undefined> {
+  const { data: settleData } = await tryCatch((async () => SettleData.get(settleId))())
+  if (settleData) return settleData
+
   const res = await call(client, {
     ...parameters,
     to: address,
@@ -69,12 +72,13 @@ export async function fetchSettleData(
   })
 
   if (res.data) {
-    return {
+    return new SettleData({
+      settleId: settleId,
       ...decodeFunctionResult({
         abi: GetSettleData.abi,
         functionName: 'query',
         data: res.data, // raw hex data returned from the call
       })
-    };
+    });
   }
 }
