@@ -1,7 +1,7 @@
 import { vaultAbi_v0_2_0, vaultAbi_v0_3_0, vaultAbi_v0_4_0, vaultAbi_v0_5_0 } from "../constants/abis";
 import { type RoundingDirection } from "../math";
 import { type IToken, Token } from "../token/Token";
-import { type Address } from "../types";
+import { type Address, type BigIntish } from "../types";
 import { VaultUtils } from "./VaultUtils";
 
 export enum Version {
@@ -309,16 +309,24 @@ export class Vault extends Token implements IVault {
     this.version = version;
   }
 
-  public convertToAssets(shares: bigint, rounding?: RoundingDirection): bigint {
-    return VaultUtils.convertToAssets(shares, { totalAssets: this.totalAssets, totalSupply: this.totalSupply, decimalsOffset: this.decimalsOffset }, rounding);
+  public convertToAssets(shares: BigIntish, rounding?: RoundingDirection): bigint {
+    return VaultUtils.convertToAssets(shares, this, rounding);
   }
 
-  public convertToShares(assets: bigint, rounding?: RoundingDirection): bigint {
-    return VaultUtils.convertToShares(assets, { totalAssets: this.totalAssets, totalSupply: this.totalSupply, decimalsOffset: this.decimalsOffset }, rounding);
+  public convertToShares(assets: BigIntish, rounding?: RoundingDirection): bigint {
+    return VaultUtils.convertToShares(assets, this, rounding);
   }
 
   public calculateTotalAssetsAtHWM(): bigint {
-    return VaultUtils.calculateShareValue(this.highWaterMark, { supplyShares: this.totalSupply, decimals: this.decimals })
+    return VaultUtils.calculateShareValue(this.highWaterMark, this)
+  }
+
+  public calculateAssetsToUnwind(
+    sharesToRedeem: BigIntish,
+    safeAssetBalance: BigIntish,
+    assetsPendingDeposit: BigIntish,
+  ): bigint {
+    return VaultUtils.calculateAssetsToUnwind(sharesToRedeem, safeAssetBalance, assetsPendingDeposit, this)
   }
 
   public getAbi() {

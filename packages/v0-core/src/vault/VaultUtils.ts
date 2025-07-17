@@ -55,19 +55,34 @@ export namespace VaultUtils {
   export function calculateShareValue(
     pricePerShare: BigIntish,
     {
-      supplyShares,
+      totalSupply,
       decimals
     }: {
-      supplyShares: BigIntish,
+      totalSupply: BigIntish,
       decimals: BigIntish
     },
     rounding: RoundingDirection = "Down"
   ): bigint {
     return MathLib.mulDiv(
       pricePerShare,
-      supplyShares,
+      totalSupply,
       10n ** BigInt(decimals),
       rounding
     )
   }
+
+  export function calculateAssetsToUnwind(
+    sharesToRedeem: BigIntish,
+    safeAssetBalance: BigIntish,
+    assetsPendingDeposit: BigIntish,
+    vault: {
+      totalAssets: BigIntish;
+      totalSupply: BigIntish;
+      decimalsOffset: BigIntish;
+    },
+  ) {
+    const assetsToRedeem = convertToAssets(sharesToRedeem, vault);
+    return assetsToRedeem - BigInt(safeAssetBalance) + BigInt(assetsPendingDeposit);
+
+  };
 }
