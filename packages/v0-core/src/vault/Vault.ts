@@ -1,3 +1,4 @@
+import { vaultAbi_v0_2_0, vaultAbi_v0_3_0, vaultAbi_v0_4_0, vaultAbi_v0_5_0 } from "../constants/abis";
 import { type RoundingDirection } from "../math";
 import { type IToken, Token } from "../token/Token";
 import { type Address } from "../types";
@@ -318,5 +319,21 @@ export class Vault extends Token implements IVault {
 
   public calculateTotalAssetsAtHWM(): bigint {
     return VaultUtils.calculateShareValue(this.highWaterMark, { supplyShares: this.totalSupply, decimals: this.decimals })
+  }
+
+  public getAbi() {
+    switch (this.version) {
+      case Version.v0_5_0:
+        return vaultAbi_v0_5_0
+      case Version.v0_4_0:
+        return vaultAbi_v0_4_0
+      case Version.v0_3_0:
+        return vaultAbi_v0_3_0
+      case Version.v0_2_0:
+        return vaultAbi_v0_2_0
+      case Version.v0_1_0:
+        return vaultAbi_v0_2_0;
+    }
+    throw new Error("Unknown version")
   }
 }
