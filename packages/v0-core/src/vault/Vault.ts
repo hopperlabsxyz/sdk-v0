@@ -323,10 +323,10 @@ export class Vault extends Token implements IVault {
 
   public calculateAssetsToUnwind(
     sharesToRedeem: BigIntish,
-    safeAssetBalance: BigIntish,
     assetsPendingDeposit: BigIntish,
+    safeAssetBalance: BigIntish,
   ): bigint {
-    return VaultUtils.calculateAssetsToUnwind(sharesToRedeem, safeAssetBalance, assetsPendingDeposit, this)
+    return VaultUtils.calculateAssetsToUnwind(sharesToRedeem, assetsPendingDeposit, safeAssetBalance, this)
   }
 
   public getAbi() {

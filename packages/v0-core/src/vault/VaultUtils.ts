@@ -73,8 +73,8 @@ export namespace VaultUtils {
 
   export function calculateAssetsToUnwind(
     sharesToRedeem: BigIntish,
-    safeAssetBalance: BigIntish,
     assetsPendingDeposit: BigIntish,
+    safeAssetBalance: BigIntish,
     vault: {
       totalAssets: BigIntish;
       totalSupply: BigIntish;
@@ -82,7 +82,6 @@ export namespace VaultUtils {
     },
   ) {
     const assetsToRedeem = convertToAssets(sharesToRedeem, vault);
-    return assetsToRedeem - BigInt(safeAssetBalance) + BigInt(assetsPendingDeposit);
-
+    return MathLib.zeroFloorSub(assetsToRedeem, BigInt(safeAssetBalance) + BigInt(assetsPendingDeposit));
   };
 }

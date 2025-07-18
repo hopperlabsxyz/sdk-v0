@@ -55,7 +55,7 @@ describe("augment/Vault", () => {
   });
 
   test.sequential("should fetch vault safe balance", async ({ client }) => {
-    const expectedValue = 5698935886487280250n;
+    const expectedValue = 5320805121967064414n;
     const flagship9sEth = await Vault.fetch("0x07ed467acd4ffd13023046968b0859781cb90d9b", client);
     const value = await flagship9sEth?.getSafeBalance(client);
     expect(value).toStrictEqual(expectedValue);
@@ -89,26 +89,36 @@ describe("augment/Vault", () => {
   test2("should fetch assets deposited if there is a settlement2", async ({ client }) => {
     const expectedValue = 26210000000000000000n;
     const flagship9sEth = await Vault.fetch("0x07ed467acd4ffd13023046968b0859781cb90d9b", client);
-    const value = await flagship9sEth?.getAssetsDepositedIfSettled(client);
+    const value = await flagship9sEth?.getPendingAssets(client);
     expect(value).toStrictEqual(expectedValue);
   });
 
   test2("should fetch shares redeemed if there is a settlement", async ({ client }) => {
     const expectedValue = 9639440171297953296n;
     const flagship9sEth = await Vault.fetch("0x07ed467acd4ffd13023046968b0859781cb90d9b", client);
-    const value = await flagship9sEth?.getSharesRedeemedIfSettled(client);
+    const value = await flagship9sEth?.getPendingShares(client);
     expect(value).toStrictEqual(expectedValue);
   });
 
   test2("should fetch 0 assets to unwind", async ({ client }) => {
-    const expectedValue = 0n;
+    const expectedValue = {
+      assetsToUnwind: 0n,
+      pendingAssets: 26210000000000000000n,
+      pendingShares: 9639440171297953296n,
+      safeAssetBalance: 12696164219476638680n,
+    };
     const flagship9sEth = await Vault.fetch("0x07ed467acd4ffd13023046968b0859781cb90d9b", client);
     const value = await flagship9sEth?.getAssetsToUnwind(client);
     expect(value).toStrictEqual(expectedValue);
   });
 
   test3("should fetch some assets to unwind", async ({ client }) => {
-    const expectedValue = 1161562817536403779579n;
+    const expectedValue = {
+      assetsToUnwind: 0n,
+      pendingAssets: 2200000000000000000n,
+      pendingShares: 1110414386408159642658n,
+      safeAssetBalance: 1168640109514053386871n,
+    };
     const flagship9sEth = await Vault.fetch("0x07ed467acd4ffd13023046968b0859781cb90d9b", client);
     const value = await flagship9sEth?.getAssetsToUnwind(client);
     expect(value).toStrictEqual(expectedValue);
