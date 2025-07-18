@@ -6,6 +6,18 @@ import type { FetchParameters } from "../types";
 import type { BigIntish } from "v0-core/dist/types/types";
 import { fetchBalanceOf } from "./Token";
 
+/**
+ * Gets vault data including metadata and configuration
+ * 
+ * @param address - Vault contract address
+ * @param client - Viem client
+ * @param parameters - Optional fetch parameters (block number, state overrides, etc.)
+ * 
+ * @returns Promise with Vault object containing all vault properties
+ * 
+ * @example
+ * const vault = await fetchVault('0x123...', client);
+ */
 export async function fetchVault(
   address: Address,
   client: Client,
@@ -50,6 +62,19 @@ export async function fetchVault(
   }
 }
 
+/**
+ * Gets settle data for a specific settlement id
+ * 
+ * @param vault - Object containing vault address
+ * @param settleId - Settlement id to query
+ * @param client - Viem client
+ * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidate to bypass cache
+ * 
+ * @returns Promise with SettleData object
+ * 
+ * @example
+ * const settleData = await fetchSettleData({ address: '0x123...' }, 42, client, { blocknumber: 1 });
+ */
 export async function fetchSettleData(
   { address }: {
     address: Address
@@ -57,7 +82,7 @@ export async function fetchSettleData(
   settleId: number,
   client: Client,
   parameters: FetchParameters & { revalidate?: boolean } = { revalidate: false }
-): Promise<SettleData | undefined> {
+): Promise<SettleData> {
   if (parameters.revalidate === false) {
     const { data: settleData } = await tryCatch((async () => SettleData.get(settleId))())
     if (settleData) return settleData
@@ -77,18 +102,30 @@ export async function fetchSettleData(
       code: GetSettleData.code
     }]
   })
-  if (res.data) {
-    return new SettleData({
-      settleId: settleId,
-      ...decodeFunctionResult({
-        abi: GetSettleData.abi,
-        functionName: 'query',
-        data: res.data, // raw hex data returned from the call
-      })
-    });
-  }
+  if (!res.data) throw new Error("fetchSettleData: settleData is undefined"); // TODO: appropriate error type
+  return new SettleData({
+    settleId: settleId,
+    ...decodeFunctionResult({
+      abi: GetSettleData.abi,
+      functionName: 'query',
+      data: res.data, // raw hex data returned from the call
+    })
+  });
 }
 
+/**
+ * Gets pending asset amounts to be deposited for a specific settlement
+ * 
+ * @param vault - Vault object with address, pendingSilo, and asset
+ * @param settleId - Settlement id to query
+ * @param client - Viem client
+ * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidate to bypass cache
+ * 
+ * @returns Promise with pending asset balance
+ * 
+ * @example
+ * const pendingAssets = await fetchPendingAssets(vault, 42, client, { blocknumber: 1 });
+ */
 export async function fetchPendingAssets(
   { address, pendingSilo, asset }: {
     address: Address,
@@ -103,12 +140,24 @@ export async function fetchPendingAssets(
     fetchSettleData({ address }, settleId, client, parameters),
     fetchBalanceOf({ address: asset }, pendingSilo, client, parameters)
   ])
-  if (!settleData) throw new Error("fetchPendingAssets: settleData is undefined"); // TODO: appropriate error type
   if (settleData.pendingAssets === 0n) return pendingSiloAssets;
   return settleData.pendingAssets;
 
 }
 
+/**
+ * Gets pending share amounts to be redeemed for a specific settlement
+ * 
+ * @param vault - Vault object with address and pendingSilo
+ * @param settleId - Settlement id to query
+ * @param client - Viem client
+ * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidate to bypass cache
+ * 
+ * @returns Promise with pending share balance
+ * 
+ * @example
+ * const pendingShares = await fetchPendingShares(vault, 42, client, { blocknumber: 1 });
+ */
 export async function fetchPendingShares(
   { address, pendingSilo }: {
     address: Address,
@@ -122,11 +171,22 @@ export async function fetchPendingShares(
     fetchSettleData({ address }, settleId, client, parameters),
     fetchBalanceOf({ address }, pendingSilo, client, parameters),
   ])
-  if (!settleData) throw new Error("fetchPendingShares: settleData is undefined"); // TODO: appropriate error type
   if (settleData.pendingShares === 0n) return pendingSiloShares;
   return settleData.pendingShares;
 }
 
+/**
+ * Gets both pending assets to be deposited and shares to be redeemed for deposit and redeem settlements
+ * 
+ * @param vault - Vault object with settlement ids and addresses
+ * @param client - Viem client
+ * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidate to bypass cache
+ * 
+ * @returns Promise with {pendingAssets, pendingShares}
+ * 
+ * @example
+ * const {pendingAssets, pendingShares} = await fetchPendings(vault, client, { blocknumber: 1 });
+ */
 export async function fetchPendings(
   { depositSettleId, redeemSettleId, ...vault }: {
     address: Address,
@@ -147,6 +207,23 @@ export async function fetchPendings(
 
 
 
+/**
+ * Gets assets to unwind along with pending balances and safe asset balance
+ * 
+ * @param vault - Vault object with safe, address, pendingSilo, asset, and other vault properties
+ * @param client - Viem client
+ * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidate to bypass cache
+ * 
+ * @returns Promise with {assetsToUnwind, pendingAssets, pendingShares, safeAssetBalance}
+ * 
+ * @example
+ * const {
+ *     assetsToUnwind,
+ *     pendingAssets, 
+ *     pendingShares, 
+ *     safeAssetBalance
+ *  } = await fetchAssetsToUnwind({ ...vault, totalAssets: 42n }, client, { blocknumber: 1 });
+ */
 export async function fetchAssetsToUnwind(
   { safe, ...vault }: {
     address: Address,
@@ -175,15 +252,26 @@ export async function fetchAssetsToUnwind(
   }
 }
 
-
+/**
+ * Gets pending silo balances for shares and assets
+ * 
+ * @param vault - Vault object with pendingSilo, address, and asset
+ * @param client - Viem client
+ * @param parameters - Optional fetch parameters (block number, state overrides, etc.)
+ * 
+ * @returns Promise with {shares, assets} balances
+ * 
+ * @example
+ * const {shares, assets} = await fetchPendingSiloBalances(vault, client, { blocknumber: 1 });
+ */
 export async function fetchPendingSiloBalances(
   { address, pendingSilo, asset }: {
     address: Address,
-    pendingSilo: Address,
     asset: Address,
+    pendingSilo: Address,
   },
   client: Client,
-  parameters: FetchParameters & { revalidate?: boolean } = { revalidate: false }
+  parameters: FetchParameters
 ) {
   const [shares, assets] = await Promise.all([
     fetchBalanceOf({ address }, pendingSilo, client, parameters),

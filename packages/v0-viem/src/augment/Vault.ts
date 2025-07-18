@@ -35,21 +35,49 @@ declare module "@lagoon-protocol/v0-core" {
      */
     let beaconProxyConstructorEncoded: typeof beaconProxyConstructorEncodedCall;
   }
+  /**
+   * Vault interface for fetching vault-related data and balances
+   */
   interface Vault {
+    /**
+     * Gets the asset balance in the vault's safe contract
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters (block number, state overrides, etc.)
+     * @returns Promise<BigInt> - Safe's asset balance
+     */
     getSafeBalance(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchBalanceOf>;
 
-    getSiloBalances(client: Client, parameters?: FetchParameters): Promise<{ shares: bigint, assets: bigint }>;
+    /**
+     * Gets share and asset balances in the vault's pending silo
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidata to bypass cache
+     * @returns Promise<{shares: BigInt, assets: BigInt}> - Silo balances
+     */
+    getSiloBalances(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchPendingSiloBalances>;
 
-    getPendingAssets: (client: Client, parameters?: FetchParameters) => Promise<bigint>;
+    /**
+     * Gets assets pending deposit for current settlement
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidata to bypass cache
+     * @returns Promise<BigInt> - Pending asset amount
+     */
+    getPendingAssets: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchPendingAssets>;
 
-    getPendingShares: (client: Client, parameters?: FetchParameters) => Promise<bigint>;
+    /**
+     * Gets shares pending redemption for current settlement
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidata to bypass cache
+     * @returns Promise<BigInt> - Pending share amount
+     */
+    getPendingShares: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchPendingShares>;
 
-    getAssetsToUnwind: (client: Client, parameters?: FetchParameters) => Promise<{
-      assetsToUnwind: bigint,
-      pendingShares: bigint,
-      pendingAssets: bigint,
-      safeAssetBalance: bigint
-    }>;
+    /**
+     * Calculates assets to unwind with current balances
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidata to bypass cache
+     * @returns Promise<{assetsToUnwind: BigInt, pendingAssets: BigInt, pendingShares: BigInt, safeAssetBalance: BigInt}>
+     */
+    getAssetsToUnwind: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchAssetsToUnwind>;
 
     /**
      * Encodes the initialization call for a vault.
