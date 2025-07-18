@@ -22,7 +22,7 @@ export async function fetchVault(
   address: Address,
   client: Client,
   parameters: FetchParameters = {}
-) {
+): Promise<Vault> {
   const [res, version] = await Promise.all([
     call(client, {
       ...parameters,
@@ -49,17 +49,16 @@ export async function fetchVault(
       }
     })()])
 
-  if (res.data) {
-    return new Vault({
-      address,
-      version,
-      ...decodeFunctionResult({
-        abi: GetVault.abi,
-        functionName: 'query',
-        data: res.data, // raw hex data returned from the call
-      })
-    });
-  }
+  if (!res.data) throw new Error("fetch: vault data is undefined"); // TODO: appropriate error type
+  return new Vault({
+    address,
+    version,
+    ...decodeFunctionResult({
+      abi: GetVault.abi,
+      functionName: 'query',
+      data: res.data, // raw hex data returned from the call
+    })
+  });
 }
 
 /**
