@@ -10,8 +10,6 @@ export interface IToken {
   totalSupply: bigint;
 }
 
-export class Test { }
-
 export class Token implements IToken {
   /**
    * The token's address.

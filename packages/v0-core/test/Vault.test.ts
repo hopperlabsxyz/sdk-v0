@@ -54,8 +54,14 @@ describe("vault/Vault", () => {
   })
 
   test("convertToShares", () => {
-    const expectedValue = VaultUtils.ONE_SHARE;  // 1 asset
+    const expectedValue = VaultUtils.ONE_SHARE;  // 1 share
     const value = tacUSN.convertToShares(BigInt(10 ** tacUSN.underlyingDecimals));
+    expect(value).toStrictEqual(expectedValue);
+  })
+
+  test("calculateTotalAssetsAtHWM", () => {
+    const expectedValue = tacUSN.totalAssets;
+    const value = tacUSN.calculateTotalAssetsAtHWM();
     expect(value).toStrictEqual(expectedValue);
   })
 });
