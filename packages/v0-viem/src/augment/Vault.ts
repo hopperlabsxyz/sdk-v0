@@ -45,7 +45,7 @@ declare module "@lagoon-protocol/v0-core" {
     getPendingShares: (client: Client, parameters?: FetchParameters) => Promise<bigint>;
 
     getAssetsToUnwind: (client: Client, parameters?: FetchParameters) => Promise<{
-      assetsToUwind: bigint,
+      assetsToUnwind: bigint,
       pendingShares: bigint,
       pendingAssets: bigint,
       safeAssetBalance: bigint
