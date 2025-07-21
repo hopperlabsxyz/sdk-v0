@@ -22,7 +22,7 @@ export namespace VaultUtils {
       decimalsOffset: BigIntish;
     },
     rounding: RoundingDirection = "Down",
-  ) {
+  ): bigint {
     return MathLib.mulDiv(
       shares,
       BigInt(totalAssets) + VIRTUAL_ASSETS,
@@ -30,6 +30,7 @@ export namespace VaultUtils {
       rounding,
     );
   }
+
   export function convertToShares(
     assets: BigIntish,
     {
@@ -42,7 +43,7 @@ export namespace VaultUtils {
       decimalsOffset: BigIntish;
     },
     rounding: RoundingDirection = "Up",
-  ) {
+  ): bigint {
     return MathLib.mulDiv(
       assets,
       BigInt(totalSupply) + 10n ** BigInt(decimalsOffset),
@@ -50,4 +51,37 @@ export namespace VaultUtils {
       rounding,
     );
   }
+
+  export function calculateShareValue(
+    pricePerShare: BigIntish,
+    {
+      totalSupply,
+      decimals
+    }: {
+      totalSupply: BigIntish,
+      decimals: BigIntish
+    },
+    rounding: RoundingDirection = "Down"
+  ): bigint {
+    return MathLib.mulDiv(
+      pricePerShare,
+      totalSupply,
+      10n ** BigInt(decimals),
+      rounding
+    )
+  }
+
+  export function calculateAssetsToUnwind(
+    sharesToRedeem: BigIntish,
+    assetsPendingDeposit: BigIntish,
+    safeAssetBalance: BigIntish,
+    vault: {
+      totalAssets: BigIntish;
+      totalSupply: BigIntish;
+      decimalsOffset: BigIntish;
+    },
+  ) {
+    const assetsToRedeem = convertToAssets(sharesToRedeem, vault);
+    return MathLib.zeroFloorSub(assetsToRedeem, BigInt(safeAssetBalance) + BigInt(assetsPendingDeposit));
+  };
 }

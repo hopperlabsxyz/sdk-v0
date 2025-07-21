@@ -1,8 +1,10 @@
 import { Vault } from "@lagoon-protocol/v0-core";
 
-import { fetchVault } from "../fetch";
+import { fetchAssetsToUnwind, fetchBalanceOf, fetchPendingAssets, fetchPendingShares, fetchPendingSiloBalances, fetchVault } from "../fetch";
 import { initializeEncodedCall, siloConstructorEncodedCall, beaconProxyConstructorEncodedCall } from "../encode/Vault";
-import type { Address } from "viem";
+import type { Address, Client } from "viem";
+import type { FetchParameters } from "../types";
+
 
 declare module "@lagoon-protocol/v0-core" {
   namespace Vault {
@@ -33,7 +35,50 @@ declare module "@lagoon-protocol/v0-core" {
      */
     let beaconProxyConstructorEncoded: typeof beaconProxyConstructorEncodedCall;
   }
+  /**
+   * Vault interface for fetching vault-related data and balances
+   */
   interface Vault {
+    /**
+     * Gets the asset balance in the vault's safe contract
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters (block number, state overrides, etc.)
+     * @returns Promise<BigInt> - Safe's asset balance
+     */
+    getSafeBalance(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchBalanceOf>;
+
+    /**
+     * Gets share and asset balances in the vault's pending silo
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidata to bypass cache
+     * @returns Promise<{shares: BigInt, assets: BigInt}> - Silo balances
+     */
+    getSiloBalances(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchPendingSiloBalances>;
+
+    /**
+     * Gets assets pending deposit for current settlement
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidata to bypass cache
+     * @returns Promise<BigInt> - Pending asset amount
+     */
+    getPendingAssets: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchPendingAssets>;
+
+    /**
+     * Gets shares pending redemption for current settlement
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidata to bypass cache
+     * @returns Promise<BigInt> - Pending share amount
+     */
+    getPendingShares: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchPendingShares>;
+
+    /**
+     * Calculates assets to unwind with current balances
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidata to bypass cache
+     * @returns Promise<{assetsToUnwind: BigInt, pendingAssets: BigInt, pendingShares: BigInt, safeAssetBalance: BigInt}>
+     */
+    getAssetsToUnwind: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchAssetsToUnwind>;
+
     /**
      * Encodes the initialization call for a vault.
      *
@@ -59,6 +104,31 @@ declare module "@lagoon-protocol/v0-core" {
 }
 
 Vault.fetch = fetchVault;
+
+Vault.prototype.getSafeBalance =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchBalanceOf({ address: this.asset }, this.safe, client, parameters)
+  };
+
+Vault.prototype.getSiloBalances =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchPendingSiloBalances(this, client, parameters)
+  }
+
+Vault.prototype.getPendingAssets =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchPendingAssets(this, this.depositSettleId, client, { ...parameters, revalidate: true })
+  }
+
+Vault.prototype.getPendingShares =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchPendingShares(this, this.redeemSettleId, client, { ...parameters, revalidate: true })
+  }
+
+Vault.prototype.getAssetsToUnwind =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchAssetsToUnwind(this, client, { ...parameters, revalidate: true })
+  }
 
 Vault.initializeEncoded = initializeEncodedCall
 Vault.prototype.initializeEncoded = function () { return initializeEncodedCall(this) }
