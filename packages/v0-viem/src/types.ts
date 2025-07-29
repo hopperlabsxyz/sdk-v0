@@ -20,3 +20,7 @@ export type GetStorageAtParameters = {
     }
   )
 
+export type Uint8 = number;
+export type Uint16 = number;
+export type Uint40 = number;
+export type Uint128 = bigint;

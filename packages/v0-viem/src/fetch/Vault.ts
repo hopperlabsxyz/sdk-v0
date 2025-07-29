@@ -1,12 +1,12 @@
 import { Vault, SettleData, tryCatch, VaultUtils, State } from "@lagoon-protocol/v0-core";
-import { decodeFunctionResult, encodeFunctionData, hexToBigInt, hexToBool, hexToNumber, numberToHex, pad, parseAbi, type Address, type Client, } from "viem";
+import { createPublicClient, decodeFunctionResult, encodeFunctionData, hexToBigInt, hexToBool, hexToNumber, http, numberToHex, pad, parseAbi, type Address, type Client, } from "viem";
 import { GetVault, GetSettleData } from "../queries"
 import { call, readContract, getStorageAt, getBlock } from "viem/actions";
 import type { FetchParameters, GetStorageAtParameters } from "../types";
 import type { BigIntish } from "v0-core/dist/types/types";
 import { fetchBalanceOf, fetchName, fetchSymbol, fetchTotalSupply } from "./Token";
 import { BlockFetchError, StorageFetchError } from "../errors";
-import { getMappingSlot, getStorageSlot } from "../utils";
+import { extractUint8, extractUint16, extractUint40, extractUint128, getMappingSlot, getStorageSlot } from "../utils";
 
 /**
  * Gets vault data including metadata and configuration
@@ -471,12 +471,12 @@ export async function fetchEpochAndSettleIds(
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   const value = hexToBigInt(data)
-  const depositEpochId = Number(value & 0xFFFFFFFFFFn)
-  const depositSettleId = Number((value >> 40n) & 0xFFFFFFFFFFn)
-  const lastDepositEpochIdSettled = Number((value >> 80n) & 0xFFFFFFFFFFn)
-  const redeemEpochId = Number((value >> 120n) & 0xFFFFFFFFFFn)
-  const redeemSettleId = Number((value >> 160n) & 0xFFFFFFFFFFn)
-  const lastRedeemEpochIdSettled = Number((value >> 200n) & 0xFFFFFFFFFFn)
+  const depositEpochId = extractUint40(value, 0)
+  const depositSettleId = extractUint40(value, 1)
+  const lastDepositEpochIdSettled = extractUint40(value, 2)
+  const redeemEpochId = extractUint40(value, 3)
+  const redeemSettleId = extractUint40(value, 4)
+  const lastRedeemEpochIdSettled = extractUint40(value, 5)
   return { depositEpochId, depositSettleId, lastDepositEpochIdSettled, redeemEpochId, redeemSettleId, lastRedeemEpochIdSettled }
 }
 
@@ -602,11 +602,10 @@ export async function fetchDecimalsData(
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   const value = hexToBigInt(data)
-  const decimals = Number((value >> 160n) & 0xffn)
-  const decimalsOffset = Number((value >> 0x21n) & 0xffn)
+  const decimals = extractUint8(value, 20)
+  const decimalsOffset = extractUint8(value, 21)
   return { decimals, decimalsOffset }
 }
-
 
 /**
  * Gets total assets timestamps from contract storage
@@ -627,10 +626,11 @@ export async function fetchTotalAssetsTimestamps(
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   const value = hexToBigInt(data)
-  const totalAssetsLifespan = value & ((1n << 128n) - 1n)
-  const totalAssetsExpiration = (value >> 128n) & ((1n << 128n) - 1n)
+  const totalAssetsLifespan = extractUint128(value, 0)
+  const totalAssetsExpiration = extractUint128(value, 1)
   return { totalAssetsExpiration, totalAssetsLifespan }
 }
+
 
 /**
  * Gets underlying asset address from contract storage
@@ -667,7 +667,7 @@ export async function fetchUnderlyingDecimals(
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   const value = hexToBigInt(data)
-  return Number((value >> 160n) & 0xFFn)
+  return extractUint8(value, 20)
 }
 
 /**
@@ -787,8 +787,8 @@ export async function fetchFeeRates(
   if (!data) throw new StorageFetchError(slot)
   const value = hexToBigInt(data)
   return {
-    managementRate: Number(value & 0xFFFFn),
-    performanceRate: Number((value >> 16n) & 0xFFFFn)
+    managementRate: extractUint16(value, 0),
+    performanceRate: extractUint16(value, 1)
   };
 }
 
