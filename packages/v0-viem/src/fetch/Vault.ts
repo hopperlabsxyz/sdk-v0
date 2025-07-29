@@ -1,10 +1,12 @@
 import { Vault, SettleData, tryCatch, VaultUtils } from "@lagoon-protocol/v0-core";
-import { decodeFunctionResult, encodeFunctionData, parseAbi, type Address, type Client } from "viem";
+import { decodeFunctionResult, encodeFunctionData, hexToBigInt, hexToBool, hexToNumber, pad, parseAbi, type Address, type Client, } from "viem";
 import { GetVault, GetSettleData } from "../queries"
-import { call, readContract } from "viem/actions";
-import type { FetchParameters } from "../types";
+import { call, readContract, getStorageAt } from "viem/actions";
+import type { FetchParameters, GetStorageAtParameters } from "../types";
 import type { BigIntish } from "v0-core/dist/types/types";
 import { fetchBalanceOf } from "./Token";
+import { StorageFetchError } from "../errors";
+import { getMappingSlot, getStorageSlot } from "../utils";
 
 /**
  * Gets vault data including metadata and configuration
@@ -277,4 +279,195 @@ export async function fetchPendingSiloBalances(
     fetchBalanceOf({ address: asset }, pendingSilo, client, parameters)
   ])
   return { shares, assets }
+}
+
+/**
+ * Gets total assets from contract storage
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with total assets as bigint
+ */
+export async function fetchTotalAssets(
+  client: Client,
+  { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 0), ...params }: GetStorageAtParameters
+): Promise<bigint> {
+  const data = await getStorageAt(client, { slot, ...params })
+  if (!data) throw new StorageFetchError(slot)
+  return hexToBigInt(data)
+}
+
+
+/**
+ * Gets new total assets from contract storage
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with new total assets as bigint
+ */
+export async function fetchNewTotalAssets(
+  client: Client,
+  { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 1), ...params }: GetStorageAtParameters
+): Promise<bigint> {
+  const data = await getStorageAt(client, { slot, ...params })
+  if (!data) throw new StorageFetchError(slot)
+  return hexToBigInt(data)
+}
+
+/**
+ * Gets epoch and settlement id from contract storage
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with epoch and settlement id object
+ */
+export async function fetchEpochAndSettleIds(
+  client: Client,
+  { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 2), ...params }: GetStorageAtParameters
+): Promise<{
+  depositEpochId: number
+  depositSettleId: number
+  lastDepositEpochIdSettled: number
+  redeemEpochId: number
+  redeemSettleId: number
+  lastRedeemEpochIdSettled: number
+}> {
+  const data = await getStorageAt(client, { slot, ...params })
+  if (!data) throw new StorageFetchError(slot)
+  const value = hexToBigInt(data)
+  const depositEpochId = Number(value & 0xFFFFFFFFFFn)
+  const depositSettleId = Number((value >> 40n) & 0xFFFFFFFFFFn)
+  const lastDepositEpochIdSettled = Number((value >> 80n) & 0xFFFFFFFFFFn)
+  const redeemEpochId = Number((value >> 120n) & 0xFFFFFFFFFFn)
+  const redeemSettleId = Number((value >> 160n) & 0xFFFFFFFFFFn)
+  const lastRedeemEpochIdSettled = Number((value >> 200n) & 0xFFFFFFFFFFn)
+  return { depositEpochId, depositSettleId, lastDepositEpochIdSettled, redeemEpochId, redeemSettleId, lastRedeemEpochIdSettled }
+}
+
+/**
+ * Gets last deposit request ID for a user
+ * @param userAddress - User's address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with last deposit request id
+ */
+export async function fetchLastDepositRequestId(
+  userAddress: Address,
+  client: Client,
+  { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 5), ...params }: GetStorageAtParameters
+): Promise<number> {
+  const lastDepositRequestIdSlot = getMappingSlot(slot, pad(userAddress))
+  const data = await getStorageAt(client, { slot: lastDepositRequestIdSlot, ...params })
+  if (!data) throw new StorageFetchError(slot)
+  return hexToNumber(data)
+}
+
+
+/**
+ * Gets last redeem request ID for a user
+ * @param userAddress - User's address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with last redeem request id
+ */
+export async function fetchLastRedeemRequestId(
+  userAddress: Address,
+  client: Client,
+  { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 6), ...params }: GetStorageAtParameters
+): Promise<number> {
+  const lastRedeemRequestIdSlot = getMappingSlot(slot, pad(userAddress))
+  const data = await getStorageAt(client, { slot: lastRedeemRequestIdSlot, ...params })
+  if (!data) throw new StorageFetchError(slot)
+  return hexToNumber(data)
+}
+
+/**
+ * Checks if an address is an operator for a controller
+ * @param controller - Controller address
+ * @param operator - Operator address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with operator status as boolean
+ */
+export async function fetchIsOperator(
+  controller: Address,
+  operator: Address,
+  client: Client,
+  { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 7), ...params }: GetStorageAtParameters
+): Promise<boolean> {
+  if (operator === controller) return true;
+  const controllerSlot = getMappingSlot(slot, pad(controller))
+  const operatorSlot = getMappingSlot(controllerSlot, pad(operator))
+  const data = await getStorageAt(client, { slot: operatorSlot, ...params })
+  if (!data) throw new StorageFetchError(slot)
+  return hexToBool(data)
+}
+
+
+/**
+ * Gets pending silo address from contract storage
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with pending silo address
+ */
+export async function fetchPendingSilo(
+  client: Client,
+  { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 8), ...params }: GetStorageAtParameters
+): Promise<Address> {
+  const data = await getStorageAt(client, { slot, ...params })
+  if (!data) throw new StorageFetchError(slot)
+  return `0x${data.slice(-40)}`
+}
+
+/**
+ * Gets wrapped native token address from contract storage
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with wrapped native token address
+ */
+export async function fetchWrappedNativeToken(
+  client: Client,
+  { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 9), ...params }: GetStorageAtParameters
+): Promise<Address> {
+  const data = await getStorageAt(client, { slot, ...params })
+  if (!data) throw new StorageFetchError(slot)
+  return `0x${data.slice(-40)}`
+}
+
+
+/**
+ * Gets decimals and decimals offset from contract storage
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with { decimals, decimalsOffset }
+ */
+export async function fetchDecimalsData(
+  client: Client,
+  { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 9), ...params }: GetStorageAtParameters
+): Promise<{ decimals: number; decimalsOffset: number }> {
+  const data = await getStorageAt(client, { slot, ...params })
+  if (!data) throw new StorageFetchError(slot)
+  const value = hexToBigInt(data)
+  const decimals = Number((value >> 160n) & 0xffn)
+  const decimalsOffset = Number((value >> 0x21n) & 0xffn)
+  return { decimals, decimalsOffset }
+}
+
+
+/**
+ * Gets total assets timestamps from contract storage
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with { totalAssetsExpiration, totalAssetsLifespan }
+ */
+export async function fetchTotalAssetsTimestamps(
+  client: Client,
+  { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 10), ...params }: GetStorageAtParameters
+): Promise<{
+  totalAssetsExpiration: bigint
+  totalAssetsLifespan: bigint
+}> {
+  const data = await getStorageAt(client, { slot, ...params })
+  if (!data) throw new StorageFetchError(slot)
+  const value = hexToBigInt(data)
+  const totalAssetsLifespan = value & ((1n << 128n) - 1n)
+  const totalAssetsExpiration = (value >> 128n) & ((1n << 128n) - 1n)
+  return { totalAssetsExpiration, totalAssetsLifespan }
 }
