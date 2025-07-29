@@ -1,13 +1,12 @@
 import { Vault, SettleData, tryCatch, VaultUtils, State } from "@lagoon-protocol/v0-core";
-import { createPublicClient, decodeFunctionResult, encodeFunctionData, hexToBigInt, hexToBool, hexToNumber, http, pad, parseAbi, type Address, type Client, } from "viem";
+import { decodeFunctionResult, encodeFunctionData, hexToBigInt, hexToBool, hexToNumber, pad, parseAbi, type Address, type Client, } from "viem";
 import { GetVault, GetSettleData } from "../queries"
 import { call, readContract, getStorageAt, getBlock } from "viem/actions";
 import type { FetchParameters, GetStorageAtParameters } from "../types";
 import type { BigIntish } from "v0-core/dist/types/types";
-import { fetchBalanceOf, fetchDecimals, fetchName, fetchSymbol, fetchTotalSupply } from "./Token";
+import { fetchBalanceOf, fetchName, fetchSymbol, fetchTotalSupply } from "./Token";
 import { BlockFetchError, StorageFetchError } from "../errors";
 import { getMappingSlot, getStorageSlot } from "../utils";
-import { mainnet } from 'viem/chains'
 
 /**
  * Gets vault data including metadata and configuration
@@ -21,111 +20,146 @@ import { mainnet } from 'viem/chains'
  * @example
  * const vault = await fetchVault('0x123...', client);
  */
-// export async function fetchVault(
-//   address: Address,
-//   client: Client,
-//   parameters: FetchParameters = {}
-// ): Promise<Vault | undefined> {
-//   {
-//     const [vaultResponse, versionResponse] = await Promise.all([
-//       tryCatch(
-//         (async () => (await call(client, {
-//           ...parameters,
-//           to: address,
-//           data: encodeFunctionData({
-//             abi: GetVault.abi,
-//             functionName: 'query'
-//           }),
-//           stateOverride: [{
-//             address,
-//             code: GetVault.code
-//           }]
-//         })).data)()
-//       ),
-//       tryCatch(
-//         readContract(client, {
-//           ...parameters,
-//           address,
-//           abi: parseAbi(["function version() returns(string)"]),
-//           functionName: "version"
-//         })
-//       )
-//     ])
-//     if (vaultResponse.data) {
-//       return new Vault({
-//         address,
-//         version: versionResponse.data ?? "v0.2.0",
-//         ...decodeFunctionResult({
-//           abi: GetVault.abi,
-//           functionName: 'query',
-//           data: vaultResponse.data, // raw hex data returned from the call
-//         })
-//       });
-//     }
-//   }
-//   {
-//     const [
-//       name,
-//       symbol,
-//       totalSupply,
-//
-//       asset,
-//       underlyingDecimals,
-//
-//       totalAssets,
-//       newTotalAssets,
-//       epochAndSettleIds,
-//       pendingSilo,
-//       wrappedNativeToken,
-//       decimalsData,
-//       totalAssetsTimestamps,
-//
-//       versionResponse
-//     ] = await Promise.all([
-//       fetchName({ address }, client, parameters),
-//       fetchSymbol({ address }, client, parameters),
-//       fetchTotalSupply({ address }, client, parameters),
-//
-//       fetchAsset({ address }, client, parameters),
-//       fetchUnderlyingDecimals({ address }, client, parameters),
-//
-//       fetchTotalAssets({ address }, client, parameters),
-//       fetchNewTotalAssets({ address }, client, parameters),
-//       fetchEpochAndSettleIds({ address }, client, parameters),
-//       fetchPendingSilo({ address }, client, parameters),
-//       fetchWrappedNativeToken({ address }, client, parameters),
-//       fetchDecimalsData({ address }, client, parameters),
-//       fetchTotalAssetsTimestamps({ address }, client, parameters),
-//       tryCatch(
-//         readContract(client, {
-//           ...parameters,
-//           address,
-//           abi: parseAbi(["function version() returns(string)"]),
-//           functionName: "version"
-//         })
-//       )
-//     ])
-//     return new Vault({
-//       address,
-//       name,
-//       symbol,
-//       totalSupply,
-//
-//       asset,
-//       underlyingDecimals,
-//
-//       totalAssets,
-//       newTotalAssets,
-//       ...epochAndSettleIds,
-//       pendingSilo,
-//       wrappedNativeToken,
-//       ...decimalsData,
-//       ...totalAssetsTimestamps,
-//
-//       version: versionResponse.data ?? "v0.2.0",
-//     });
-//   }
-// }
+export async function fetchVault(
+  address: Address,
+  client: Client,
+  parameters: FetchParameters = {}
+): Promise<Vault | undefined> {
+  {
+    const [vaultResponse, versionResponse] = await Promise.all([
+      tryCatch(
+        (async () => (await call(client, {
+          ...parameters,
+          to: address,
+          data: encodeFunctionData({
+            abi: GetVault.abi,
+            functionName: 'query'
+          }),
+          stateOverride: [{
+            address,
+            code: GetVault.code
+          }]
+        })).data)()
+      ),
+      tryCatch(
+        readContract(client, {
+          ...parameters,
+          address,
+          abi: parseAbi(["function version() returns(string)"]),
+          functionName: "version"
+        })
+      )
+    ])
+    if (vaultResponse.data) {
+      return new Vault({
+        address,
+        version: versionResponse.data ?? "v0.2.0",
+        ...decodeFunctionResult({
+          abi: GetVault.abi,
+          functionName: 'query',
+          data: vaultResponse.data, // raw hex data returned from the call
+        })
+      });
+    }
+  }
+  // Fallback in case the rpc node does not support state overrides
+  {
+    const [
+      name,
+      symbol,
+      totalSupply,
+      asset,
+      underlyingDecimals,
+      totalAssets,
+      newTotalAssets,
+      epochAndSettleIds,
+      pendingSilo,
+      wrappedNativeToken,
+      decimalsData,
+      totalAssetsTimestamps,
+      feeRegistry,
+      newRatesTimestamp,
+      lastFeeTime,
+      highWaterMark,
+      cooldown,
+      feeRates,
+      owner,
+      pendingOwner,
+      whitelistManager,
+      feeReceiver,
+      safe,
+      valuationManager,
+      state,
+      isWhitelistActivated,
+      versionResponse
+    ] = await Promise.all([
+      fetchName({ address }, client, parameters),
+      fetchSymbol({ address }, client, parameters),
+      fetchTotalSupply({ address }, client, parameters),
+      fetchAsset({ address }, client, parameters),
+      fetchUnderlyingDecimals({ address }, client, parameters),
+      fetchTotalAssets({ address }, client, parameters),
+      fetchNewTotalAssets({ address }, client, parameters),
+      fetchEpochAndSettleIds({ address }, client, parameters),
+      fetchPendingSilo({ address }, client, parameters),
+      fetchWrappedNativeToken({ address }, client, parameters),
+      fetchDecimalsData({ address }, client, parameters),
+      fetchTotalAssetsTimestamps({ address }, client, parameters),
+      fetchFeeRegistry({ address }, client, parameters),
+      fetchNewRatesTimestamp({ address }, client, parameters),
+      fetchLastFeeTime({ address }, client, parameters),
+      fetchHighWaterMark({ address }, client, parameters),
+      fetchCooldown({ address }, client, parameters),
+      fetchFeeRates({ address }, client, parameters),
+      fetchOwner({ address }, client, parameters),
+      fetchPendingOwner({ address }, client, parameters),
+      fetchWhitelistManager({ address }, client, parameters),
+      fetchFeeReceiver({ address }, client, parameters),
+      fetchSafe({ address }, client, parameters),
+      fetchValuationManager({ address }, client, parameters),
+      fetchState({ address }, client, parameters),
+      fetchIsWhitelistActivated({ address }, client, parameters),
+      tryCatch(
+        readContract(client, {
+          ...parameters,
+          address,
+          abi: parseAbi(["function version() returns(string)"]),
+          functionName: "version"
+        })
+      )
+    ])
+    return new Vault({
+      address,
+      name,
+      symbol,
+      totalSupply,
+      asset,
+      underlyingDecimals,
+      totalAssets,
+      newTotalAssets,
+      ...epochAndSettleIds,
+      pendingSilo,
+      wrappedNativeToken,
+      ...decimalsData,
+      ...totalAssetsTimestamps,
+      feeRegistry,
+      newRatesTimestamp,
+      lastFeeTime,
+      highWaterMark,
+      cooldown,
+      feeRates,
+      owner,
+      pendingOwner,
+      whitelistManager,
+      feeReceiver,
+      safe,
+      valuationManager,
+      state,
+      isWhitelistActivated,
+      version: versionResponse.data ?? "v0.2.0",
+    });
+  }
+}
 
 /**
  * Gets settle data for a specific settlement id
