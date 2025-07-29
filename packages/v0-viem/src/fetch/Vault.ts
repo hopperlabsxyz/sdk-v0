@@ -1,5 +1,5 @@
 import { Vault, SettleData, tryCatch, VaultUtils, State } from "@lagoon-protocol/v0-core";
-import { decodeFunctionResult, encodeFunctionData, hexToBigInt, hexToBool, hexToNumber, pad, parseAbi, type Address, type Client, } from "viem";
+import { decodeFunctionResult, encodeFunctionData, hexToBigInt, hexToBool, hexToNumber, numberToHex, pad, parseAbi, type Address, type Client, } from "viem";
 import { GetVault, GetSettleData } from "../queries"
 import { call, readContract, getStorageAt, getBlock } from "viem/actions";
 import type { FetchParameters, GetStorageAtParameters } from "../types";
@@ -175,9 +175,7 @@ export async function fetchVault(
  * const settleData = await fetchSettleData({ address: '0x123...' }, 42, client, { blocknumber: 1 });
  */
 export async function fetchSettleData(
-  { address }: {
-    address: Address
-  },
+  { address }: { address: Address },
   settleId: number,
   client: Client,
   parameters: FetchParameters & { revalidate?: boolean } = { revalidate: false }
@@ -188,28 +186,62 @@ export async function fetchSettleData(
   }
   delete parameters.revalidate;
 
-  const res = await call(client, {
-    ...parameters,
-    to: address,
-    data: encodeFunctionData({
-      abi: GetSettleData.abi,
-      functionName: 'query',
-      args: [settleId]
-    }),
-    stateOverride: [{
-      address,
-      code: GetSettleData.code
-    }]
-  })
-  if (!res.data) throw new Error("fetchSettleData: settleData is undefined"); // TODO: appropriate error type
-  return new SettleData({
-    settleId: settleId,
-    ...decodeFunctionResult({
-      abi: GetSettleData.abi,
-      functionName: 'query',
-      data: res.data, // raw hex data returned from the call
+  {
+    const response = await tryCatch(
+      (async () => (await call(client, {
+        ...parameters,
+        to: address,
+        data: encodeFunctionData({
+          abi: GetSettleData.abi,
+          functionName: 'query',
+          args: [settleId]
+        }),
+        stateOverride: [{
+          address,
+          code: GetSettleData.code
+        }]
+      })).data)()
+    )
+    if (response.data) {
+      return new SettleData({
+        settleId: settleId,
+        ...decodeFunctionResult({
+          abi: GetSettleData.abi,
+          functionName: 'query',
+          data: response.data, // raw hex data returned from the call
+        })
+      });
+    }
+  }
+  // Fallback in case the rpc node does not support state overrides
+  {
+    const totalSupplySlot = getMappingSlot(getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 4), pad(numberToHex(settleId)))
+    const totalAssetsSlot = getStorageSlot(totalSupplySlot, 1)
+    const pendingAssetsSlot = getStorageSlot(totalSupplySlot, 2)
+    const pendingSharesSlot = getStorageSlot(totalSupplySlot, 3)
+    const [
+      totalSupply,
+      totalAssets,
+      pendingAssets,
+      pendingShares
+    ] = await Promise.all([
+      getStorageAt(client, { slot: totalSupplySlot, address, ...parameters }),
+      getStorageAt(client, { slot: totalAssetsSlot, address, ...parameters }),
+      getStorageAt(client, { slot: pendingAssetsSlot, address, ...parameters }),
+      getStorageAt(client, { slot: pendingSharesSlot, address, ...parameters }),
+    ])
+    if (!totalSupply) throw new StorageFetchError(totalSupplySlot);
+    if (!totalAssets) throw new StorageFetchError(totalAssetsSlot);
+    if (!pendingAssets) throw new StorageFetchError(pendingAssetsSlot);
+    if (!pendingShares) throw new StorageFetchError(pendingSharesSlot);
+    return new SettleData({
+      settleId,
+      totalSupply,
+      totalAssets,
+      pendingAssets,
+      pendingShares
     })
-  });
+  }
 }
 
 /**
