@@ -3,6 +3,36 @@ import { Vault } from "../src/augment/Vault";
 import { addresses, ChainId, SettleData, Version } from "@lagoon-protocol/v0-core";
 import { fetchSettleData } from "../src/fetch";
 import { test, test2, test3 } from "./setup";
+import {
+  fetchTotalAssets,
+  fetchNewTotalAssets,
+  fetchEpochAndSettleIds,
+  fetchLastDepositRequestId,
+  fetchLastRedeemRequestId,
+  fetchIsOperator,
+  fetchPendingSilo,
+  fetchWrappedNativeToken,
+  fetchDecimalsData,
+  fetchTotalAssetsTimestamps,
+  fetchAsset,
+  fetchUnderlyingDecimals,
+  fetchFeeRegistry,
+  fetchNewRatesTimestamp,
+  fetchLastFeeTime,
+  fetchHighWaterMark,
+  fetchCooldown,
+  fetchFeeRates,
+  fetchOwner,
+  fetchPendingOwner,
+  fetchWhitelistManager,
+  fetchFeeReceiver,
+  fetchSafe,
+  fetchValuationManager,
+  fetchState,
+  fetchIsWhitelistActivated
+} from "../src/fetch";
+import { testFetchVaultWithStorageFetchers } from "./utils";
+import { getAddress } from "viem";
 
 const UINT256_MAX = 2n ** 256n - 1n;
 
@@ -46,11 +76,21 @@ const tacUSN = new Vault({
   totalSupply: 0n
 })
 
+const tacUSNAddress = "0x7895A046b26CC07272B022a0C9BAFC046E6F6396";
+const testUserAddress = "0x1234567890123456789012345678901234567890";
+const testControllerAddress = "0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550";
+const testOperatorAddress = "0xF53eAeB7e6f15CBb6dB990eaf2A26702e1d986d8";
 
 describe("augment/Vault", () => {
   test.sequential("should fetch vault data", async ({ client }) => {
     const expectedValue = tacUSN;
     const value = await Vault.fetch("0x7895A046b26CC07272B022a0C9BAFC046E6F6396", client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should output the same result if fetched from storage", async ({ client }) => {
+    const expectedValue = tacUSN;
+    const value = await testFetchVaultWithStorageFetchers("0x7895A046b26CC07272B022a0C9BAFC046E6F6396", client);
     expect(value).toStrictEqual(expectedValue);
   });
 
@@ -156,6 +196,180 @@ describe("fetch/fetchSettleData", () => {
     ).rejects.toThrow(); // or .rejects.toThrow("specific error message")
 
     const value = await fetchSettleData({ address: "0x07ed467acd4ffd13023046968b0859781cb90d9b" }, 3, client) as SettleData;
+    expect(value).toStrictEqual(expectedValue);
+  });
+});
+
+describe("Storage fetch functions", () => {
+  test.sequential("should fetch total assets", async ({ client }) => {
+    const expectedValue = 0n;
+    const value = await fetchTotalAssets({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch new total assets", async ({ client }) => {
+    const expectedValue = 2n ** 256n - 1n; // UINT256_MAX
+    const value = await fetchNewTotalAssets({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch epoch and settle IDs", async ({ client }) => {
+    const expectedValue = {
+      depositEpochId: 1,
+      depositSettleId: 1,
+      lastDepositEpochIdSettled: 0,
+      redeemEpochId: 2,
+      redeemSettleId: 2,
+      lastRedeemEpochIdSettled: 0
+    };
+    const value = await fetchEpochAndSettleIds({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch last deposit request ID", async ({ client }) => {
+    const expectedValue = 0; // Assuming no deposit requests for test user
+    const value = await fetchLastDepositRequestId({ address: tacUSNAddress }, testUserAddress, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch last redeem request ID", async ({ client }) => {
+    const expectedValue = 0; // Assuming no redeem requests for test user
+    const value = await fetchLastRedeemRequestId({ address: tacUSNAddress }, testUserAddress, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch is operator status", async ({ client }) => {
+    const expectedValue = true; // Controller is always operator of itself
+    const value = await fetchIsOperator({ address: tacUSNAddress }, testControllerAddress, testControllerAddress, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch is operator status for different addresses", async ({ client }) => {
+    const expectedValue = false; // Assuming operator is not set for test addresses
+    const value = await fetchIsOperator({ address: tacUSNAddress }, testControllerAddress, testOperatorAddress, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch pending silo address", async ({ client }) => {
+    const expectedValue = getAddress("0x65d57bb5fb43fc227518d7c983e83388d4017687");
+    const value = await fetchPendingSilo({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch wrapped native token address", async ({ client }) => {
+    const expectedValue = getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2");
+    const value = await fetchWrappedNativeToken({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch decimals data", async ({ client }) => {
+    const expectedValue = { decimals: 18, decimalsOffset: 12 };
+    const value = await fetchDecimalsData({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch total assets timestamps", async ({ client }) => {
+    const expectedValue = {
+      totalAssetsExpiration: 0n,
+      totalAssetsLifespan: 0n
+    };
+    const value = await fetchTotalAssetsTimestamps({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch asset address", async ({ client }) => {
+    const expectedValue = getAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
+    const value = await fetchAsset({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch underlying decimals", async ({ client }) => {
+    const expectedValue = 6;
+    const value = await fetchUnderlyingDecimals({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch fee registry address", async ({ client }) => {
+    const expectedValue = getAddress(addresses[ChainId.EthMainnet].feeRegistry);
+    const value = await fetchFeeRegistry({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch new rates timestamp", async ({ client }) => {
+    const expectedValue = 1744463627n;
+    const value = await fetchNewRatesTimestamp({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch last fee time", async ({ client }) => {
+    const expectedValue = 0n;
+    const value = await fetchLastFeeTime({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch high water mark", async ({ client }) => {
+    const expectedValue = 1000000n;
+    const value = await fetchHighWaterMark({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch cooldown", async ({ client }) => {
+    const expectedValue = 0n;
+    const value = await fetchCooldown({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch fee rates", async ({ client }) => {
+    const expectedValue = { managementRate: 50, performanceRate: 1000 };
+    const value = await fetchFeeRates({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch owner address", async ({ client }) => {
+    const expectedValue = getAddress("0xa766cda5848ffd7d33ce3861f6dc0a5ee38f3550");
+    const value = await fetchOwner({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch pending owner address", async ({ client }) => {
+    const expectedValue = getAddress("0x0000000000000000000000000000000000000000");
+    const value = await fetchPendingOwner({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch whitelist manager address", async ({ client }) => {
+    const expectedValue = "0x0000000000000000000000000000000000000000";
+    const value = await fetchWhitelistManager({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch fee receiver address", async ({ client }) => {
+    const expectedValue = getAddress("0xa336da6a81effa40362d2763d81643a67c82d151");
+    const value = await fetchFeeReceiver({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch safe address", async ({ client }) => {
+    const expectedValue = getAddress("0xa766cda5848ffd7d33ce3861f6dc0a5ee38f3550");
+    const value = await fetchSafe({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch valuation manager address", async ({ client }) => {
+    const expectedValue = getAddress("0xf53eaeb7e6f15cbb6db990eaf2a26702e1d986d8");
+    const value = await fetchValuationManager({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch vault state", async ({ client }) => {
+    const expectedValue = 0; // State.Open
+    const value = await fetchState({ address: tacUSNAddress }, client);
+    expect(value).toStrictEqual(expectedValue);
+  });
+
+  test.sequential("should fetch whitelist activation status", async ({ client }) => {
+    const expectedValue = false;
+    const value = await fetchIsWhitelistActivated({ address: tacUSNAddress }, client);
     expect(value).toStrictEqual(expectedValue);
   });
 });

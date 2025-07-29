@@ -1,5 +1,5 @@
 {
-  "name": "sdk-v0",
+  "name": "Lagoon SDKs",
   "type": "module",
   "private": true,
   "workspaces": [
