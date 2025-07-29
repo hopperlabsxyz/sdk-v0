@@ -1,4 +1,4 @@
-import type { Address, BlockTag, CallParameters, Hex, UnionPick } from "viem";
+import type { BlockTag, CallParameters, Hex, UnionPick } from "viem";
 
 export type FetchParameters = UnionPick<
   CallParameters,
@@ -8,7 +8,6 @@ export type FetchParameters = UnionPick<
 };
 
 export type GetStorageAtParameters = {
-  address: Address
   slot?: Hex
 } & (
     | {
