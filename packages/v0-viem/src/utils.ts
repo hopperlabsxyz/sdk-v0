@@ -1,6 +1,6 @@
 import { encodePacked, hexToBigInt, keccak256, toHex, type Hex } from "viem"
 import { type Uint8, type Uint16, type Uint40, type Uint128 } from "./types"
-import { type BigIntish } from "v0-core/dist/types/types";
+import { type BigIntish } from "@lagoon-protocol/v0-core";
 
 
 export function getStorageSlot(baseSlot: Hex, offset: BigIntish): Hex {

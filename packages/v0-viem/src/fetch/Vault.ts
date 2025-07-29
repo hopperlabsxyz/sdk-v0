@@ -1,9 +1,8 @@
-import { Vault, SettleData, tryCatch, VaultUtils, State } from "@lagoon-protocol/v0-core";
-import { createPublicClient, decodeFunctionResult, encodeFunctionData, hexToBigInt, hexToBool, hexToNumber, http, numberToHex, pad, parseAbi, type Address, type Client, } from "viem";
+import { Vault, SettleData, tryCatch, VaultUtils, State, type BigIntish } from "@lagoon-protocol/v0-core";
+import { decodeFunctionResult, encodeFunctionData, hexToBigInt, hexToBool, hexToNumber, numberToHex, pad, parseAbi, type Address, type Client, } from "viem";
 import { GetVault, GetSettleData } from "../queries"
 import { call, readContract, getStorageAt, getBlock } from "viem/actions";
 import type { FetchParameters, GetStorageAtParameters } from "../types";
-import type { BigIntish } from "v0-core/dist/types/types";
 import { fetchBalanceOf, fetchName, fetchSymbol, fetchTotalSupply } from "./Token";
 import { BlockFetchError, StorageFetchError } from "../errors";
 import { extractUint8, extractUint16, extractUint40, extractUint128, getMappingSlot, getStorageSlot } from "../utils";
