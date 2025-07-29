@@ -774,7 +774,7 @@ export async function fetchWhitelistManager(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.ROlES_STORAGE_LOCATION, 0), ...restParams } = params
+  const { slot = getStorageSlot(VaultUtils.ROLES_STORAGE_LOCATION, 0), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return `0x${data.slice(-40)}`
@@ -792,7 +792,7 @@ export async function fetchFeeReceiver(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.ROlES_STORAGE_LOCATION, 1), ...restParams } = params
+  const { slot = getStorageSlot(VaultUtils.ROLES_STORAGE_LOCATION, 1), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return `0x${data.slice(-40)}`
@@ -810,7 +810,7 @@ export async function fetchSafe(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.ROlES_STORAGE_LOCATION, 2), ...restParams } = params
+  const { slot = getStorageSlot(VaultUtils.ROLES_STORAGE_LOCATION, 2), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return `0x${data.slice(-40)}`
@@ -828,7 +828,7 @@ export async function fetchValuationManager(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.ROlES_STORAGE_LOCATION, 4), ...restParams } = params
+  const { slot = getStorageSlot(VaultUtils.ROLES_STORAGE_LOCATION, 4), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return `0x${data.slice(-40)}`
