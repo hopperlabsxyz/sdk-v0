@@ -1,4 +1,4 @@
-import type { Vault } from "@lagoon-protocol/v0-core";
+import type { Rates } from "@lagoon-protocol/v0-core";
 import { encodeAbiParameters, encodeFunctionData, parseAbiParameter, parseAbiParameters, type Address, type Hex } from "viem";
 
 /**
@@ -7,7 +7,22 @@ import { encodeAbiParameters, encodeFunctionData, parseAbiParameter, parseAbiPar
  * @param vault - The vault object containing the initialization parameters.
  * @returns The encoded initialization call data as a hexadecimal string.
  */
-export function initializeEncodedCall(vault: Vault): Hex {
+export function initializeEncodedCall(
+  vault: {
+    asset: Address,
+    name?: string,
+    symbol?: string,
+    safe: Address,
+    whitelistManager: Address,
+    valuationManager: Address,
+    owner: Address,
+    feeReceiver: Address,
+    feeRates: Rates,
+    isWhitelistActivated: boolean,
+    cooldown: bigint,
+    wrappedNativeToken: Address,
+    feeRegistry: Address
+  }): Hex {
   const initAbiParams = parseAbiParameter([
     'InitStruct init',
     'struct InitStruct { address underlying; string name; string symbol; address safe; address whitelistManager; address valuationManager; address admin; address feeReceiver; uint16 managementRate; uint16 performanceRate; bool enableWhitelist; uint256 rateUpdateCooldown; }',
@@ -58,7 +73,7 @@ export function initializeEncodedCall(vault: Vault): Hex {
  * @param vault - The vault object containing the silo constructor parameters.
  * @returns The encoded constructor call data as a hexadecimal string.
  */
-export function siloConstructorEncodedCall(vault: Vault): Hex {
+export function siloConstructorEncodedCall(vault: { asset: Address; wrappedNativeToken: Address }): Hex {
   const constructorEncoded = encodeAbiParameters(
     parseAbiParameters('address,address'),
     [vault.asset, vault.wrappedNativeToken]
@@ -74,7 +89,24 @@ export function siloConstructorEncodedCall(vault: Vault): Hex {
  * @param beacon - The address of the beacon contract.
  * @returns The encoded constructor call data as a hexadecimal string.
  */
-export function beaconProxyConstructorEncodedCall(vault: Vault, beacon: Address) {
+export function beaconProxyConstructorEncodedCall(
+  vault: {
+    asset: Address,
+    name?: string,
+    symbol?: string,
+    safe: Address,
+    whitelistManager: Address,
+    valuationManager: Address,
+    owner: Address,
+    feeReceiver: Address,
+    feeRates: Rates,
+    isWhitelistActivated: boolean,
+    cooldown: bigint,
+    wrappedNativeToken: Address,
+    feeRegistry: Address
+  },
+  beacon: Address
+) {
   const data = initializeEncodedCall(vault);
   return encodeAbiParameters(
     parseAbiParameters('address beacon, bytes data'),
