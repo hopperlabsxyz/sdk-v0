@@ -79,12 +79,12 @@ export namespace EncodingUtils {
   }
 
   /**
-   * Encodes the constructor call for a silo.
+   * Encodes the constructor params for a silo.
    *
    * @param vault - The vault object containing the silo constructor parameters.
    * @returns The encoded constructor call data as a hexadecimal string.
    */
-  export function siloConstructorEncodedCall(vault: { asset: Address; wrappedNativeToken: Address }): Hex {
+  export function siloConstructorEncodedParams(vault: { asset: Address; wrappedNativeToken: Address }): Hex {
     const constructorEncoded = encodeAbiParameters(
       parseAbiParameters('address,address'),
       [vault.asset, vault.wrappedNativeToken]
@@ -94,13 +94,13 @@ export namespace EncodingUtils {
   }
 
   /**
-   * Encodes the constructor call for a beacon proxy.
+   * Encodes the constructor params for a beacon proxy.
    *
    * @param vault - The vault object containing the initialization parameters.
    * @param beacon - The address of the beacon contract.
    * @returns The encoded constructor call data as a hexadecimal string.
    */
-  export function beaconProxyConstructorEncodedCall(
+  export function beaconProxyConstructorEncodedParams(
     vault: {
       asset: Address,
       name?: string,
@@ -126,7 +126,7 @@ export namespace EncodingUtils {
   }
 
   /**
-   * Encodes the constructor call for an OptinProxy.
+   * Encodes the constructor params for an OptinProxy.
    *
    * @param params - The OptinProxy constructor parameters.
    * @param params.logic - Initial logic implementation address. Can be address(0) for default logic.
@@ -136,7 +136,7 @@ export namespace EncodingUtils {
    * @param params.data - Initialization data for the logic contract.
    * @returns Encoded constructor call data as hex string.
    */
-  export function optinProxyConstructorEncodedCall(params: {
+  export function optinProxyConstructorEncodedParams(params: {
     logic: Address;
     logicRegistry: Address;
     initialOwner: Address;
@@ -150,7 +150,7 @@ export namespace EncodingUtils {
   }
 
   /**
-   * Encodes the constructor call for an OptinProxy with vault initialization.
+   * Encodes the constructor params for an OptinProxy with vault initialization.
    *
    * @param vault - The vault object with initialization parameters.
    * @param params - The OptinProxy parameters.
@@ -160,7 +160,7 @@ export namespace EncodingUtils {
    * @param params.initialDelay - Initial delay before proxy admin can upgrade.
    * @returns The encoded constructor call data as hex string.
    */
-  export function optinProxyWithVaultInitConstructorEncodedCall(
+  export function optinProxyWithVaultInitConstructorEncodedParams(
     vault: {
       asset: Address,
       name?: string,
@@ -184,7 +184,7 @@ export namespace EncodingUtils {
     }
   ): Hex {
     const initData = initializeEncodedCall(vault);
-    return optinProxyConstructorEncodedCall({ ...params, data: initData });
+    return optinProxyConstructorEncodedParams({ ...params, data: initData });
   }
 
   /**
@@ -195,7 +195,7 @@ export namespace EncodingUtils {
    * @param params.initialDelay - The initial delay period before upgrades can be executed.
    * @returns The encoded constructor call data as a hexadecimal string.
    */
-  export function delayProxyAdminConstructorEncodedCall(params: {
+  export function delayProxyAdminConstructorEncodedParams(params: {
     initialOwner: Address;
     initialDelay: bigint;
   }): Hex {
