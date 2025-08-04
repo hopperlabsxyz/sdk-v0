@@ -1,4 +1,4 @@
-import { Vault, SettleData, tryCatch, EncodingUtils, State, type BigIntish } from "@lagoon-protocol/v0-core";
+import { Vault, SettleData, tryCatch, EncodingUtils, State, type BigIntish, VaultUtils } from "@lagoon-protocol/v0-core";
 import { decodeFunctionResult, encodeFunctionData, getAddress, hexToBigInt, hexToBool, hexToNumber, numberToHex, pad, parseAbi, type Address, type Client, } from "viem";
 import { GetVault, GetSettleData } from "../queries"
 import { call, readContract, getStorageAt, getBlock } from "viem/actions";
@@ -6,6 +6,7 @@ import type { FetchParameters, GetStorageAtParameters } from "../types";
 import { fetchBalanceOf, fetchName, fetchSymbol, fetchTotalSupply } from "./Token";
 import { BlockFetchError, StorageFetchError } from "../errors";
 import { extractUint8, extractUint16, extractUint40, extractUint128, getMappingSlot, getStorageSlot } from "../utils";
+import { fetchOwner } from "./Ownable";
 
 /**
  * Gets vault data including metadata and configuration
@@ -373,7 +374,7 @@ export async function fetchAssetsToUnwind(
     fetchPendings(vault, client, parameters),
     fetchBalanceOf({ address: vault.asset }, safe, client, parameters)
   ])
-  const assetsToUnwind = EncodingUtils.calculateAssetsToUnwind(pendingShares, pendingAssets, safeAssetBalance, vault)
+  const assetsToUnwind = VaultUtils.calculateAssetsToUnwind(pendingShares, pendingAssets, safeAssetBalance, vault)
   return {
     assetsToUnwind,
     pendingAssets,
@@ -789,24 +790,6 @@ export async function fetchFeeRates(
     managementRate: extractUint16(value, 0),
     performanceRate: extractUint16(value, 1)
   };
-}
-
-/**
- * Gets admin address from contract storage
- * @param address - Contract address
- * @param client - Viem client
- * @param params - Storage parameters including slot
- * @returns Promise with owner address
- */
-export async function fetchOwner(
-  { address }: { address: Address },
-  client: Client,
-  params: GetStorageAtParameters = {}
-): Promise<Address> {
-  const { slot = getStorageSlot(EncodingUtils.OWNABLE_STORAGE_LOCATION, 0), ...restParams } = params
-  const data = await getStorageAt(client, { slot, address, ...restParams })
-  if (!data) throw new StorageFetchError(slot)
-  return getAddress(`0x${data.slice(-40)}`)
 }
 
 /**

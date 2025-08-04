@@ -1,8 +1,10 @@
-import type { BigIntish } from "../types";
+import type { Address, BigIntish } from "../types";
 
 export interface IDelayProxyAdmin {
+  address: Address;
+  owner: Address;
   implementationUpdateTime: BigIntish;
-  newImplementation: BigIntish;
+  newImplementation: Address;
   delayUpdateTime: BigIntish;
   newDelay: BigIntish;
   delay: BigIntish;
@@ -16,6 +18,14 @@ export interface IDelayProxyAdmin {
  * and delay period changes.
  */
 export class DelayProxyAdmin implements IDelayProxyAdmin {
+  /**
+   * The DelayProxyAdmin's address.
+   */
+  public readonly address: Address;
+  /**
+   * The address that has the authority to initiate implementation upgrades and delay period changes
+   */
+  public readonly owner: Address;
   /** 
    * The maximum delay before which the implementation and the delay can be upgraded
    */
@@ -34,7 +44,7 @@ export class DelayProxyAdmin implements IDelayProxyAdmin {
   /**
    * The new implementation address that will be enforced after upgradeAndCall
    */
-  public readonly newImplementation: bigint;
+  public readonly newImplementation: Address;
 
   /**
    * The timestamp at which updateDelay is callable
@@ -53,14 +63,18 @@ export class DelayProxyAdmin implements IDelayProxyAdmin {
   public readonly delay: bigint;
 
   constructor({
+    address,
+    owner,
     implementationUpdateTime,
     newImplementation,
     delayUpdateTime,
     newDelay,
     delay,
   }: IDelayProxyAdmin) {
+    this.address = address;
+    this.owner = owner;
     this.implementationUpdateTime = BigInt(implementationUpdateTime);
-    this.newImplementation = BigInt(newImplementation);
+    this.newImplementation = newImplementation;
     this.delayUpdateTime = BigInt(delayUpdateTime);
     this.newDelay = BigInt(newDelay);
     this.delay = BigInt(delay);
