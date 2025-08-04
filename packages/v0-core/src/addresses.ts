@@ -84,7 +84,7 @@ export const addresses = {
   [ChainId.KatanaMainnet]: {
     beaconProxyFactory: "0x37f4b3f0102fdc1ff0c7ef644751052fb276dc6e",
     feeRegistry: "0xC0Ef4c34A118a1bEc0912B8Ba8C6424F871A1628",
-    "v0_5_0": "",
+    "v0_5_0": "0x7fe0c16eAa18562f1E37E6f6B205fDA70164e2fb",
     wrappedNative: "0x4200000000000000000000000000000000000006",
     optinFactory: "0xC094C224ce0406BC338E00837B96aD2e265F7287"
   },
