@@ -1,4 +1,4 @@
-import { DelayProxyAdmin } from "@lagoon-protocol/v0-core";
+import { DelayProxyAdmin, EncodingUtils } from "@lagoon-protocol/v0-core";
 import {
   fetchDelayProxyAdmin,
   fetchImplementationUpdateTime,
@@ -22,6 +22,14 @@ declare module "@lagoon-protocol/v0-core" {
      * @returns Promise with DelayProxyAdmin object containing all properties
      */
     let fetch: typeof fetchDelayProxyAdmin;
+
+    /**
+     * Encodes the constructor call for a DelayProxyAdmin.
+     *
+     * @param params - The DelayProxyAdmin constructor parameters.
+     * @returns The encoded constructor call data as a hexadecimal string.
+     */
+    let delayProxyAdminConstructorEncoded: typeof EncodingUtils.delayProxyAdminConstructorEncodedParams;
   }
 
   /**
@@ -88,6 +96,8 @@ declare module "@lagoon-protocol/v0-core" {
 
 // Static method
 DelayProxyAdmin.fetch = fetchDelayProxyAdmin;
+
+DelayProxyAdmin.delayProxyAdminConstructorEncoded = EncodingUtils.delayProxyAdminConstructorEncodedParams
 
 // Instance methods
 DelayProxyAdmin.prototype.getImplementationUpdateTime =
