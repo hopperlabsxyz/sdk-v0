@@ -46,6 +46,7 @@ export async function fetchDelayProxyAdmin(
   ]);
 
   return new DelayProxyAdmin({
+    address,
     owner,
     implementationUpdateTime,
     newImplementation,
