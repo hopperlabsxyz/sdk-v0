@@ -33,7 +33,26 @@ declare module "@lagoon-protocol/v0-core" {
      * @returns The encoded constructor call data as a hexadecimal string.
      */
     let beaconProxyConstructorEncoded: typeof EncodingUtils.beaconProxyConstructorEncodedParams;
+
+    /**
+     * Encodes the constructor params for an OptinProxy.
+     *
+     * @param params - The OptinProxy constructor parameters.
+     * @returns Encoded constructor call data as hex string.
+     */
+    let optinProxyConstructorEncoded: typeof EncodingUtils.optinProxyConstructorEncodedParams;
+
+    /**
+     * Encodes the constructor params for an OptinProxy with vault initialization.
+     *
+     * @param vault - The vault object with initialization parameters.
+     * @param params - The OptinProxy parameters.
+     * @returns The encoded constructor call data as hex string.
+     */
+    let optinProxyWithVaultInitConstructorEncoded: typeof EncodingUtils.optinProxyWithVaultInitConstructorEncodedParams;
+
   }
+
   /**
    * Vault interface for fetching vault-related data and balances
    */
@@ -99,11 +118,36 @@ declare module "@lagoon-protocol/v0-core" {
      * @returns The encoded constructor call data as a hexadecimal string.
      */
     beaconProxyConstructorEncoded(beacon: Address): ReturnType<typeof EncodingUtils.beaconProxyConstructorEncodedParams>;
+
+    /**
+     * Encodes the constructor params for an OptinProxy with vault initialization.
+     *
+     * @param params - The OptinProxy parameters.
+     * @returns The encoded constructor call data as hex string.
+     */
+    optinProxyWithVaultInitConstructorEncoded(params: {
+      logic: Address;
+      logicRegistry: Address;
+      initialOwner: Address;
+      initialDelay: bigint;
+    }): ReturnType<typeof EncodingUtils.optinProxyWithVaultInitConstructorEncodedParams>;
   }
 }
 
+// Static method
 Vault.fetch = fetchVault;
 
+Vault.initializeEncoded = EncodingUtils.initializeEncodedCall
+
+Vault.siloConstructorEncoded = EncodingUtils.siloConstructorEncodedParams
+
+Vault.beaconProxyConstructorEncoded = EncodingUtils.beaconProxyConstructorEncodedParams
+
+Vault.optinProxyConstructorEncoded = EncodingUtils.optinProxyConstructorEncodedParams
+
+Vault.optinProxyWithVaultInitConstructorEncoded = EncodingUtils.optinProxyWithVaultInitConstructorEncodedParams
+
+// Instance methods
 Vault.prototype.getSafeBalance =
   async function (client: Client, parameters: FetchParameters = {}) {
     return fetchBalanceOf({ address: this.asset }, this.safe, client, parameters)
@@ -129,13 +173,18 @@ Vault.prototype.getAssetsToUnwind =
     return fetchAssetsToUnwind(this, client, { ...parameters, revalidate: true })
   }
 
-Vault.initializeEncoded = EncodingUtils.initializeEncodedCall
 Vault.prototype.initializeEncoded = function () { return EncodingUtils.initializeEncodedCall(this) }
 
-Vault.siloConstructorEncoded = EncodingUtils.siloConstructorEncodedParams
 Vault.prototype.siloConstructorEncoded = function () { return EncodingUtils.siloConstructorEncodedParams(this) }
 
-Vault.beaconProxyConstructorEncoded = EncodingUtils.beaconProxyConstructorEncodedParams
 Vault.prototype.beaconProxyConstructorEncoded = function (beacon: Address) { return EncodingUtils.beaconProxyConstructorEncodedParams(this, beacon) }
 
-export { Vault };
+Vault.prototype.optinProxyWithVaultInitConstructorEncoded = function (params: {
+  logic: Address;
+  logicRegistry: Address;
+  initialOwner: Address;
+  initialDelay: bigint;
+}) {
+  return EncodingUtils.optinProxyWithVaultInitConstructorEncodedParams(this, params)
+}
+
