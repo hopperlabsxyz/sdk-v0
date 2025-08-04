@@ -7,7 +7,9 @@ import {
   fetchNewDelay,
   fetchDelay,
   fetchCanUpgrade,
-  fetchCanUpdateDelay
+  fetchCanUpdateDelay,
+  fetchTimeUntilUpgrade,
+  fetchTimeUntilDelayUpdate
 } from "../fetch/DelayProxyAdmin";
 import type { Client } from "viem";
 import type { FetchParameters } from "../types";
@@ -91,6 +93,22 @@ declare module "@lagoon-protocol/v0-core" {
      * @returns Promise<boolean> - Whether delay update is ready to execute
      */
     canUpdateDelay(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchCanUpdateDelay>;
+
+    /**
+     * Gets the time remaining before an implementation upgrade can be executed
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters (block number, etc.)
+     * @returns Promise<bigint> - Time remaining in seconds (-1 if no upgrade scheduled)
+     */
+    getTimeUntilUpgrade(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchTimeUntilUpgrade>;
+
+    /**
+     * Gets the time remaining before a delay update can be executed
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters (block number, etc.)
+     * @returns Promise<bigint> - Time remaining in seconds (-1 if no delay update scheduled)
+     */
+    getTimeUntilDelayUpdate(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchTimeUntilDelayUpdate>;
   }
 }
 
@@ -133,6 +151,16 @@ DelayProxyAdmin.prototype.canUpgrade =
 DelayProxyAdmin.prototype.canUpdateDelay =
   async function (client: Client, parameters: FetchParameters = {}) {
     return fetchCanUpdateDelay({ address: this.address }, client, parameters);
+  };
+
+DelayProxyAdmin.prototype.getTimeUntilUpgrade =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchTimeUntilUpgrade({ address: this.address }, client, parameters);
+  };
+
+DelayProxyAdmin.prototype.getTimeUntilDelayUpdate =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchTimeUntilDelayUpdate({ address: this.address }, client, parameters);
   };
 
 export { DelayProxyAdmin };

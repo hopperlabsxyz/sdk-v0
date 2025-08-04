@@ -194,3 +194,43 @@ export async function fetchCanUpdateDelay(
   ])
   return delayUpdateTime !== MathLib.MAX_UINT_256 && block.timestamp >= delayUpdateTime;
 }
+
+/**
+ * Gets the time remaining before an implementation upgrade can be executed
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param parameters - Fetch parameters
+ * @returns Promise with time remaining in seconds as bigint (-1 if no upgrade scheduled)
+ */
+export async function fetchTimeUntilUpgrade(
+  { address }: { address: Address },
+  client: Client,
+  parameters: FetchParameters = {}
+): Promise<bigint> {
+  const [implementationUpdateTime, block] = await Promise.all([
+    fetchImplementationUpdateTime({ address }, client, parameters),
+    getBlock(client, parameters)
+  ]);
+  if (implementationUpdateTime === MathLib.MAX_UINT_256) return -1n;
+  return MathLib.zeroFloorSub(implementationUpdateTime, block.timestamp)
+}
+
+/**
+ * Gets the time remaining before a delay update can be executed
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param parameters - Fetch parameters
+ * @returns Promise with time remaining in seconds as bigint (-1 if no delay update scheduled)
+ */
+export async function fetchTimeUntilDelayUpdate(
+  { address }: { address: Address },
+  client: Client,
+  parameters: FetchParameters = {}
+): Promise<bigint> {
+  const [delayUpdateTime, block] = await Promise.all([
+    fetchDelayUpdateTime({ address }, client, parameters),
+    getBlock(client, parameters)
+  ]);
+  if (delayUpdateTime === MathLib.MAX_UINT_256) return -1n;
+  return MathLib.zeroFloorSub(delayUpdateTime, block.timestamp)
+}
