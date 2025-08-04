@@ -1,4 +1,4 @@
-import { Vault, SettleData, tryCatch, VaultUtils, State, type BigIntish } from "@lagoon-protocol/v0-core";
+import { Vault, SettleData, tryCatch, EncodingUtils, State, type BigIntish, VaultUtils } from "@lagoon-protocol/v0-core";
 import { decodeFunctionResult, encodeFunctionData, getAddress, hexToBigInt, hexToBool, hexToNumber, numberToHex, pad, parseAbi, type Address, type Client, } from "viem";
 import { GetVault, GetSettleData } from "../queries"
 import { call, readContract, getStorageAt, getBlock } from "viem/actions";
@@ -6,6 +6,7 @@ import type { FetchParameters, GetStorageAtParameters } from "../types";
 import { fetchBalanceOf, fetchName, fetchSymbol, fetchTotalSupply } from "./Token";
 import { BlockFetchError, StorageFetchError } from "../errors";
 import { extractUint8, extractUint16, extractUint40, extractUint128, getMappingSlot, getStorageSlot } from "../utils";
+import { fetchOwner } from "./Ownable";
 
 /**
  * Gets vault data including metadata and configuration
@@ -214,7 +215,7 @@ export async function fetchSettleData(
   }
   // Fallback in case the rpc node does not support state overrides
   {
-    const totalSupplySlot = getMappingSlot(getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 4), pad(numberToHex(settleId)))
+    const totalSupplySlot = getMappingSlot(getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 4), pad(numberToHex(settleId)))
     const totalAssetsSlot = getStorageSlot(totalSupplySlot, 1)
     const pendingAssetsSlot = getStorageSlot(totalSupplySlot, 2)
     const pendingSharesSlot = getStorageSlot(totalSupplySlot, 3)
@@ -422,7 +423,7 @@ export async function fetchTotalAssets(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<bigint> {
-  const { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 0), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 0), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return hexToBigInt(data)
@@ -441,7 +442,7 @@ export async function fetchNewTotalAssets(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<bigint> {
-  const { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 1), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 1), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return hexToBigInt(data)
@@ -466,7 +467,7 @@ export async function fetchEpochAndSettleIds(
   redeemSettleId: number
   lastRedeemEpochIdSettled: number
 }> {
-  const { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 2), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 2), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   const value = hexToBigInt(data)
@@ -493,7 +494,7 @@ export async function fetchLastDepositRequestId(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<number> {
-  const { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 5), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 5), ...restParams } = params
   const lastDepositRequestIdSlot = getMappingSlot(slot, pad(userAddress))
   const data = await getStorageAt(client, { slot: lastDepositRequestIdSlot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
@@ -515,7 +516,7 @@ export async function fetchLastRedeemRequestId(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<number> {
-  const { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 6), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 6), ...restParams } = params
   const lastRedeemRequestIdSlot = getMappingSlot(slot, pad(userAddress))
   const data = await getStorageAt(client, { slot: lastRedeemRequestIdSlot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
@@ -539,7 +540,7 @@ export async function fetchIsOperator(
   params: GetStorageAtParameters = {}
 ): Promise<boolean> {
   if (operator === controller) return true;
-  const { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 7), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 7), ...restParams } = params
   const controllerSlot = getMappingSlot(slot, pad(controller))
   const operatorSlot = getMappingSlot(controllerSlot, pad(operator))
   const data = await getStorageAt(client, { slot: operatorSlot, address, ...restParams })
@@ -560,7 +561,7 @@ export async function fetchPendingSilo(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 8), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 8), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return getAddress(`0x${data.slice(-40)}`)
@@ -578,7 +579,7 @@ export async function fetchWrappedNativeToken(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 9), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 9), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return getAddress(`0x${data.slice(-40)}`)
@@ -597,7 +598,7 @@ export async function fetchDecimalsData(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<{ decimals: number; decimalsOffset: number }> {
-  const { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 9), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 9), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   const value = hexToBigInt(data)
@@ -621,7 +622,7 @@ export async function fetchTotalAssetsTimestamps(
   totalAssetsExpiration: bigint
   totalAssetsLifespan: bigint
 }> {
-  const { slot = getStorageSlot(VaultUtils.ERC7540_STORAGE_LOCATION, 10), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 10), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   const value = hexToBigInt(data)
@@ -643,7 +644,7 @@ export async function fetchAsset(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.ERC4626_STORAGE_LOCATION, 0), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ERC4626_STORAGE_LOCATION, 0), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return getAddress(`0x${data.slice(-40)}`)
@@ -662,7 +663,7 @@ export async function fetchUnderlyingDecimals(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<number> {
-  const { slot = getStorageSlot(VaultUtils.ERC4626_STORAGE_LOCATION, 0), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ERC4626_STORAGE_LOCATION, 0), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   const value = hexToBigInt(data)
@@ -681,7 +682,7 @@ export async function fetchFeeRegistry(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.FEE_MANAGER_STORAGE_LOCATION, 0), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.FEE_MANAGER_STORAGE_LOCATION, 0), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return getAddress(`0x${data.slice(-40)}`)
@@ -699,7 +700,7 @@ export async function fetchNewRatesTimestamp(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<bigint> {
-  const { slot = getStorageSlot(VaultUtils.FEE_MANAGER_STORAGE_LOCATION, 1), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.FEE_MANAGER_STORAGE_LOCATION, 1), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return hexToBigInt(data)
@@ -717,7 +718,7 @@ export async function fetchLastFeeTime(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<bigint> {
-  const { slot = getStorageSlot(VaultUtils.FEE_MANAGER_STORAGE_LOCATION, 2), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.FEE_MANAGER_STORAGE_LOCATION, 2), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return hexToBigInt(data)
@@ -735,7 +736,7 @@ export async function fetchHighWaterMark(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<bigint> {
-  const { slot = getStorageSlot(VaultUtils.FEE_MANAGER_STORAGE_LOCATION, 3), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.FEE_MANAGER_STORAGE_LOCATION, 3), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return hexToBigInt(data)
@@ -753,7 +754,7 @@ export async function fetchCooldown(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<bigint> {
-  const { slot = getStorageSlot(VaultUtils.FEE_MANAGER_STORAGE_LOCATION, 4), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.FEE_MANAGER_STORAGE_LOCATION, 4), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return hexToBigInt(data)
@@ -778,8 +779,8 @@ export async function fetchFeeRates(
   if (!block) throw new BlockFetchError(params.blockNumber ?? params.blockTag)
   const {
     slot = newRatesTimestamp <= block.timestamp ?
-      getStorageSlot(VaultUtils.FEE_MANAGER_STORAGE_LOCATION, 5) : // rates slot
-      getStorageSlot(VaultUtils.FEE_MANAGER_STORAGE_LOCATION, 6), // old rate slot
+      getStorageSlot(EncodingUtils.FEE_MANAGER_STORAGE_LOCATION, 5) : // rates slot
+      getStorageSlot(EncodingUtils.FEE_MANAGER_STORAGE_LOCATION, 6), // old rate slot
     ...restParams
   } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
@@ -789,24 +790,6 @@ export async function fetchFeeRates(
     managementRate: extractUint16(value, 0),
     performanceRate: extractUint16(value, 1)
   };
-}
-
-/**
- * Gets admin address from contract storage
- * @param address - Contract address
- * @param client - Viem client
- * @param params - Storage parameters including slot
- * @returns Promise with owner address
- */
-export async function fetchOwner(
-  { address }: { address: Address },
-  client: Client,
-  params: GetStorageAtParameters = {}
-): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.OWNABLE_STORAGE_LOCATION, 0), ...restParams } = params
-  const data = await getStorageAt(client, { slot, address, ...restParams })
-  if (!data) throw new StorageFetchError(slot)
-  return getAddress(`0x${data.slice(-40)}`)
 }
 
 /**
@@ -821,7 +804,7 @@ export async function fetchPendingOwner(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.OWNABLE_2_STEP_UPGRADEABLE_STORAGE_LOCATION, 0), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.OWNABLE_2_STEP_UPGRADEABLE_STORAGE_LOCATION, 0), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return getAddress(`0x${data.slice(-40)}`)
@@ -839,7 +822,7 @@ export async function fetchWhitelistManager(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.ROLES_STORAGE_LOCATION, 0), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ROLES_STORAGE_LOCATION, 0), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return getAddress(`0x${data.slice(-40)}`)
@@ -857,7 +840,7 @@ export async function fetchFeeReceiver(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.ROLES_STORAGE_LOCATION, 1), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ROLES_STORAGE_LOCATION, 1), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return getAddress(`0x${data.slice(-40)}`)
@@ -875,7 +858,7 @@ export async function fetchSafe(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.ROLES_STORAGE_LOCATION, 2), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ROLES_STORAGE_LOCATION, 2), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return getAddress(`0x${data.slice(-40)}`)
@@ -893,7 +876,7 @@ export async function fetchValuationManager(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<Address> {
-  const { slot = getStorageSlot(VaultUtils.ROLES_STORAGE_LOCATION, 4), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.ROLES_STORAGE_LOCATION, 4), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return getAddress(`0x${data.slice(-40)}`)
@@ -911,7 +894,7 @@ export async function fetchState(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<State> {
-  const { slot = getStorageSlot(VaultUtils.VAULT_STORAGE_LOCATION, 0), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.VAULT_STORAGE_LOCATION, 0), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return hexToNumber(data)
@@ -929,7 +912,7 @@ export async function fetchIsWhitelistActivated(
   client: Client,
   params: GetStorageAtParameters = {}
 ): Promise<boolean> {
-  const { slot = getStorageSlot(VaultUtils.WHITELISTABLE_STORAGE_LOCATION, 0), ...restParams } = params
+  const { slot = getStorageSlot(EncodingUtils.WHITELISTABLE_STORAGE_LOCATION, 0), ...restParams } = params
   const data = await getStorageAt(client, { slot, address, ...restParams })
   if (!data) throw new StorageFetchError(slot)
   return hexToBool(data)

@@ -1,4 +1,5 @@
 export * from "./vault/"
+export * from "./proxy/"
 export * from "./math/"
 export * from "./token/"
 export * from "./addresses"
