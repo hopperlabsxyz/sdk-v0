@@ -125,4 +125,83 @@ export namespace EncodingUtils {
     );
   }
 
+  /**
+   * Encodes the constructor call for an OptinProxy.
+   *
+   * @param params - The OptinProxy constructor parameters.
+   * @param params.logic - Initial logic implementation address. Can be address(0) for default logic.
+   * @param params.logicRegistry - Address of the logic registry contract.
+   * @param params.initialOwner - Initial owner/admin of the proxy.
+   * @param params.initialDelay - Initial delay before proxy admin can upgrade.
+   * @param params.data - Initialization data for the logic contract.
+   * @returns Encoded constructor call data as hex string.
+   */
+  export function optinProxyConstructorEncodedCall(params: {
+    logic: Address;
+    logicRegistry: Address;
+    initialOwner: Address;
+    initialDelay: bigint;
+    data: Hex;
+  }): Hex {
+    return encodeAbiParameters(
+      parseAbiParameters('address _logic, address _logicRegistry, address _initialOwner, uint256 _initialDelay, bytes _data'),
+      [params.logic, params.logicRegistry, params.initialOwner, params.initialDelay, params.data]
+    );
+  }
+
+  /**
+   * Encodes the constructor call for an OptinProxy with vault initialization.
+   *
+   * @param vault - The vault object with initialization parameters.
+   * @param params - The OptinProxy parameters.
+   * @param params.logic - Initial logic implementation address. Can be zero address for registry default.
+   * @param params.logicRegistry - Address of the logic registry contract.
+   * @param params.initialOwner - Initial owner/admin of the proxy.
+   * @param params.initialDelay - Initial delay before proxy admin can upgrade.
+   * @returns The encoded constructor call data as hex string.
+   */
+  export function optinProxyWithVaultInitConstructorEncodedCall(
+    vault: {
+      asset: Address,
+      name?: string,
+      symbol?: string,
+      safe: Address,
+      whitelistManager: Address,
+      valuationManager: Address,
+      owner: Address,
+      feeReceiver: Address,
+      feeRates: Rates,
+      isWhitelistActivated: boolean,
+      cooldown: bigint,
+      wrappedNativeToken: Address,
+      feeRegistry: Address
+    },
+    params: {
+      logic: Address;
+      logicRegistry: Address;
+      initialOwner: Address;
+      initialDelay: bigint;
+    }
+  ): Hex {
+    const initData = initializeEncodedCall(vault);
+    return optinProxyConstructorEncodedCall({ ...params, data: initData });
+  }
+
+  /**
+   * Encodes the constructor call for a DelayProxyAdmin.
+   *
+   * @param params - The DelayProxyAdmin constructor parameters.
+   * @param params.initialOwner - The address that will own the DelayProxyAdmin contract.
+   * @param params.initialDelay - The initial delay period before upgrades can be executed.
+   * @returns The encoded constructor call data as a hexadecimal string.
+   */
+  export function delayProxyAdminConstructorEncodedCall(params: {
+    initialOwner: Address;
+    initialDelay: bigint;
+  }): Hex {
+    return encodeAbiParameters(
+      parseAbiParameters('address initialOwner, uint256 initialDelay'),
+      [params.initialOwner, params.initialDelay]
+    );
+  }
 }
