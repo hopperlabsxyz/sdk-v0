@@ -18,6 +18,9 @@ export enum ChainId {
   BerachainMainnet = 80094,
   MantleMainnet = 5000,
   AvalancheMainnet = 43114,
+  TacMainnet = 239,
+  KatanaMainnet = 747474,
+  BscMainnet = 64
 }
 
 export interface ChainMetadata {
@@ -182,6 +185,29 @@ export namespace ChainUtils {
       nativeCurrency: { name: "Avalanche", symbol: "AVAX", decimals: 18 },
       explorerUrl: "https://snowtrace.io",
       identifier: "avalanche",
+    },
+    [ChainId.TacMainnet]: {
+      name: "Tac",
+      id: ChainId.TacMainnet,
+      nativeCurrency: { name: "Tac", symbol: "TAC", decimals: 18 },
+      explorerUrl: "https://explorer.tac.build/",
+      identifier: "tac",
+    },
+    [ChainId.KatanaMainnet]: {
+      name: "Katana",
+      id: ChainId.KatanaMainnet,
+      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+      explorerUrl: "https://katanascan.com/",
+      identifier: "katana",
+    },
+    [ChainId.BscMainnet]: {
+      name: "Binance Smart Chain",
+      id: ChainId.BscMainnet,
+      nativeCurrency: { name: "Binance", symbol: "BNB", decimals: 18 },
+      explorerUrl: "https://bscscan.com/",
+      identifier: "bsc",
     }
+
+
   } as const
 }
