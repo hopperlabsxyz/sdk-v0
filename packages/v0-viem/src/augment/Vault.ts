@@ -1,7 +1,6 @@
-import { Vault } from "@lagoon-protocol/v0-core";
+import { EncodingUtils, Vault } from "@lagoon-protocol/v0-core";
 
 import { fetchAssetsToUnwind, fetchBalanceOf, fetchPendingAssets, fetchPendingShares, fetchPendingSiloBalances, fetchVault } from "../fetch";
-import { initializeEncodedCall, siloConstructorEncodedCall, beaconProxyConstructorEncodedCall } from "../encode/Vault";
 import type { Address, Client } from "viem";
 import type { FetchParameters } from "../types";
 
@@ -16,7 +15,7 @@ declare module "@lagoon-protocol/v0-core" {
      * @param vault - The vault object containing the initialization parameters.
      * @returns The encoded initialization call data as a hexadecimal string.
      */
-    let initializeEncoded: typeof initializeEncodedCall;
+    let initializeEncoded: typeof EncodingUtils.initializeEncodedCall;
 
     /**
      * Encodes the constructor call for a silo.
@@ -24,7 +23,7 @@ declare module "@lagoon-protocol/v0-core" {
      * @param vault - The vault object containing the silo constructor parameters.
      * @returns The encoded constructor call data as a hexadecimal string.
      */
-    let siloConstructorEncoded: typeof siloConstructorEncodedCall;
+    let siloConstructorEncoded: typeof EncodingUtils.siloConstructorEncodedParams;
 
     /**
      * Encodes the constructor call for a beacon proxy.
@@ -33,7 +32,7 @@ declare module "@lagoon-protocol/v0-core" {
      * @param beacon - The address of the beacon contract.
      * @returns The encoded constructor call data as a hexadecimal string.
      */
-    let beaconProxyConstructorEncoded: typeof beaconProxyConstructorEncodedCall;
+    let beaconProxyConstructorEncoded: typeof EncodingUtils.beaconProxyConstructorEncodedParams;
   }
   /**
    * Vault interface for fetching vault-related data and balances
@@ -84,14 +83,14 @@ declare module "@lagoon-protocol/v0-core" {
      *
      * @returns The encoded initialization call data as a hexadecimal string.
      */
-    initializeEncoded(): ReturnType<typeof initializeEncodedCall>;
+    initializeEncoded(): ReturnType<typeof EncodingUtils.initializeEncodedCall>;
 
     /**
      * Encodes the constructor call for a silo.
      *
      * @returns The encoded constructor call data as a hexadecimal string.
      */
-    siloConstructorEncoded(): ReturnType<typeof siloConstructorEncodedCall>;
+    siloConstructorEncoded(): ReturnType<typeof EncodingUtils.siloConstructorEncodedParams>;
 
     /**
      * Encodes the constructor call for a beacon proxy.
@@ -99,7 +98,7 @@ declare module "@lagoon-protocol/v0-core" {
      * @param beacon - The address of the beacon contract.
      * @returns The encoded constructor call data as a hexadecimal string.
      */
-    beaconProxyConstructorEncoded(beacon: Address): ReturnType<typeof beaconProxyConstructorEncodedCall>;
+    beaconProxyConstructorEncoded(beacon: Address): ReturnType<typeof EncodingUtils.beaconProxyConstructorEncodedParams>;
   }
 }
 
@@ -130,13 +129,13 @@ Vault.prototype.getAssetsToUnwind =
     return fetchAssetsToUnwind(this, client, { ...parameters, revalidate: true })
   }
 
-Vault.initializeEncoded = initializeEncodedCall
-Vault.prototype.initializeEncoded = function () { return initializeEncodedCall(this) }
+Vault.initializeEncoded = EncodingUtils.initializeEncodedCall
+Vault.prototype.initializeEncoded = function () { return EncodingUtils.initializeEncodedCall(this) }
 
-Vault.siloConstructorEncoded = siloConstructorEncodedCall
-Vault.prototype.siloConstructorEncoded = function () { return siloConstructorEncodedCall(this) }
+Vault.siloConstructorEncoded = EncodingUtils.siloConstructorEncodedParams
+Vault.prototype.siloConstructorEncoded = function () { return EncodingUtils.siloConstructorEncodedParams(this) }
 
-Vault.beaconProxyConstructorEncoded = beaconProxyConstructorEncodedCall
-Vault.prototype.beaconProxyConstructorEncoded = function (beacon: Address) { return beaconProxyConstructorEncodedCall(this, beacon) }
+Vault.beaconProxyConstructorEncoded = EncodingUtils.beaconProxyConstructorEncodedParams
+Vault.prototype.beaconProxyConstructorEncoded = function (beacon: Address) { return EncodingUtils.beaconProxyConstructorEncodedParams(this, beacon) }
 
 export { Vault };
