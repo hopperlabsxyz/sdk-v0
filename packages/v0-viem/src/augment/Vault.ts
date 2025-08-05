@@ -188,3 +188,4 @@ Vault.prototype.optinProxyWithVaultInitConstructorEncoded = function (params: {
   return EncodingUtils.optinProxyWithVaultInitConstructorEncodedParams(this, params)
 }
 
+export { Vault }
