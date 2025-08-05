@@ -1,7 +1,7 @@
 {
   "name": "@lagoon-protocol/v0-viem",
   "description": "Viem based package that defines Lagoon utilities for vault core classes",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "license": "MIT",
   "type": "module",
   "main": "./dist/cjs/index.cjs",

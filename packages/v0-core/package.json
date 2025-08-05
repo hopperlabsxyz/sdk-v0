@@ -1,7 +1,7 @@
 {
   "name": "@lagoon-protocol/v0-core",
   "description": "Framework-agnostic package that defines Lagoon related entity classes (such as Vault)",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "license": "MIT",
   "type": "module",
   "main": "./dist/cjs/index.cjs",
