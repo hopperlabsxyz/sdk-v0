@@ -11,6 +11,7 @@ export namespace EncodingUtils {
   export const ROLES_STORAGE_LOCATION = '0x7c302ed2c673c3d6b4551cf74a01ee649f887e14fd20d13dbca1b6099534d900';
   export const VAULT_STORAGE_LOCATION = '0x0e6b3200a60a991c539f47dddaca04a18eb4bcf2b53906fb44751d827f001400';
   export const WHITELISTABLE_STORAGE_LOCATION = '0x083cc98ab296d1a1f01854b5f7a2f47df4425a56ba7b35f7faa3a336067e4800';
+  export const EIP1967_PROXY_IMPLEMENTATION_SLOT = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'
 
   /**
    * Encodes the initialization call for a vault.
