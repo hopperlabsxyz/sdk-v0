@@ -883,8 +883,8 @@ export async function fetchValuationManager(
 }
 
 /**
- * Gets state of the vault (open | closing | closed)
  * @param address - Contract address
+ * Gets state of the vault (open | closing | closed)
  * @param client - Viem client
  * @param params - Storage parameters including slot
  * @returns Promise State enum
@@ -917,4 +917,3 @@ export async function fetchIsWhitelistActivated(
   if (!data) throw new StorageFetchError(slot)
   return hexToBool(data)
 }
-
