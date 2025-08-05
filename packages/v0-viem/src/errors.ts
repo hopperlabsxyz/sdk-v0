@@ -13,3 +13,10 @@ export class BlockFetchError extends Error {
     this.name = 'StorageFetchError'
   }
 }
+
+export class BytecodeFetchError extends Error {
+  constructor(address: string, message?: string) {
+    super(message || `Failed to fetch bytecode of address: ${address}`)
+    this.name = 'BytecodeFetchError'
+  }
+}

@@ -20,6 +20,18 @@ export type GetStorageAtParameters = {
     }
   )
 
+export type GetCodeParameters =
+  (
+    | {
+      blockNumber?: undefined
+      blockTag?: BlockTag | undefined
+    }
+    | {
+      blockNumber?: bigint | undefined
+      blockTag?: undefined
+    }
+  )
+
 export type Uint8 = number;
 export type Uint16 = number;
 export type Uint40 = number;
