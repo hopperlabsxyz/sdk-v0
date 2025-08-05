@@ -24,7 +24,7 @@ export async function fetchVault(
   address: Address,
   client: Client,
   parameters: FetchParameters = {}
-): Promise<Vault | undefined> {
+): Promise<Vault> {
   {
     const [vaultResponse, versionResponse] = await Promise.all([
       tryCatch(
