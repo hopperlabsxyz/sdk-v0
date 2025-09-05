@@ -93,5 +93,11 @@ export const addresses = {
     "v0_5_0": "0x7175E7E5C246e2E5c8C54Ede2ee0180e39fcA879",
     wrappedNative: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
     optinFactory: "0x3f680aB9E51EEED9381dE5275f4995611Ff884d5"
+  },
+  [ChainId.HyperEVMMainnet]: {
+    feeRegistry: "0xd70937AA2B73A8a2100932c4f5a8D32c9bE8b80f",
+    "v0_5_0": "0xC1D5F01A6491b97B94F3670Aed4BEcB897293CF8",
+    wrappedNative: "0x5555555555555555555555555555555555555555",
+    optinFactory: "0x90beB507A1BA7D64633540cbce615B574224CD84"
   }
 } as const
