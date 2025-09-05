@@ -20,7 +20,8 @@ export enum ChainId {
   AvalancheMainnet = 43114,
   TacMainnet = 239,
   KatanaMainnet = 747474,
-  BscMainnet = 64
+  BscMainnet = 56,
+  HyperEVMMainnet = 999
 }
 
 export interface ChainMetadata {
@@ -206,8 +207,13 @@ export namespace ChainUtils {
       nativeCurrency: { name: "Binance", symbol: "BNB", decimals: 18 },
       explorerUrl: "https://bscscan.com/",
       identifier: "bsc",
+    },
+    [ChainId.HyperEVMMainnet]: {
+      name: "Hyperliquid EVM",
+      id: ChainId.HyperEVMMainnet,
+      nativeCurrency: { name: 'HYPE', symbol: 'HYPE', decimals: 18 },
+      explorerUrl: "https://hyperevmscan.io/",
+      identifier: "hyperevm",
     }
-
-
   } as const
 }
