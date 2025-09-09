@@ -1,4 +1,4 @@
-import { encodePacked, getAddress, hexToBigInt, keccak256, slice, toHex, type Hex } from "viem"
+import { encodePacked, hexToBigInt, keccak256, slice, toHex, type Hex } from "viem"
 import { type Uint8, type Uint16, type Uint40, type Uint128 } from "./types"
 import { type Address, type BigIntish } from "@lagoon-protocol/v0-core";
 
