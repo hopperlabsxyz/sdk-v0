@@ -21,7 +21,8 @@ export enum ChainId {
   TacMainnet = 239,
   KatanaMainnet = 747474,
   BscMainnet = 56,
-  HyperEVMMainnet = 999
+  HyperEVMMainnet = 999,
+  Linea = 59144
 }
 
 export interface ChainMetadata {
@@ -214,6 +215,13 @@ export namespace ChainUtils {
       nativeCurrency: { name: 'HYPE', symbol: 'HYPE', decimals: 18 },
       explorerUrl: "https://hyperevmscan.io/",
       identifier: "hyperevm",
+    },
+    [ChainId.Linea]: {
+      name: "Linea Mainnet",
+      id: ChainId.Linea,
+      nativeCurrency: { name: 'Linea Ether', symbol: 'ETH', decimals: 18 },
+      explorerUrl: "https://lineascan.build",
+      identifier: "linea",
     }
   } as const
 }
