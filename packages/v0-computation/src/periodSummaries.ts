@@ -4,12 +4,12 @@
  * @param duration - The duration to get the last period summary in.
  * @returns The last period summary comprised in the duration.
  */
-export function getLastPeriodSummariesInDuration<
+export function getLastPeriodSummaryInDuration<
   T extends { blockTimestamp: bigint }
 >(periodSummaries: T[], duration: number): T | undefined {
   if (periodSummaries.length == 0) return undefined;
 
-  const isAscending = isArrayStrictlyAscending(periodSummaries);
+  const isAscending = isSortedArrayStrictlyAscending(periodSummaries);
 
   const mostRecentSummary = isAscending
     ? periodSummaries[periodSummaries.length - 1]
@@ -37,13 +37,13 @@ export function getLastPeriodSummariesInDuration<
 }
 
 /**
- * Checks if an array is strictly ascending.
+ * Checks if a sorted array is strictly ascending.
  * @param array - The array to check.
  * @returns True if the array is strictly ascending, false otherwise.
  */
-function isArrayStrictlyAscending<T extends { blockTimestamp: bigint }>(
-  array: T[]
-): boolean {
+export function isSortedArrayStrictlyAscending<
+  T extends { blockTimestamp: bigint }
+>(array: T[]): boolean {
   if (array.length == 0 || array.length == 1) return true;
   if (array[1]!.blockTimestamp > array[0]!.blockTimestamp) return true;
   return false;

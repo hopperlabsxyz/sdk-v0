@@ -127,7 +127,7 @@ export function simulateManagementFees({
   const timeElapsed = nowUnix - BigInt(lastFeeTime);
   const annualRate = BigInt(managementRate);
   const annualFee = (totalAssets * annualRate) / VaultUtils.BPS;
-  return (annualFee * timeElapsed) / SECONDS_PER_YEAR;
+  return (annualFee * timeElapsed) / BigInt(SECONDS_PER_YEAR);
 }
 
 /**

@@ -3,7 +3,7 @@ import {
   VaultUtils,
   type VersionOrLatest,
 } from "@lagoon-protocol/v0-core";
-import { simulateManagementFees } from "./Simulation/fees";
+import { simulateManagementFees } from "./simulation/fees";
 
 /**
  * Computes the total assets at high water mark. Two things to know to understand this function:
