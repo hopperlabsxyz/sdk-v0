@@ -2,8 +2,8 @@ import { formatUnits } from "viem";
 
 /**
  *
- * @param newestPrice - The price of the asset at the newest timestamp.
- * @param oldestPrice - The price of the asset at the oldest timestamp.
+ * @param newestPrice - The price of the asset at the newest timestamp with decimals.
+ * @param oldestPrice - The price of the asset at the oldest timestamp with decimals.
  * @param newestTimestamp - The timestamp of the newest event in seconds.
  * @param oldestTimestamp - The timestamp of the oldest event in seconds.
  * @returns

@@ -4,6 +4,7 @@ import { VaultUtils } from "@lagoon-protocol/v0-core";
 import { computeTotalAssetsAtHighWaterMark } from "../TotalAssetsAtHighWaterMark";
 import type { SimulationInput, SimulationResult } from "../types";
 import { computeFees } from "./fees";
+import { computeAPR } from "../APR";
 
 /**
  * Simulates a deposit or withdrawal of assets into a vault
@@ -58,6 +59,12 @@ export function simulate(
     decimalsOffset,
   });
 
+  const grossPricePerShare = VaultUtils.convertToAssets(oneShare, {
+    totalAssets: input.newTotalAssets,
+    totalSupply: vault.totalSupply,
+    decimalsOffset,
+  });
+
   const { totalAssets, totalSupply } = computeTotalsAfterDepositsAndRedemptions(
     {
       settleDeposit: input.settleDeposit,
@@ -75,6 +82,40 @@ export function simulate(
     totalAssets
   );
 
+  const periodNetApr = computeAPR({
+    newPrice: netPricePerShare,
+    oldPrice: vault.highWaterMark,
+    newTimestamp: now,
+    oldTimestamp: vault.lastFeeTime,
+  });
+
+  const periodGrossApr = computeAPR({
+    newPrice: grossPricePerShare,
+    oldPrice: vault.highWaterMark,
+    newTimestamp: now,
+    oldTimestamp: vault.lastFeeTime,
+  });
+
+  let thirtyDaysNetApr = undefined;
+  if (input.thirtyDay) {
+    thirtyDaysNetApr = computeAPR({
+      newPrice: netPricePerShare,
+      oldPrice: input.thirtyDay.pricePerShare,
+      newTimestamp: now,
+      oldTimestamp: BigInt(input.thirtyDay.timestamp),
+    });
+  }
+
+  let inceptionNetApr = undefined;
+  if (input.inception) {
+    inceptionNetApr = computeAPR({
+      newPrice: netPricePerShare,
+      oldPrice: input.inception.pricePerShare,
+      newTimestamp: now,
+      oldTimestamp: BigInt(input.inception.timestamp),
+    });
+  }
+
   return {
     managementFees,
     performanceFees,
@@ -84,10 +125,10 @@ export function simulate(
     totalSupply,
     assetsToBeTransferedFromSafe,
     excessReturns,
-    periodNetApr: 0,
-    periodGrossApr: 0,
-    thirtyDaysNetAPR: 0,
-    inceptionNetAPR: 0,
+    periodNetApr,
+    periodGrossApr,
+    thirtyDaysNetApr,
+    inceptionNetApr,
     totalAssetsAtHighWaterMark,
     assetsToUnwind,
   };

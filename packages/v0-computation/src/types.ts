@@ -61,8 +61,8 @@ export interface SimulationResult {
   excessReturns: bigint;
   periodNetApr: number;
   periodGrossApr: number;
-  thirtyDaysNetAPR?: number;
-  inceptionNetAPR?: number;
+  thirtyDaysNetApr?: number;
+  inceptionNetApr?: number;
   pricePerShare: bigint;
   highWaterMark: bigint;
   totalAssetsAtHighWaterMark: bigint;
