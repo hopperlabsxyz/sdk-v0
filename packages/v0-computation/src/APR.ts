@@ -1,3 +1,5 @@
+import { formatUnits } from "viem";
+
 /**
  *
  * @param newestPrice - The price of the asset at the newest timestamp.
@@ -34,7 +36,7 @@ export function computeAPR({
 
   const periodYield = gain * SECONDS_PER_YEAR * INCREASE_PRECISION;
 
-  //   return Number(
-  //     formatUnits(periodYield / (periodSeconds * oldestPrice), decimals)
-  //   );
+  return Number(
+    formatUnits(periodYield / (periodSeconds * oldPrice), decimals)
+  );
 }

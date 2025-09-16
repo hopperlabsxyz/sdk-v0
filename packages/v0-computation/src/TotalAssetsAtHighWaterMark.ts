@@ -1,11 +1,9 @@
 import {
   resolveVersion,
   VaultUtils,
-  Version,
-  type Vault,
   type VersionOrLatest,
-} from "../vault";
-import { simulateManagementFees } from "./Simulation";
+} from "@lagoon-protocol/v0-core";
+import { simulateManagementFees } from "./Simulation/fees";
 
 /**
  * Computes the total assets at high water mark. Two things to know to understand this function:
@@ -46,36 +44,17 @@ export function computeTotalAssetsAtHighWaterMark(
     totalSupply: vault.totalSupply,
   });
 
-  return calculateTotalAssetsAtHWM({
-    highWaterMark: vault.highWaterMark,
-    totalSupply: vault.totalSupply + managementFeeInShares,
-    vaultDecimals: vault.decimals,
-    assetDecimals: vault.underlyingDecimals,
-  });
-}
-
-function calculateTotalAssetsAtHWM({
-  highWaterMark,
-  totalSupply,
-  vaultDecimals,
-  assetDecimals,
-}: {
-  highWaterMark: bigint;
-  totalSupply: bigint;
-  vaultDecimals: number;
-  assetDecimals: number;
-}): bigint {
-  highWaterMark += 1n;
   // by adding 1n we make sure we are reaching the value for assets at which performance will start
   // to happen.
+  vault.highWaterMark += 1n;
 
-  const shares = 10n ** BigInt(vaultDecimals);
+  const shares = 10n ** BigInt(vault.decimals);
 
-  const decimalsOffset = vaultDecimals - assetDecimals;
+  const decimalsOffset = vault.decimals - vault.underlyingDecimals;
 
-  const _totalSupply = totalSupply + 10n ** BigInt(decimalsOffset);
-  const nominator = highWaterMark * _totalSupply;
+  const _totalSupply =
+    vault.totalSupply + managementFeeInShares + 10n ** BigInt(decimalsOffset);
+  const nominator = vault.highWaterMark * _totalSupply;
   const denominator = shares;
-  const totalAssetsAtHWM = nominator / denominator - 1n;
-  return totalAssetsAtHWM;
+  return nominator / denominator - 1n;
 }

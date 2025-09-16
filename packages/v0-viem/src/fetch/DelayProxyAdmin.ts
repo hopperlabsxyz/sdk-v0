@@ -9,18 +9,18 @@ const delayProxyAdminAbi = parseAbi([
   "function newImplementation() view returns (address)",
   "function delayUpdateTime() view returns (uint256)",
   "function newDelay() view returns (uint256)",
-  "function delay() view returns (uint256)"
+  "function delay() view returns (uint256)",
 ]);
 
 /**
  * Gets DelayProxyAdmin data including all timing and implementation information
- * 
+ *
  * @param address - DelayProxyAdmin contract address
  * @param client - Viem client
  * @param parameters - Optional fetch parameters (block number, etc.)
- * 
+ *
  * @returns Promise with DelayProxyAdmin object containing all properties
- * 
+ *
  * @example
  * const delayProxyAdmin = await fetchDelayProxyAdmin('0x123...', client);
  */
@@ -35,14 +35,14 @@ export async function fetchDelayProxyAdmin(
     newImplementation,
     delayUpdateTime,
     newDelay,
-    delay
+    delay,
   ] = await Promise.all([
     fetchOwner({ address }, client, parameters),
     fetchImplementationUpdateTime({ address }, client, parameters),
     fetchNewImplementation({ address }, client, parameters),
     fetchDelayUpdateTime({ address }, client, parameters),
     fetchNewDelay({ address }, client, parameters),
-    fetchDelay({ address }, client, parameters)
+    fetchDelay({ address }, client, parameters),
   ]);
 
   return new DelayProxyAdmin({
@@ -52,7 +52,7 @@ export async function fetchDelayProxyAdmin(
     newImplementation,
     delayUpdateTime,
     newDelay,
-    delay
+    delay,
   });
 }
 
@@ -72,14 +72,14 @@ export async function fetchImplementationUpdateTime(
     ...parameters,
     address,
     abi: delayProxyAdminAbi,
-    functionName: "implementationUpdateTime"
+    functionName: "implementationUpdateTime",
   });
 }
 
 /**
  * Gets the new implementation address that will be enforced after upgradeAndCall
  * @param address - Contract address
- * @param client - Viem client  
+ * @param client - Viem client
  * @param parameters - Fetch parameters
  * @returns Promise with new implementation address as bigint (address converted to bigint)
  */
@@ -92,7 +92,7 @@ export async function fetchNewImplementation(
     ...parameters,
     address,
     abi: delayProxyAdminAbi,
-    functionName: "newImplementation"
+    functionName: "newImplementation",
   });
   return implementation;
 }
@@ -113,7 +113,7 @@ export async function fetchDelayUpdateTime(
     ...parameters,
     address,
     abi: delayProxyAdminAbi,
-    functionName: "delayUpdateTime"
+    functionName: "delayUpdateTime",
   });
 }
 
@@ -133,7 +133,7 @@ export async function fetchNewDelay(
     ...parameters,
     address,
     abi: delayProxyAdminAbi,
-    functionName: "newDelay"
+    functionName: "newDelay",
   });
 }
 
@@ -153,7 +153,7 @@ export async function fetchDelay(
     ...parameters,
     address,
     abi: delayProxyAdminAbi,
-    functionName: "delay"
+    functionName: "delay",
   });
 }
 
@@ -171,9 +171,12 @@ export async function fetchCanUpgrade(
 ): Promise<boolean> {
   const [implementationUpdateTime, block] = await Promise.all([
     fetchImplementationUpdateTime({ address }, client, parameters),
-    getBlock(client, parameters)
-  ])
-  return implementationUpdateTime !== MathLib.MAX_UINT_256 && block.timestamp >= implementationUpdateTime;
+    getBlock(client, parameters),
+  ]);
+  return (
+    implementationUpdateTime !== MathLib.MAX_UINT_256 &&
+    block.timestamp >= implementationUpdateTime
+  );
 }
 
 /**
@@ -190,9 +193,12 @@ export async function fetchCanUpdateDelay(
 ): Promise<boolean> {
   const [delayUpdateTime, block] = await Promise.all([
     fetchDelayUpdateTime({ address }, client, parameters),
-    getBlock(client, parameters)
-  ])
-  return delayUpdateTime !== MathLib.MAX_UINT_256 && block.timestamp >= delayUpdateTime;
+    getBlock(client, parameters),
+  ]);
+  return (
+    delayUpdateTime !== MathLib.MAX_UINT_256 &&
+    block.timestamp >= delayUpdateTime
+  );
 }
 
 /**
@@ -209,10 +215,10 @@ export async function fetchTimeUntilUpgrade(
 ): Promise<bigint> {
   const [implementationUpdateTime, block] = await Promise.all([
     fetchImplementationUpdateTime({ address }, client, parameters),
-    getBlock(client, parameters)
+    getBlock(client, parameters),
   ]);
   if (implementationUpdateTime === MathLib.MAX_UINT_256) return -1n;
-  return MathLib.zeroFloorSub(implementationUpdateTime, block.timestamp)
+  return MathLib.zeroFloorSub(implementationUpdateTime, block.timestamp);
 }
 
 /**
@@ -229,8 +235,8 @@ export async function fetchTimeUntilDelayUpdate(
 ): Promise<bigint> {
   const [delayUpdateTime, block] = await Promise.all([
     fetchDelayUpdateTime({ address }, client, parameters),
-    getBlock(client, parameters)
+    getBlock(client, parameters),
   ]);
   if (delayUpdateTime === MathLib.MAX_UINT_256) return -1n;
-  return MathLib.zeroFloorSub(delayUpdateTime, block.timestamp)
+  return MathLib.zeroFloorSub(delayUpdateTime, block.timestamp);
 }

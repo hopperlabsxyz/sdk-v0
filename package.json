@@ -7,7 +7,10 @@
   ],
   "scripts": {
     "build": "bun run build:packages",
-    "build:packages": "bun run --cwd packages/v0-core build && bun run --cwd packages/v0-viem build",
+    "build:packages": "bun run build:core && bun run build:viem && bun run build:computation",
+    "build:core": "bun run --cwd packages/v0-core build",
+    "build:viem": "bun run --cwd packages/v0-viem build",
+    "build:computation": "bun run --cwd packages/v0-computation build",
     "dev": "bun run --watch index.ts",
     "clean": "rm -rf packages/*/dist"
   },

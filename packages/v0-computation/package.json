@@ -1,0 +1,49 @@
+{
+  "name": "@lagoon-protocol/v0-computation",
+  "description": "Computation package that defines some Lagoon related computations utilities",
+  "version": "0.7.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "../../LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "scripts": {
+    "re": "bun run clean && bun run build",
+    "build": "bun run build:types && bun run build:cjs && bun run build:esm",
+    "build:types": "tsc -p tsconfig.json --declaration --emitDeclarationOnly --outDir ./dist/types",
+    "build:cjs": " bun build ./src/index.ts --target node --format cjs --outfile ./dist/cjs/index.cjs",
+    "build:esm": " bun build ./src/index.ts --target node --format esm --outfile ./dist/esm/index.js",
+    "clean": "rm -rf dist",
+    "test": "vitest --run",
+    "dev": "bun run --watch src/index.ts"
+  },
+  "devDependencies": {
+    "@morpho-org/test": "^2.1.4",
+    "@types/bun": "latest",
+    "typescript": "^5",
+    "viem": "^2.0.0",
+    "vitest": "^3.2.3"
+  },
+  "peerDependencies": {
+    "@lagoon-protocol/v0-core": "workspace:^",
+    "viem": "^2.0.0"
+  },
+  "private": false,
+  "publishConfig": {
+    "tag": "next",
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts"
+  }
+}
