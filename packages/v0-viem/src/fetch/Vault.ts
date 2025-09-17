@@ -15,6 +15,7 @@ import {
   hexToBigInt,
   hexToBool,
   hexToNumber,
+  maxUint256,
   numberToHex,
   pad,
   parseAbi,
@@ -297,7 +298,8 @@ export async function fetchSettleData(
 }
 
 /**
- * Gets pending asset amounts to be deposited for a specific settlement
+ * Gets pending asset amounts to be deposited for a specific settlement. If no valuation
+ * has been proposed, we will return the pending silo assets.
  *
  * @param vault - Vault object with address, pendingSilo, and asset
  * @param settleId - Settlement id to query
@@ -307,9 +309,9 @@ export async function fetchSettleData(
  * @returns Promise with pending asset balance
  *
  * @example
- * const pendingAssets = await fetchPendingAssets(vault, 42, client, { blocknumber: 1 });
+ * const pendingAssets = await fetchPendingSettlementAssets(vault, 42, client, { blocknumber: 1 });
  */
-export async function fetchPendingAssets(
+export async function fetchPendingSettlementAssets(
   {
     address,
     pendingSilo,
@@ -323,16 +325,18 @@ export async function fetchPendingAssets(
   client: Client,
   parameters: FetchParameters & { revalidate?: boolean } = { revalidate: false }
 ) {
-  const [settleData, pendingSiloAssets] = await Promise.all([
+  const [settleData, pendingSiloAssets, newTotalAssets] = await Promise.all([
     fetchSettleData({ address }, settleId, client, parameters),
     fetchBalanceOf({ address: asset }, pendingSilo, client, parameters),
+    fetchNewTotalAssets({ address }, client, parameters),
   ]);
-  if (settleData.pendingAssets === 0n) return pendingSiloAssets;
+  if (newTotalAssets === maxUint256) return pendingSiloAssets;
   return settleData.pendingAssets;
 }
 
 /**
- * Gets pending share amounts to be redeemed for a specific settlement
+ * Gets pending share amounts to be redeemed for a specific settlement. If no valuation
+ * has been proposed, we will return the pending silo shares.
  *
  * @param vault - Vault object with address and pendingSilo
  * @param settleId - Settlement id to query
@@ -344,7 +348,7 @@ export async function fetchPendingAssets(
  * @example
  * const pendingShares = await fetchPendingShares(vault, 42, client, { blocknumber: 1 });
  */
-export async function fetchPendingShares(
+export async function fetchPendingSettlementShares(
   {
     address,
     pendingSilo,
@@ -356,11 +360,12 @@ export async function fetchPendingShares(
   client: Client,
   parameters: FetchParameters & { revalidate?: boolean } = { revalidate: false }
 ) {
-  const [settleData, pendingSiloShares] = await Promise.all([
+  const [settleData, pendingSiloShares, newTotalAssets] = await Promise.all([
     fetchSettleData({ address }, settleId, client, parameters),
     fetchBalanceOf({ address }, pendingSilo, client, parameters),
+    fetchNewTotalAssets({ address }, client, parameters),
   ]);
-  if (settleData.pendingShares === 0n) return pendingSiloShares;
+  if (newTotalAssets === maxUint256) return pendingSiloShares;
   return settleData.pendingShares;
 }
 
@@ -376,7 +381,7 @@ export async function fetchPendingShares(
  * @example
  * const {pendingAssets, pendingShares} = await fetchPendings(vault, client, { blocknumber: 1 });
  */
-export async function fetchPendings(
+export async function fetchPendingSettlement(
   {
     depositSettleId,
     redeemSettleId,
@@ -391,11 +396,11 @@ export async function fetchPendings(
   client: Client,
   parameters: FetchParameters & { revalidate?: boolean } = { revalidate: false }
 ) {
-  const [pendingAssets, pendingShares] = await Promise.all([
-    fetchPendingAssets(vault, depositSettleId, client, parameters),
-    fetchPendingShares(vault, redeemSettleId, client, parameters),
+  const [assets, shares] = await Promise.all([
+    fetchPendingSettlementAssets(vault, depositSettleId, client, parameters),
+    fetchPendingSettlementShares(vault, redeemSettleId, client, parameters),
   ]);
-  return { pendingAssets, pendingShares };
+  return { assets, shares };
 }
 
 /**
@@ -433,21 +438,22 @@ export async function fetchAssetsToUnwind(
   client: Client,
   parameters: FetchParameters & { revalidate?: boolean } = { revalidate: false }
 ) {
-  const [{ pendingAssets, pendingShares }, safeAssetBalance] =
-    await Promise.all([
-      fetchPendings(vault, client, parameters),
-      fetchBalanceOf({ address: vault.asset }, safe, client, parameters),
-    ]);
+  const [{ assets, shares }, safeAssetBalance] = await Promise.all([
+    fetchPendingSettlement(vault, client, parameters),
+    fetchBalanceOf({ address: vault.asset }, safe, client, parameters),
+  ]);
   const assetsToUnwind = VaultUtils.calculateAssetsToUnwind(
-    pendingShares,
-    pendingAssets,
+    shares,
+    assets,
     safeAssetBalance,
     vault
   );
   return {
     assetsToUnwind,
-    pendingAssets,
-    pendingShares,
+    pendingSettlement: {
+      assets,
+      shares,
+    },
     safeAssetBalance,
   };
 }

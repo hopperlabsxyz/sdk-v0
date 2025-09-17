@@ -2,22 +2,23 @@
  * The input of a simulation
  * @param newTotalAssets - The new total assets of the vault
  * @param assetsInSafe - The assets in safe
- * @param siloBalance - The balance of the silo in assets and shares
- * @param nextSettle - the amount of assets and shares that will be settled if the settle is possible
+ * @param pendingSiloBalances - The balance of the silo in assets and shares
+ * @param pendingAssets - the amount of assets will be settled if the settle is possible
+ * @param pendingShares - the amount of shares will be settled if the settle is possible
  * @param settleDeposit - Whether the curator wants to settle the deposits
  * @param inception - The params to use to compute the inception net APR
  * @param thirtyDay - The params to use to compute the 30 days net APR
  */
 export interface SimulationInput {
-  newTotalAssets: bigint;
+  totalAssetsForSimulation: bigint;
   assetsInSafe: bigint;
-  siloBalance: {
+  pendingSiloBalances: {
     assets: bigint;
     shares: bigint;
   };
-  nextSettle: {
-    redeem: bigint;
-    deposit: bigint;
+  pendingSettlement: {
+    assets: bigint;
+    shares: bigint;
   };
   settleDeposit: boolean;
   inception?: {
@@ -41,11 +42,12 @@ export interface SimulationInput {
  * @param periodGrossApr - The gross APR of the vault after the simulation
  * @param thirtyDaysNetAPR - The net APR of the vault over the last 30 days
  * @param inceptionNetAPR - The net APR of the vault since the inception
- * @param pricePerShare - The price per share of the vault after the simulation
+ * @param pricePerShare - The price per share of the vault after the simulation (after fees).
+ * @param grossPricePerShare - The price per share of the vault before the fees.
  * @param highWaterMark - The high water mark of the vault after the simulation
  * @param totalAssetsAtHighWaterMark - The total assets at high water mark of the vault after the simulation
  * @param assetsToUnwind - The assets to unwind in order to honor the redemptions
- * @param assetsToBeTransferedFromSafe - The assets that will be transfered from the safe to the vault to honor the redemptions
+ * @param assetsTransferedFromSafe - The assets that will be transfered from the safe to the vault to honor the redemptions
  */
 export interface SimulationResult {
   totalAssets: bigint;
@@ -64,8 +66,9 @@ export interface SimulationResult {
   thirtyDaysNetApr?: number;
   inceptionNetApr?: number;
   pricePerShare: bigint;
+  grossPricePerShare: bigint;
   highWaterMark: bigint;
   totalAssetsAtHighWaterMark: bigint;
   assetsToUnwind: bigint;
-  assetsToBeTransferedFromSafe: bigint;
+  assetsTransferedFromSafe: bigint;
 }

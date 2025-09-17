@@ -1,5 +1,5 @@
 import { resolveVersion, VaultUtils } from "@lagoon-protocol/v0-core";
-import type { Vault, Version } from "@lagoon-protocol/v0-core";
+import type { Vault, Version, VersionOrLatest } from "@lagoon-protocol/v0-core";
 import { SECONDS_PER_YEAR } from "../constants";
 
 /**
@@ -9,8 +9,18 @@ import { SECONDS_PER_YEAR } from "../constants";
  * @returns The total fees, management fees, performance fees, and excess returns
  */
 export function computeFees(
-  vault: Vault,
-  newTotalAssets: bigint
+  vault: {
+    decimals: number;
+    underlyingDecimals: number;
+    newTotalAssets: bigint;
+    totalAssets: bigint;
+    totalSupply: bigint;
+    highWaterMark: bigint;
+    lastFeeTime: bigint;
+    feeRates: { managementRate: number; performanceRate: number };
+    version: VersionOrLatest;
+  },
+  totalAssetsForSimulation: bigint
 ): {
   totalFees: {
     inShares: bigint;
@@ -30,7 +40,7 @@ export function computeFees(
   const oneShare = 10n ** BigInt(vault.decimals);
 
   const managementFeesInAssets = simulateManagementFees({
-    newTotalAssets: newTotalAssets,
+    newTotalAssets: totalAssetsForSimulation,
     previousTotalAssets: vault.totalAssets,
     lastFeeTime: vault.lastFeeTime,
     managementRate: vault.feeRates.managementRate,
@@ -41,7 +51,7 @@ export function computeFees(
     oneShare,
     {
       decimalsOffset,
-      totalAssets: newTotalAssets - managementFeesInAssets,
+      totalAssets: totalAssetsForSimulation - managementFeesInAssets,
       totalSupply: vault.totalSupply,
     }
   );
@@ -59,15 +69,17 @@ export function computeFees(
 
   const totalFeesInShares = VaultUtils.convertToShares(totalFeesInAssets, {
     decimalsOffset,
-    totalAssets: newTotalAssets - totalFeesInAssets, // after fees
+    totalAssets: totalAssetsForSimulation - totalFeesInAssets, // after fees
     totalSupply: vault.totalSupply,
   });
+
+  const totalSupplyAfterFees = vault.totalSupply + totalFeesInShares;
 
   const managementFeesInShares = VaultUtils.convertToShares(
     managementFeesInAssets,
     {
-      totalAssets: newTotalAssets,
-      totalSupply: vault.totalSupply + totalFeesInShares, // after fees
+      totalAssets: totalAssetsForSimulation,
+      totalSupply: totalSupplyAfterFees,
       decimalsOffset,
     }
   );
@@ -75,8 +87,8 @@ export function computeFees(
   const performanceFeesInShares = VaultUtils.convertToShares(
     managementFeesInAssets,
     {
-      totalAssets: newTotalAssets,
-      totalSupply: vault.totalSupply + totalFeesInShares, // after fees
+      totalAssets: totalAssetsForSimulation,
+      totalSupply: totalSupplyAfterFees,
       decimalsOffset,
     }
   );
@@ -153,6 +165,7 @@ export function simulatePerformanceFee({
   vaultDecimals: number;
 }): { excessReturns: bigint; value: bigint } {
   let profitPerShare = 0n;
+
   if (pricePerShare > highWaterMark) {
     profitPerShare = pricePerShare - highWaterMark;
   }

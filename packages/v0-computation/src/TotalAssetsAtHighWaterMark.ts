@@ -23,13 +23,13 @@ export function computeTotalAssetsAtHighWaterMark(
     highWaterMark: bigint;
     decimals: number;
     underlyingDecimals: number;
-    decimalsOffset: number;
     feeRates: { managementRate: number };
     version: VersionOrLatest;
     lastFeeTime: bigint;
   },
   newTotalAssets?: bigint
 ): bigint {
+  const decimalsOffset = vault.decimals - vault.underlyingDecimals;
   const managementFee = simulateManagementFees({
     newTotalAssets: newTotalAssets || vault.totalAssets,
     previousTotalAssets: vault.totalAssets,
@@ -39,7 +39,7 @@ export function computeTotalAssetsAtHighWaterMark(
   });
 
   const managementFeeInShares = VaultUtils.convertToShares(managementFee, {
-    decimalsOffset: vault.decimalsOffset,
+    decimalsOffset,
     totalAssets: vault.totalAssets,
     totalSupply: vault.totalSupply,
   });
@@ -49,8 +49,6 @@ export function computeTotalAssetsAtHighWaterMark(
   vault.highWaterMark += 1n;
 
   const shares = 10n ** BigInt(vault.decimals);
-
-  const decimalsOffset = vault.decimals - vault.underlyingDecimals;
 
   const _totalSupply =
     vault.totalSupply + managementFeeInShares + 10n ** BigInt(decimalsOffset);

@@ -1,30 +1,38 @@
-# @lagoon-protocol/v0-viem
+# @lagoon-protocol/v0-computation
 
-Viem based extension of `@lagoon-protocol/v0-core`, inspired by [@morpho-org/blue-sdk-viem](https://github.com/morpho-org/sdks/tree/main/packages/blue-sdk-viem) architecture:
+Computation package that defines some Lagoon related computations utilities:
 
 ## How to install
 
 ```bash
-npm install @lagoon-protocol/v0-viem
+npm install @lagoon-protocol/v0-computation
 ```
 
 ```bash
-bun install @lagoon-protocol/v0-viem
+bun install @lagoon-protocol/v0-computation
 ```
 
 ## How to use
 
 ```typescript
-import { Vault } from "@lagoon-protocol/v0-viem/augment/Vault";
+import { simulate } from "@lagoon-protocol/v0-computation";
 
-const vault = await Vault.fetch(
-  "0x7895A046b26CC07272B022a0C9BAFC046E6F6396",
-  client // viem client.
-);
-
-vault.name // e.g. "Noon tacUSN"
+const vault = await simulate(vault, {
+  totalAssetsForSimulation: 1000000000000000000n,
+  assetsInSafe: 0n,
+  pendingSiloBalances: {
+    assets: 0n,
+    shares: 0n,
+  },
+  pendingSettlement: {
+    assets: 0n,
+    shares: 0n,
+  },
+  settleDeposit: false,
+  inception: undefined,
+  thirtyDay: undefined,
+});
 ```
-
 
 ## Local development:
 
