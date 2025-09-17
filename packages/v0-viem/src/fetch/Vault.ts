@@ -404,61 +404,6 @@ export async function fetchPendingSettlement(
 }
 
 /**
- * Gets assets to unwind along with pending balances and safe asset balance
- *
- * @param vault - Vault object with safe, address, pendingSilo, asset, and other vault properties
- * @param client - Viem client
- * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidate to bypass cache
- *
- * @returns Promise with {assetsToUnwind, pendingAssets, pendingShares, safeAssetBalance}
- *
- * @example
- * const {
- *     assetsToUnwind,
- *     pendingAssets,
- *     pendingShares,
- *     safeAssetBalance
- *  } = await fetchAssetsToUnwind({ ...vault, totalAssets: 42n }, client, { blocknumber: 1 });
- */
-export async function fetchAssetsToUnwind(
-  {
-    safe,
-    ...vault
-  }: {
-    address: Address;
-    pendingSilo: Address;
-    asset: Address;
-    safe: Address;
-    totalAssets: BigIntish;
-    totalSupply: BigIntish;
-    decimalsOffset: BigIntish;
-    depositSettleId: number;
-    redeemSettleId: number;
-  },
-  client: Client,
-  parameters: FetchParameters & { revalidate?: boolean } = { revalidate: false }
-) {
-  const [{ assets, shares }, safeAssetBalance] = await Promise.all([
-    fetchPendingSettlement(vault, client, parameters),
-    fetchBalanceOf({ address: vault.asset }, safe, client, parameters),
-  ]);
-  const assetsToUnwind = VaultUtils.calculateAssetsToUnwind(
-    shares,
-    assets,
-    safeAssetBalance,
-    vault
-  );
-  return {
-    assetsToUnwind,
-    pendingSettlement: {
-      assets,
-      shares,
-    },
-    safeAssetBalance,
-  };
-}
-
-/**
  * Gets pending silo balances for shares and assets
  *
  * @param vault - Vault object with pendingSilo, address, and asset
