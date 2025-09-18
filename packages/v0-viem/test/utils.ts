@@ -25,10 +25,10 @@ import {
   fetchIsWhitelistActivated,
   fetchName,
   fetchSymbol,
-  fetchTotalSupply
+  fetchTotalSupply,
 } from "../src/fetch";
 import { FetchParameters } from "../src/types";
-import { tryCatch, Vault } from "@lagoon-protocol/v0-core";
+import { tryCatch, Vault, Version } from "@lagoon-protocol/v0-core";
 import { readContract } from "viem/actions";
 
 export async function testFetchVaultWithStorageFetchers(
@@ -63,7 +63,7 @@ export async function testFetchVaultWithStorageFetchers(
     valuationManager,
     state,
     isWhitelistActivated,
-    versionResponse
+    versionResponse,
   ] = await Promise.all([
     fetchName({ address }, client, parameters),
     fetchSymbol({ address }, client, parameters),
@@ -96,10 +96,10 @@ export async function testFetchVaultWithStorageFetchers(
         ...parameters,
         address,
         abi: parseAbi(["function version() returns(string)"]),
-        functionName: "version"
+        functionName: "version",
       })
-    )
-  ])
+    ),
+  ]);
   return new Vault({
     address,
     name,
@@ -128,7 +128,6 @@ export async function testFetchVaultWithStorageFetchers(
     valuationManager,
     state,
     isWhitelistActivated,
-    version: versionResponse.data ?? "v0.2.0",
+    version: versionResponse.data ?? Version.v0_2_0,
   });
-
 }

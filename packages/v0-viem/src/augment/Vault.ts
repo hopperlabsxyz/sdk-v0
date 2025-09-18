@@ -1,6 +1,6 @@
 import { EncodingUtils, Vault } from "@lagoon-protocol/v0-core";
 
-import { fetchAssetsToUnwind, fetchBalanceOf, fetchPendingAssets, fetchPendingShares, fetchPendingSiloBalances, fetchVault } from "../fetch";
+import { fetchBalanceOf, fetchPendingSiloBalances, fetchVault } from "../fetch";
 import type { Address, Client } from "viem";
 import type { FetchParameters } from "../types";
 
@@ -74,30 +74,6 @@ declare module "@lagoon-protocol/v0-core" {
     getSiloBalances(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchPendingSiloBalances>;
 
     /**
-     * Gets assets pending deposit for current settlement
-     * @param client - Viem client for blockchain interactions
-     * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidata to bypass cache
-     * @returns Promise<BigInt> - Pending asset amount
-     */
-    getPendingAssets: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchPendingAssets>;
-
-    /**
-     * Gets shares pending redemption for current settlement
-     * @param client - Viem client for blockchain interactions
-     * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidata to bypass cache
-     * @returns Promise<BigInt> - Pending share amount
-     */
-    getPendingShares: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchPendingShares>;
-
-    /**
-     * Calculates assets to unwind with current balances
-     * @param client - Viem client for blockchain interactions
-     * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidata to bypass cache
-     * @returns Promise<{assetsToUnwind: BigInt, pendingAssets: BigInt, pendingShares: BigInt, safeAssetBalance: BigInt}>
-     */
-    getAssetsToUnwind: (client: Client, parameters?: FetchParameters) => ReturnType<typeof fetchAssetsToUnwind>;
-
-    /**
      * Encodes the initialization call for a vault.
      *
      * @returns The encoded initialization call data as a hexadecimal string.
@@ -156,21 +132,6 @@ Vault.prototype.getSafeBalance =
 Vault.prototype.getSiloBalances =
   async function (client: Client, parameters: FetchParameters = {}) {
     return fetchPendingSiloBalances(this, client, parameters)
-  }
-
-Vault.prototype.getPendingAssets =
-  async function (client: Client, parameters: FetchParameters = {}) {
-    return fetchPendingAssets(this, this.depositSettleId, client, { ...parameters, revalidate: true })
-  }
-
-Vault.prototype.getPendingShares =
-  async function (client: Client, parameters: FetchParameters = {}) {
-    return fetchPendingShares(this, this.redeemSettleId, client, { ...parameters, revalidate: true })
-  }
-
-Vault.prototype.getAssetsToUnwind =
-  async function (client: Client, parameters: FetchParameters = {}) {
-    return fetchAssetsToUnwind(this, client, { ...parameters, revalidate: true })
   }
 
 Vault.prototype.initializeEncoded = function () { return EncodingUtils.initializeEncodedCall(this) }

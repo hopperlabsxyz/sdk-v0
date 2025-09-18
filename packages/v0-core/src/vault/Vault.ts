@@ -1,4 +1,9 @@
-import { vaultAbi_v0_2_0, vaultAbi_v0_3_0, vaultAbi_v0_4_0, vaultAbi_v0_5_0 } from "../constants/abis";
+import {
+  vaultAbi_v0_2_0,
+  vaultAbi_v0_3_0,
+  vaultAbi_v0_4_0,
+  vaultAbi_v0_5_0,
+} from "../constants/abis";
 import { type RoundingDirection } from "../math";
 import { type IToken, Token } from "../token/Token";
 import { type Address, type BigIntish } from "../types";
@@ -9,7 +14,7 @@ export enum Version {
   v0_4_0 = "v0.4.0",
   v0_3_0 = "v0.3.0",
   v0_2_0 = "v0.2.0",
-  v0_1_0 = "v0.1.0"
+  v0_1_0 = "v0.1.0",
 }
 
 export const LATEST_VERSION = Version.v0_5_0;
@@ -36,7 +41,7 @@ export function isValidVersion(version: string): version is Version {
 export enum State {
   Open,
   Closing,
-  Closed
+  Closed,
 }
 
 export interface Rates {
@@ -58,7 +63,7 @@ export interface IVault extends IToken {
   lastFeeTime: bigint;
   highWaterMark: bigint;
   cooldown: bigint;
-  feeRates: Rates
+  feeRates: Rates;
   totalAssets: bigint;
   newTotalAssets: bigint;
   depositEpochId: number;
@@ -73,9 +78,9 @@ export interface IVault extends IToken {
   decimalsOffset: number;
   totalAssetsExpiration: bigint;
   totalAssetsLifespan: bigint;
-  state: State,
-  isWhitelistActivated: boolean,
-  version: Version | string
+  state: State;
+  isWhitelistActivated: boolean;
+  version: VersionOrLatest;
 }
 
 export class Vault extends Token implements IVault {
@@ -95,9 +100,9 @@ export class Vault extends Token implements IVault {
   /** The new valuation proposed for the next settlement */
   public readonly newTotalAssets: bigint;
 
-  /** 
-   * The current deposit epoch ID 
-   * 
+  /**
+   * The current deposit epoch ID
+   *
    * @see [Key Data Structures and Epoch Mechanism](https://docs.lagoon.finance/developer-hub/key-data-structures-and-epoch-mechanism)
    */
   public readonly depositEpochId: number;
@@ -130,20 +135,20 @@ export class Vault extends Token implements IVault {
    */
   public readonly redeemSettleId: number;
 
-  /** 
-   * The last redeem epoch ID settled 
+  /**
+   * The last redeem epoch ID settled
    *
    * @see [Key Data Structures and Epoch Mechanism](https://docs.lagoon.finance/developer-hub/key-data-structures-and-epoch-mechanism)
    */
   public readonly lastRedeemEpochIdSettled: number;
 
-  /** 
+  /**
    * The pending silo is a utility contract deployed at the creation of the vault to store the pending assets of the requests.
    * It is used to simplify the vault’s internal accountability. It is also used for redemptions requests.
    */
   public readonly pendingSilo: Address;
 
-  /** 
+  /**
    * The wrapped native token. (WETH for ethereum)
    * If the underlying token is equal to this address, native token deposits are allowed
    */
@@ -154,20 +159,20 @@ export class Vault extends Token implements IVault {
 
   /**
    * Unix timestamp (in seconds since epoch) when the cached totalAssets value expires.
-   * When this timestamp is reached, the vault will transition from synchronous to 
+   * When this timestamp is reached, the vault will transition from synchronous to
    * asynchronous mode.
-   * 
+   *
    * @example
    * // If current time is 1735689600 (Jan 1, 2025 00:00:00 UTC) and lifespan is 3600 seconds
    * // totalAssetsExpiration would be 1735693200 (Jan 1, 2025 01:00:00 UTC)
    */
   public readonly totalAssetsExpiration: bigint;
 
-  /** 
+  /**
    * The duration (in seconds) that cached totalAssets remain valid before expiring.
    * This determines how long the vault operates in synchronous mode before switching
    * to asynchronous mode.
-   * 
+   *
    * @example 3600n // 1 hour lifespan
    */
   public readonly totalAssetsLifespan: bigint;
@@ -240,8 +245,7 @@ export class Vault extends Token implements IVault {
   public readonly isWhitelistActivated: boolean;
 
   /// Bytecoded ///
-  public readonly version: Version | string;
-
+  public readonly version: VersionOrLatest;
 
   constructor({
     asset,
@@ -309,39 +313,50 @@ export class Vault extends Token implements IVault {
     this.version = version;
   }
 
-  public convertToAssets(shares: BigIntish, rounding?: RoundingDirection): bigint {
+  public convertToAssets(
+    shares: BigIntish,
+    rounding?: RoundingDirection
+  ): bigint {
     return VaultUtils.convertToAssets(shares, this, rounding);
   }
 
-  public convertToShares(assets: BigIntish, rounding?: RoundingDirection): bigint {
+  public convertToShares(
+    assets: BigIntish,
+    rounding?: RoundingDirection
+  ): bigint {
     return VaultUtils.convertToShares(assets, this, rounding);
   }
 
   public calculateTotalAssetsAtHWM(): bigint {
-    return VaultUtils.calculateShareValue(this.highWaterMark, this)
+    return VaultUtils.calculateShareValue(this.highWaterMark, this);
   }
 
   public calculateAssetsToUnwind(
     sharesToRedeem: BigIntish,
     assetsPendingDeposit: BigIntish,
-    safeAssetBalance: BigIntish,
+    safeAssetBalance: BigIntish
   ): bigint {
-    return VaultUtils.calculateAssetsToUnwind(sharesToRedeem, assetsPendingDeposit, safeAssetBalance, this)
+    return VaultUtils.calculateAssetsToUnwind(
+      sharesToRedeem,
+      assetsPendingDeposit,
+      safeAssetBalance,
+      this
+    );
   }
 
   public getAbi() {
     switch (this.version) {
       case Version.v0_5_0:
-        return vaultAbi_v0_5_0
+        return vaultAbi_v0_5_0;
       case Version.v0_4_0:
-        return vaultAbi_v0_4_0
+        return vaultAbi_v0_4_0;
       case Version.v0_3_0:
-        return vaultAbi_v0_3_0
+        return vaultAbi_v0_3_0;
       case Version.v0_2_0:
-        return vaultAbi_v0_2_0
+        return vaultAbi_v0_2_0;
       case Version.v0_1_0:
         return vaultAbi_v0_2_0;
     }
-    throw new Error("Unknown version")
+    throw new Error("Unknown version");
   }
 }

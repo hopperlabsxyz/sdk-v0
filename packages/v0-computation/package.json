@@ -1,6 +1,6 @@
 {
-  "name": "@lagoon-protocol/v0-core",
-  "description": "Framework-agnostic package that defines Lagoon related entity classes (such as Vault)",
+  "name": "@lagoon-protocol/v0-computation",
+  "description": "Computation package that defines some Lagoon related computations utilities",
   "version": "0.8.0",
   "license": "MIT",
   "type": "module",
@@ -26,14 +26,19 @@
     "build:cjs": " bun build ./src/index.ts --target node --format cjs --outfile ./dist/cjs/index.cjs",
     "build:esm": " bun build ./src/index.ts --target node --format esm --outfile ./dist/esm/index.js",
     "clean": "rm -rf dist",
-    "test": "bun test",
+    "test": "vitest --run",
     "dev": "bun run --watch src/index.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@morpho-org/test": "^2.1.4",
+    "@types/bun": "latest",
+    "typescript": "^5",
+    "viem": "^2.0.0",
+    "vitest": "^3.2.3"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "@lagoon-protocol/v0-core": "workspace:^",
+    "viem": "^2.0.0"
   },
   "private": false,
   "publishConfig": {

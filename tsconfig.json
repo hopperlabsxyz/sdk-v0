@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
     // Environment setup & latest features
-    "lib": [
-      "ESNext"
-    ],
+    "lib": ["ESNext"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
@@ -26,23 +24,20 @@
     // Monorepo support
     "baseUrl": ".",
     "paths": {
-      "@lagoon-protocol/*": [
-        "packages/*/src"
-      ]
+      "@lagoon-protocol/*": ["packages/*/src"]
     }
   },
-  "include": [
-    "index.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
+  "include": ["index.ts"],
+  "exclude": ["node_modules"],
   "references": [
     {
       "path": "./packages/v0-core"
     },
     {
       "path": "./packages/v0-viem"
+    },
+    {
+      "path": "./packages/v0-computation"
     }
   ]
 }
