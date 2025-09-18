@@ -30,13 +30,16 @@ export function computeTotalAssetsAtHighWaterMark(
   newTotalAssets?: bigint
 ): bigint {
   const decimalsOffset = vault.decimals - vault.underlyingDecimals;
-  const managementFee = simulateManagementFees({
-    newTotalAssets: newTotalAssets || vault.totalAssets,
-    previousTotalAssets: vault.totalAssets,
-    lastFeeTime: vault.lastFeeTime,
-    managementRate: vault.feeRates.managementRate,
-    version: resolveVersion(vault.version),
-  });
+  const managementFee = simulateManagementFees(
+    {
+      proposedTotalAssets: newTotalAssets || vault.totalAssets,
+    },
+    {
+      totalAssets: vault.totalAssets,
+      lastFeeTime: vault.lastFeeTime,
+      managementRate: vault.feeRates.managementRate,
+      version: resolveVersion(vault.version),
+    });
 
   const managementFeeInShares = VaultUtils.convertToShares(managementFee, {
     decimalsOffset,

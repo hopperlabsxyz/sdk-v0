@@ -39,9 +39,8 @@ export function computeFees(
   const decimalsOffset = vault.decimals - vault.underlyingDecimals;
   const oneShare = 10n ** BigInt(vault.decimals);
 
-  const managementFeesInAssets = simulateManagementFees({
-    newTotalAssets: totalAssetsForSimulation,
-    previousTotalAssets: vault.totalAssets,
+  const managementFeesInAssets = simulateManagementFees({ proposedTotalAssets: totalAssetsForSimulation }, {
+    totalAssets: vault.totalAssets,
     lastFeeTime: vault.lastFeeTime,
     managementRate: vault.feeRates.managementRate,
     version: resolveVersion(vault.version),
@@ -119,26 +118,23 @@ export function computeFees(
  * @param version - The version of the vault
  * @returns The management fees in assets
  */
-export function simulateManagementFees({
-  newTotalAssets,
-  previousTotalAssets,
-  lastFeeTime,
-  managementRate,
-}: {
-  newTotalAssets: bigint;
-  previousTotalAssets: bigint;
-  lastFeeTime: bigint;
-  managementRate: number;
-  version: Version;
-}): bigint {
+export function simulateManagementFees(
+  { proposedTotalAssets }: { proposedTotalAssets: bigint },
+  {
+    totalAssets,
+    lastFeeTime,
+    managementRate,
+  }: {
+    totalAssets: bigint;
+    lastFeeTime: bigint;
+    managementRate: number;
+    version: Version;
+  }): bigint {
   if (managementRate === 0) return 0n;
-
-  const totalAssets = newTotalAssets;
-
   const nowUnix = BigInt(Math.trunc(Date.now() / 1000));
   const timeElapsed = nowUnix - BigInt(lastFeeTime);
   const annualRate = BigInt(managementRate);
-  const annualFee = (totalAssets * annualRate) / VaultUtils.BPS;
+  const annualFee = (proposedTotalAssets * annualRate) / VaultUtils.BPS;
   return (annualFee * timeElapsed) / BigInt(SECONDS_PER_YEAR);
 }
 
