@@ -5,9 +5,11 @@
  * @returns The last period summary comprised in the duration.
  */
 export function getLastPeriodSummaryInDuration<
-  T extends { blockTimestamp: bigint }
+  T extends { blockTimestamp?: bigint; timestamp?: bigint }
 >(periodSummaries: T[], duration: number): T | undefined {
   if (periodSummaries.length == 0) return undefined;
+
+  const getTimestamp = (item: T) => item.blockTimestamp ?? item.timestamp!;
 
   const isAscending = isSortedArrayStrictlyAscending(periodSummaries);
 
@@ -18,18 +20,18 @@ export function getLastPeriodSummaryInDuration<
   // normally impossible to happen but we keep the check for type safety
   if (!mostRecentSummary) return undefined;
 
-  const until = Number(mostRecentSummary.blockTimestamp) - duration;
+  const until = Number(getTimestamp(mostRecentSummary)) - duration;
   if (isAscending) {
     let summary: T | undefined;
     for (let i = periodSummaries.length - 1; i >= 0; i--) {
-      if (Number(periodSummaries[i]!.blockTimestamp) < until) break;
+      if (Number(getTimestamp(periodSummaries[i]!)) < until) break;
       summary = periodSummaries[i];
     }
     return summary;
   } else {
     let summary: T | undefined;
     for (let i = 0; i < periodSummaries.length; i++) {
-      if (Number(periodSummaries[i]!.blockTimestamp) < until) break;
+      if (Number(getTimestamp(periodSummaries[i]!)) < until) break;
       summary = periodSummaries[i];
     }
     return summary;
@@ -42,9 +44,10 @@ export function getLastPeriodSummaryInDuration<
  * @returns True if the array is strictly ascending, false otherwise.
  */
 export function isSortedArrayStrictlyAscending<
-  T extends { blockTimestamp: bigint }
+  T extends { blockTimestamp?: bigint; timestamp?: bigint }
 >(array: T[]): boolean {
   if (array.length == 0 || array.length == 1) return true;
-  if (array[1]!.blockTimestamp > array[0]!.blockTimestamp) return true;
+  const getTimestamp = (item: T) => item.blockTimestamp ?? item.timestamp!;
+  if (getTimestamp(array[1]!) > getTimestamp(array[0]!)) return true;
   return false;
 }

@@ -30,6 +30,7 @@ export function computeTotalAssetsAtHighWaterMark(
   newTotalAssets?: bigint
 ): bigint {
   const decimalsOffset = vault.decimals - vault.underlyingDecimals;
+  const oneShare = 10n ** BigInt(vault.decimals);
   const managementFee = simulateManagementFees(
     {
       proposedTotalAssets: newTotalAssets || vault.totalAssets,
@@ -51,11 +52,8 @@ export function computeTotalAssetsAtHighWaterMark(
   // to happen.
   vault.highWaterMark += 1n;
 
-  const shares = 10n ** BigInt(vault.decimals);
-
   const _totalSupply =
     vault.totalSupply + managementFeeInShares + 10n ** BigInt(decimalsOffset);
   const nominator = vault.highWaterMark * _totalSupply;
-  const denominator = shares;
-  return nominator / denominator - 1n;
+  return nominator / oneShare - 1n;
 }
