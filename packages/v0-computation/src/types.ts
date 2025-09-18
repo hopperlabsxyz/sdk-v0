@@ -1,10 +1,9 @@
 /**
  * The input of a simulation
- * @param newTotalAssets - The new total assets of the vault
+ * @param totalAssetsForSimulation - The total assets of the vault for the simulation
  * @param assetsInSafe - The assets in safe
  * @param pendingSiloBalances - The balance of the silo in assets and shares
- * @param pendingAssets - the amount of assets will be settled if the settle is possible
- * @param pendingShares - the amount of shares will be settled if the settle is possible
+ * @param pendingSettlement - The shares and assets that will be settled if the settle is possible
  * @param settleDeposit - Whether the curator wants to settle the deposits
  * @param inception - The params to use to compute the inception net APR
  * @param thirtyDay - The params to use to compute the 30 days net APR
