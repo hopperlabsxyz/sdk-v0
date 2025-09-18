@@ -17,7 +17,7 @@ bun install @lagoon-protocol/v0-computation
 ```typescript
 import { simulate } from "@lagoon-protocol/v0-computation";
 
-const vault = await simulate(vault, {
+const simulationResult = await simulate(vault, {
   totalAssetsForSimulation: 1000000000000000000n,
   assetsInSafe: 0n,
   pendingSiloBalances: {
