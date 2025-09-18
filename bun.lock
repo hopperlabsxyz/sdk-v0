@@ -14,9 +14,8 @@
     },
     "packages/v0-computation": {
       "name": "@lagoon-protocol/v0-computation",
-      "version": "0.7.0",
+      "version": "0.8.0",
       "devDependencies": {
-        "@lagoon-protocol/v0-core": "workspace:^",
         "@morpho-org/test": "^2.1.4",
         "@types/bun": "latest",
         "typescript": "^5",
@@ -30,7 +29,7 @@
     },
     "packages/v0-core": {
       "name": "@lagoon-protocol/v0-core",
-      "version": "0.7.0",
+      "version": "0.8.0",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -40,7 +39,7 @@
     },
     "packages/v0-viem": {
       "name": "@lagoon-protocol/v0-viem",
-      "version": "0.7.0",
+      "version": "0.8.0",
       "devDependencies": {
         "@lagoon-protocol/v0-core": "workspace:^",
         "@morpho-org/test": "^2.1.4",
@@ -304,10 +303,14 @@
 
     "@lagoon-protocol/v0-core/@types/bun": ["@types/bun@1.2.22", "", { "dependencies": { "bun-types": "1.2.22" } }, "sha512-5A/KrKos2ZcN0c6ljRSOa1fYIyCKhZfIVYeuyb4snnvomnpFqC0tTsEkdqNxbAgExV384OETQ//WAjl3XbYqQA=="],
 
+    "@lagoon-protocol/v0-viem/@types/bun": ["@types/bun@1.2.22", "", { "dependencies": { "bun-types": "1.2.22" } }, "sha512-5A/KrKos2ZcN0c6ljRSOa1fYIyCKhZfIVYeuyb4snnvomnpFqC0tTsEkdqNxbAgExV384OETQ//WAjl3XbYqQA=="],
+
     "rollup/@types/estree": ["@types/estree@1.0.7", "", {}, "sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ=="],
 
     "@lagoon-protocol/v0-computation/@types/bun/bun-types": ["bun-types@1.2.22", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-hwaAu8tct/Zn6Zft4U9BsZcXkYomzpHJX28ofvx7k0Zz2HNz54n1n+tDgxoWFGB4PcFvJXJQloPhaV2eP3Q6EA=="],
 
     "@lagoon-protocol/v0-core/@types/bun/bun-types": ["bun-types@1.2.22", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-hwaAu8tct/Zn6Zft4U9BsZcXkYomzpHJX28ofvx7k0Zz2HNz54n1n+tDgxoWFGB4PcFvJXJQloPhaV2eP3Q6EA=="],
+
+    "@lagoon-protocol/v0-viem/@types/bun/bun-types": ["bun-types@1.2.22", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-hwaAu8tct/Zn6Zft4U9BsZcXkYomzpHJX28ofvx7k0Zz2HNz54n1n+tDgxoWFGB4PcFvJXJQloPhaV2eP3Q6EA=="],
   }
 }

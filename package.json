@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "re": "bun run clean && bun run build",
     "build": "bun run build:packages",
     "build:packages": "bun run build:core && bun run build:viem && bun run build:computation",
     "build:core": "bun run --cwd packages/v0-core build",

@@ -1,5 +1,5 @@
 import { resolveVersion, VaultUtils } from "@lagoon-protocol/v0-core";
-import type { Vault, Version, VersionOrLatest } from "@lagoon-protocol/v0-core";
+import type { Version, VersionOrLatest } from "@lagoon-protocol/v0-core";
 import { SECONDS_PER_YEAR } from "../constants";
 
 /**

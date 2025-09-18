@@ -1,5 +1,5 @@
 import { MathLib } from "@lagoon-protocol/v0-core";
-import type { Vault, VersionOrLatest } from "@lagoon-protocol/v0-core";
+import type { VersionOrLatest } from "@lagoon-protocol/v0-core";
 import { VaultUtils } from "@lagoon-protocol/v0-core";
 import { computeTotalAssetsAtHighWaterMark } from "../totalAssetsAtHighWaterMark";
 import type { SimulationInput, SimulationResult } from "../types";
