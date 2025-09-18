@@ -1,2 +1,0 @@
-export { simulate } from "./simulation";
-
