@@ -4,8 +4,6 @@ import {
   tryCatch,
   EncodingUtils,
   State,
-  type BigIntish,
-  VaultUtils,
   Version,
 } from "@lagoon-protocol/v0-core";
 import {
