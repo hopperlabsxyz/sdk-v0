@@ -55,13 +55,16 @@ export function computeFees(
     }
   );
 
-  const performanceFeesInAssets = simulatePerformanceFee({
-    highWaterMark: vault.highWaterMark,
-    performanceRate: vault.feeRates.performanceRate,
-    pricePerShare: pricePerShareAfterManagementFees,
-    totalSupply: vault.totalSupply,
-    vaultDecimals: vault.decimals,
-  });
+  const performanceFeesInAssets = simulatePerformanceFee(
+    {
+      rate: vault.feeRates.performanceRate,
+      pricePerShare: pricePerShareAfterManagementFees
+    },
+    {
+      highWaterMark: vault.highWaterMark,
+      totalSupply: vault.totalSupply,
+      vaultDecimals: vault.decimals,
+    });
 
   const totalFeesInAssets =
     performanceFeesInAssets.value + managementFeesInAssets;
@@ -147,19 +150,20 @@ export function simulateManagementFees(
  * @param vaultDecimals - The decimals of the vault
  * @returns The performance fees in assets and the excess returns
  */
-export function simulatePerformanceFee({
-  performanceRate,
-  totalSupply,
-  pricePerShare,
-  highWaterMark,
-  vaultDecimals,
-}: {
-  performanceRate: number;
-  totalSupply: bigint;
-  pricePerShare: bigint;
-  highWaterMark: bigint;
-  vaultDecimals: number;
-}): { excessReturns: bigint; value: bigint } {
+export function simulatePerformanceFee(
+  {
+    rate,
+    pricePerShare
+  }: { rate: number, pricePerShare: bigint },
+  {
+    totalSupply,
+    highWaterMark,
+    vaultDecimals,
+  }: {
+    totalSupply: bigint;
+    highWaterMark: bigint;
+    vaultDecimals: number;
+  }): { excessReturns: bigint; value: bigint } {
   let profitPerShare = 0n;
 
   if (pricePerShare > highWaterMark) {
@@ -169,6 +173,6 @@ export function simulatePerformanceFee({
     (profitPerShare * totalSupply) / 10n ** BigInt(vaultDecimals);
   return {
     excessReturns,
-    value: (excessReturns * BigInt(performanceRate)) / VaultUtils.BPS,
+    value: (excessReturns * BigInt(rate)) / VaultUtils.BPS,
   };
 }
