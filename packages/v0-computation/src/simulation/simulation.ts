@@ -102,7 +102,7 @@ export function simulate(
   });
 
   // Same for the shares redeemed if there is a settlement and
-  // without taking into assets available.
+  // without taking into account the assets available.
   const sharesRedeemedIfSettle = computeSharesRedeemsIfSettle({
     canSettle,
     pendingSettlement: input.pendingSettlement,
