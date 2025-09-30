@@ -30,7 +30,6 @@
     "dev": "bun run --watch src/index.ts"
   },
   "devDependencies": {
-    "@lagoon-protocol/v0-core": "workspace:^",
     "@morpho-org/test": "^2.1.4",
     "@types/bun": "latest",
     "typescript": "^5",
@@ -38,7 +37,7 @@
     "vitest": "^3.2.3"
   },
   "peerDependencies": {
-    "@lagoon-protocol/v0-core": "workspace:^",
+    "@lagoon-protocol/v0-core": "workspace:*",
     "viem": "^2.0.0"
   },
   "private": false,

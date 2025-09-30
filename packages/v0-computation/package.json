@@ -37,7 +37,7 @@
     "vitest": "^3.2.3"
   },
   "peerDependencies": {
-    "@lagoon-protocol/v0-core": "workspace:^",
+    "@lagoon-protocol/v0-core": "workspace:*",
     "viem": "^2.0.0"
   },
   "private": false,
