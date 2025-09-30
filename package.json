@@ -16,8 +16,8 @@
     "clean": "rm -rf packages/*/dist"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "^5"
+    "@types/bun": "^1.2.23",
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "@lagoon-protocol/v0-core": "workspace:*",
