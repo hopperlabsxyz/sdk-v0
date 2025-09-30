@@ -1,7 +1,7 @@
 {
   "name": "@lagoon-protocol/v0-viem",
   "description": "Viem based package that defines Lagoon utilities for vault core classes",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "license": "MIT",
   "type": "module",
   "main": "./dist/cjs/index.cjs",
@@ -30,7 +30,6 @@
     "dev": "bun run --watch src/index.ts"
   },
   "devDependencies": {
-    "@lagoon-protocol/v0-core": "workspace:^",
     "@morpho-org/test": "^2.1.4",
     "@types/bun": "latest",
     "typescript": "^5",
@@ -38,7 +37,7 @@
     "vitest": "^3.2.3"
   },
   "peerDependencies": {
-    "@lagoon-protocol/v0-core": "workspace:^",
+    "@lagoon-protocol/v0-core": "workspace:*",
     "viem": "^2.0.0"
   },
   "private": false,
