@@ -100,10 +100,22 @@ export const addresses = {
     wrappedNative: "0x5555555555555555555555555555555555555555",
     optinFactory: "0x90beB507A1BA7D64633540cbce615B574224CD84"
   },
-  [ChainId.Linea]: {
+  [ChainId.LineaMainnet]: {
     feeRegistry: "0xC81Dd51239119Db80D5a6E1B7347F3C3BC8674d9",
     "v0_4_0": "0xC094C224ce0406BC338E00837B96aD2e265F7287",
     wrappedNative: "0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f",
     optinFactory: "0x8D6f5479B14348186faE9BC7E636e947c260f9B1"
+  },
+  [ChainId.PlasmaMainnet]: {
+    feeRegistry: "0xfd9fa4986C6cB8cbce6b632DD7c587EBCcaEDb7A",
+    "v0_5_0": "0xa61FAEB94249F08e05e7eD7502D6Ec86297Bc9e4",
+    wrappedNative: "0x6100E367285b01F48D07953803A2d8dCA5D19873",
+    optinFactory: "0xF838E8Bd649fc6fBC48D44E9D87273c0519C45c9"
+  },
+  [ChainId.PolygonMainnet]: {
+    feeRegistry: "0x744F9cA26CD9F6Be5cf79A00b1Ad457145D9F691",
+    "v0_5_0": "0x50f30E712D535b796C8543012D0C05218b89c7d5",
+    wrappedNative: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+    optinFactory: "0x0C0E287f6e4de685f4b44A5282A3ad4A29D05a91"
   }
 } as const

@@ -5,16 +5,8 @@ export enum ChainId {
   ArbitrumMainnet = 42161,
   OptimismMainnet = 10,
   WorldChainMainnet = 480,
-  FraxtalMainnet = 252,
-  ScrollMainnet = 534352,
-  InkMainnet = 57073,
   UnichainMainnet = 130,
   SonicMainnet = 146,
-  HemiMainnet = 43111,
-  ModeMainnet = 34443,
-  CornMainnet = 21000000,
-  PlumeMainnet = 98866,
-  CampMainnet = 123420001114,
   BerachainMainnet = 80094,
   MantleMainnet = 5000,
   AvalancheMainnet = 43114,
@@ -22,7 +14,8 @@ export enum ChainId {
   KatanaMainnet = 747474,
   BscMainnet = 56,
   HyperEVMMainnet = 999,
-  Linea = 59144
+  LineaMainnet = 59144,
+  PlasmaMainnet = 9745,
 }
 
 export interface ChainMetadata {
@@ -97,27 +90,6 @@ export namespace ChainUtils {
       explorerUrl: "https://worldscan.org",
       identifier: "worldchain",
     },
-    [ChainId.FraxtalMainnet]: {
-      name: "Fraxtal",
-      id: ChainId.FraxtalMainnet,
-      nativeCurrency: { name: "Frax Ether", symbol: "frxETH", decimals: 18 },
-      explorerUrl: "https://fraxscan.com",
-      identifier: "fraxtal",
-    },
-    [ChainId.ScrollMainnet]: {
-      name: "Scroll",
-      id: ChainId.ScrollMainnet,
-      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-      explorerUrl: "https://scrollscan.com",
-      identifier: "scroll",
-    },
-    [ChainId.InkMainnet]: {
-      name: "Ink",
-      id: ChainId.InkMainnet,
-      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-      explorerUrl: "https://explorer.inkonchain.com",
-      identifier: "ink",
-    },
     [ChainId.UnichainMainnet]: {
       name: "Unichain",
       id: ChainId.UnichainMainnet,
@@ -131,41 +103,6 @@ export namespace ChainUtils {
       nativeCurrency: { name: "Sonic", symbol: "S", decimals: 18 },
       explorerUrl: "https://sonicscan.org",
       identifier: "sonic",
-    },
-    [ChainId.HemiMainnet]: {
-      name: "Hemi",
-      id: ChainId.HemiMainnet,
-      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-      explorerUrl: "https://explorer.hemi.xyz",
-      identifier: "hemi",
-    },
-    [ChainId.ModeMainnet]: {
-      name: "Mode",
-      id: ChainId.ModeMainnet,
-      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-      explorerUrl: "https://modescan.io",
-      identifier: "mode",
-    },
-    [ChainId.CornMainnet]: {
-      name: "Corn",
-      id: ChainId.CornMainnet,
-      nativeCurrency: { name: "Bitcoin", symbol: "BTCN", decimals: 18 },
-      explorerUrl: "https://cornscan.io",
-      identifier: "corn",
-    },
-    [ChainId.PlumeMainnet]: {
-      name: "Plume",
-      id: ChainId.PlumeMainnet,
-      nativeCurrency: { name: "Plume", symbol: "PLUME", decimals: 18 },
-      explorerUrl: "https://phoenix-explorer.plumenetwork.xyz",
-      identifier: "plume",
-    },
-    [ChainId.CampMainnet]: {
-      name: "Camp",
-      id: ChainId.CampMainnet,
-      nativeCurrency: { name: "Camp", symbol: "CAMP", decimals: 18 },
-      explorerUrl: "https://basecamp.cloud.blockscout.com/",
-      identifier: "camp",
     },
     [ChainId.BerachainMainnet]: {
       name: "Berachain",
@@ -216,12 +153,19 @@ export namespace ChainUtils {
       explorerUrl: "https://hyperevmscan.io/",
       identifier: "hyperevm",
     },
-    [ChainId.Linea]: {
+    [ChainId.LineaMainnet]: {
       name: "Linea Mainnet",
-      id: ChainId.Linea,
+      id: ChainId.LineaMainnet,
       nativeCurrency: { name: 'Linea Ether', symbol: 'ETH', decimals: 18 },
       explorerUrl: "https://lineascan.build",
       identifier: "linea",
+    },
+    [ChainId.PlasmaMainnet]: {
+      name: "Plasma Mainnet Beta",
+      id: ChainId.PlasmaMainnet,
+      nativeCurrency: { name: 'XPL', symbol: 'XPL', decimals: 18 },
+      explorerUrl: "https://plasmascan.to/",
+      identifier: "plasma",
     }
   } as const
 }
