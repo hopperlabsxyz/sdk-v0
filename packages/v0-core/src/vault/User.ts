@@ -3,7 +3,8 @@ import type { Address } from "../types";
 interface IUser {
   address: Address;
   vault: Address;
-  canRequestDeposit: boolean;
+  hasPendingDepositRequest: boolean;
+  hasPendingRedeemRequest: boolean;
 }
 
 export class User {
@@ -18,17 +19,24 @@ export class User {
   public readonly vault: Address;
 
   /**
-   * Whether the user can make a deposit request
+   * Whether the user has an ongoing deposit request being processed
    */
-  public canRequestDeposit: boolean;
+  public hasPendingDepositRequest: boolean;
+
+  /**
+   * Whether the user has an ongoing redeem request being processed
+   */
+  public hasPendingRedeemRequest: boolean;
 
   constructor({
     address,
     vault,
-    canRequestDeposit
+    hasPendingDepositRequest,
+    hasPendingRedeemRequest
   }: IUser) {
     this.address = address;
     this.vault = vault;
-    this.canRequestDeposit = canRequestDeposit;
+    this.hasPendingDepositRequest = hasPendingDepositRequest;
+    this.hasPendingRedeemRequest = hasPendingRedeemRequest;
   }
 }
