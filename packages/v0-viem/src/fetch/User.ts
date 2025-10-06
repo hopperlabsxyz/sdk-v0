@@ -31,13 +31,13 @@ export async function fetchUser(
     fetchLastRedeemRequestId({ address: vault }, address, client, parameters),
     fetchEpochAndSettleIds({ address: vault }, client, parameters)
   ])
-  const hasPendingDepositRequest = lastDepositRequestId === depositEpochId ? false : pendingDepositRequest > 0n;
-  const hasPendingRedeemRequest = lastRedeemRequestId === redeemEpochId ? false : pendingRedeemRequest > 0n;
+  const hasDepositRequestOnboarded = lastDepositRequestId === depositEpochId ? false : pendingDepositRequest > 0n;
+  const hasRedeemRequestOnboarded = lastRedeemRequestId === redeemEpochId ? false : pendingRedeemRequest > 0n;
   return new User({
     address,
     vault,
-    hasPendingDepositRequest,
-    hasPendingRedeemRequest,
+    hasDepositRequestOnboarded,
+    hasRedeemRequestOnboarded,
   })
 }
 

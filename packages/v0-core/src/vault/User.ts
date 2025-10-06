@@ -3,8 +3,8 @@ import type { Address } from "../types";
 interface IUser {
   address: Address;
   vault: Address;
-  hasPendingDepositRequest: boolean;
-  hasPendingRedeemRequest: boolean;
+  hasDepositRequestOnboarded: boolean;
+  hasRedeemRequestOnboarded: boolean;
 }
 
 export class User {
@@ -21,22 +21,22 @@ export class User {
   /**
    * Whether the user has an ongoing deposit request being processed
    */
-  public hasPendingDepositRequest: boolean;
+  public hasDepositRequestOnboarded: boolean;
 
   /**
    * Whether the user has an ongoing redeem request being processed
    */
-  public hasPendingRedeemRequest: boolean;
+  public hasRedeemRequestOnboarded: boolean;
 
   constructor({
     address,
     vault,
-    hasPendingDepositRequest,
-    hasPendingRedeemRequest
+    hasDepositRequestOnboarded,
+    hasRedeemRequestOnboarded
   }: IUser) {
     this.address = address;
     this.vault = vault;
-    this.hasPendingDepositRequest = hasPendingDepositRequest;
-    this.hasPendingRedeemRequest = hasPendingRedeemRequest;
+    this.hasDepositRequestOnboarded = hasDepositRequestOnboarded;
+    this.hasRedeemRequestOnboarded = hasRedeemRequestOnboarded;
   }
 }
