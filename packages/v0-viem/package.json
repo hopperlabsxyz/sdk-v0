@@ -21,6 +21,7 @@
   },
   "scripts": {
     "re": "bun run clean && bun run build",
+    "publish:package": "bun publish --access public --verbose --tag latest",
     "build": "bun run build:types && bun run build:cjs && bun run build:esm",
     "build:types": "tsc -p tsconfig.json --declaration --emitDeclarationOnly --outDir ./dist/types",
     "build:cjs": " bun build ./src/index.ts --target node --format cjs --outfile ./dist/cjs/index.cjs",
