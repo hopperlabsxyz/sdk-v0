@@ -14,7 +14,9 @@
     "build:computation": "bun run --cwd packages/v0-computation build",
     "dev": "bun run --watch index.ts",
     "clean": "rm -rf packages/*/dist",
-    "bump:minor": "(cd packages/v0-core && bun pm version minor) && (cd packages/v0-viem && bun pm version minor) && (cd packages/v0-computation && bun pm version minor)"
+    "bump:major": "(cd packages/v0-core && bun pm version major) && (cd packages/v0-viem && bun pm version major) && (cd packages/v0-computation && bun pm version major)",
+    "bump:minor": "(cd packages/v0-core && bun pm version minor) && (cd packages/v0-viem && bun pm version minor) && (cd packages/v0-computation && bun pm version minor)",
+    "bump:patch": "(cd packages/v0-core && bun pm version patch) && (cd packages/v0-viem && bun pm version patch) && (cd packages/v0-computation && bun pm version patch)"
   },
   "devDependencies": {
     "@types/bun": "^1.2.23",
