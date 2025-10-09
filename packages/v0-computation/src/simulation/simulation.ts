@@ -31,13 +31,27 @@ export function simulate(
   const oneShare = 10n ** BigInt(vault.decimals);
   const now = BigInt(Math.trunc(new Date().getTime() / 1000));
 
+  // We first compute the gross price per share. This is the price per share before the fees.
+  const grossPricePerShare = VaultUtils.convertToAssets(oneShare, {
+    totalAssets: input.totalAssetsForSimulation,
+    totalSupply: vault.totalSupply,
+    decimalsOffset,
+  });
+
+  const currentPricePerShare = VaultUtils.convertToAssets(oneShare, {
+    totalAssets: vault.totalAssets,
+    totalSupply: vault.totalSupply,
+    decimalsOffset,
+  });
+
+  // We then compute the fees
   const { totalFees, performanceFees, managementFees, excessReturns } =
     computeFees(vault, input.totalAssetsForSimulation);
 
   const canSettle = vault.newTotalAssets != MathLib.MAX_UINT_256;
   const totalSupplyAfterFees = vault.totalSupply + totalFees.inShares;
 
-  // Now that we know the fees we can compute the new price per share
+  // Now that we know the fees we can compute the new price per share.
   const netPricePerShare = VaultUtils.convertToAssets(oneShare, {
     totalAssets: input.totalAssetsForSimulation,
     totalSupply: totalSupplyAfterFees,
@@ -47,24 +61,17 @@ export function simulate(
   // We have all the information to compute the new high water mark.
   const highWaterMark = MathLib.max(vault.highWaterMark, netPricePerShare);
 
-  // We can also compute the gross price per share. This is the price per share before the fees.
-  const grossPricePerShare = VaultUtils.convertToAssets(oneShare, {
-    totalAssets: input.totalAssetsForSimulation,
-    totalSupply: vault.totalSupply,
-    decimalsOffset,
-  });
-
   // We have everything to evaluate the past performance and can now compute the APRs.
   const periodNetApr = computeAPR({
     newPrice: netPricePerShare,
-    oldPrice: vault.highWaterMark,
+    oldPrice: currentPricePerShare,
     newTimestamp: now,
     oldTimestamp: vault.lastFeeTime,
   });
 
   const periodGrossApr = computeAPR({
     newPrice: grossPricePerShare,
-    oldPrice: vault.highWaterMark,
+    oldPrice: currentPricePerShare,
     newTimestamp: now,
     oldTimestamp: vault.lastFeeTime,
   });
