@@ -5,6 +5,10 @@ interface IUser {
   vault: Address;
   hasDepositRequestOnboarded: boolean;
   hasRedeemRequestOnboarded: boolean;
+  maxMint: bigint;
+  maxWithdraw: bigint;
+  lastDepositRequestId: number;
+  lastRedeemRequestId: number;
 }
 
 export class User {
@@ -28,15 +32,43 @@ export class User {
    */
   public hasRedeemRequestOnboarded: boolean;
 
+  /**
+   * The maximum amount of shares the user can claim from a deposit request
+   */
+  public maxMint: bigint;
+
+  /**
+   * The maximum amount of assets the user can claim from a redeem request
+   */
+  public maxWithdraw: bigint;
+
+  /**
+   * The last deposit request ID
+   */
+  public lastDepositRequestId: number;
+
+  /**
+   * The last redeem request ID
+  **/
+  public lastRedeemRequestId: number;
+
   constructor({
     address,
     vault,
     hasDepositRequestOnboarded,
-    hasRedeemRequestOnboarded
+    hasRedeemRequestOnboarded,
+    maxMint,
+    maxWithdraw,
+    lastDepositRequestId,
+    lastRedeemRequestId,
   }: IUser) {
     this.address = address;
     this.vault = vault;
     this.hasDepositRequestOnboarded = hasDepositRequestOnboarded;
     this.hasRedeemRequestOnboarded = hasRedeemRequestOnboarded;
+    this.maxMint = maxMint;
+    this.maxWithdraw = maxWithdraw;
+    this.lastDepositRequestId = lastDepositRequestId;
+    this.lastRedeemRequestId = lastRedeemRequestId;
   }
 }
