@@ -32,7 +32,7 @@ export async function fetchUser(
     fetchEpochAndSettleIds({ address: vault }, client, parameters),
     fetchMaxDeposit({ address }, vault, client, parameters),
     fetchMaxRedeem({ address }, vault, client, parameters),
-    fetchBalanceOf({ address }, vault, client, parameters),
+    fetchBalanceOf({ account: address, vault }, client, parameters),
   ])
   const hasDepositRequestOnboarded = lastDepositRequestId === depositEpochId ? false : pendingDepositRequest > 0n;
   const hasRedeemRequestOnboarded = lastRedeemRequestId === redeemEpochId ? false : pendingRedeemRequest > 0n;
