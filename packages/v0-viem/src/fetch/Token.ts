@@ -55,13 +55,14 @@ export async function fetchTotalSupply(
 }
 
 export async function fetchBalanceOf(
-  { account, vault }: { account: Address, vault: Address },
+  {address }: { address: Address },
+  account: Address,
   client: Client,
   parameters: FetchParameters = {}
 ): Promise<bigint> {
   return readContract(client, {
     ...parameters,
-    address: vault,
+    address,
     abi: erc20Abi,
     functionName: "balanceOf",
     args: [account]
