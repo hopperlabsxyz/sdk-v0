@@ -1049,7 +1049,7 @@ export async function convertToAssets(
     address: vault,
     abi: vaultAbi,
     functionName: "convertToAssets",
-    args: epochId ? [epochId, shares] : [shares]
+    args: epochId ? [shares, epochId] : [shares]
   });
 }
 
@@ -1072,6 +1072,6 @@ export async function convertToShares(
     address: vault,
     abi: vaultAbi,
     functionName: "convertToShares",
-    args: epochId ? [epochId, assets] : [assets]
+    args: epochId ? [assets, epochId] : [assets]
   });
 }
