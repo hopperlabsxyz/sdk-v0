@@ -25,5 +25,6 @@
   "dependencies": {
     "@lagoon-protocol/v0-core": "workspace:*",
     "@lagoon-protocol/v0-viem": "workspace:*"
-  }
+  },
+  "version": "0.1.0"
 }
