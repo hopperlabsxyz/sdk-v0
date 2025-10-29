@@ -20,6 +20,8 @@ import {
   type Address,
   type Client,
 } from "viem";
+import { vaultAbi_v0_5_0 as vaultAbi } from "@lagoon-protocol/v0-core";
+
 import { GetVault, GetSettleData } from "../queries";
 import { call, readContract, getStorageAt, getBlock } from "viem/actions";
 import type { FetchParameters, GetStorageAtParameters } from "../types";
@@ -1026,4 +1028,50 @@ export async function fetchIsWhitelistActivated(
   const data = await getStorageAt(client, { slot, address, ...restParams });
   if (!data) throw new StorageFetchError(slot);
   return hexToBool(data);
+}
+
+/**
+ * Converts shares to assets
+ * @param shares - Shares to convert
+ * @param vault - Vault contract address
+ * @param client - Viem client
+ * @param parameters - Additional fetch parameters
+ * @returns Promise with assets
+ */
+export async function convertToAssets(
+  { shares, epochId }: { shares: bigint, epochId?: bigint },
+  vault: Address,
+  client: Client,
+  parameters: FetchParameters = {}
+): Promise<bigint> {
+  return readContract(client, {
+    ...parameters,
+    address: vault,
+    abi: vaultAbi,
+    functionName: "convertToAssets",
+    args: epochId ? [epochId, shares] : [shares]
+  });
+}
+
+/**
+ * Converts assets to shares
+ * @param assets - Assets to convert
+ * @param vault - Vault contract address
+ * @param client - Viem client
+ * @param parameters - Additional fetch parameters
+ * @returns Promise with shares
+ */
+export async function convertToShares(
+  { assets, epochId }: { assets: bigint, epochId?: bigint },
+  vault: Address,
+  client: Client,
+  parameters: FetchParameters = {}
+): Promise<bigint> {
+  return readContract(client, {
+    ...parameters,
+    address: vault,
+    abi: vaultAbi,
+    functionName: "convertToShares",
+    args: epochId ? [epochId, assets] : [assets]
+  });
 }
