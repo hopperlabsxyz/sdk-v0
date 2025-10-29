@@ -100,7 +100,7 @@ export class User {
   public positionInAssets: bigint;
 
   /**
-   * The user's pending deposit request in shares
+   * The user's pending deposit request expressed in assets
    */
   public pendingDepositRequest: bigint;
 
