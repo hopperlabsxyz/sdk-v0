@@ -55,7 +55,7 @@ export async function fetchTotalSupply(
 }
 
 export async function fetchBalanceOf(
-  {address }: { address: Address },
+  { address }: { address: Address },
   account: Address,
   client: Client,
   parameters: FetchParameters = {}
