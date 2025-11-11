@@ -12,7 +12,8 @@ interface IUser {
   pendingDepositRequestInShares: bigint;
   maxMint: bigint;
   maxDeposit: bigint;
-    
+  claimableDepositRequestActualized: bigint;
+  
   balance: bigint;
   balanceInAssets: bigint;
 
@@ -52,6 +53,9 @@ export class User {
    * The maximum amount of shares the user can finalize the deposit request for
    */
   public maxDeposit: bigint;
+
+  /** Claimable deposit request value in assets evolves, this is the actualized value */
+  public claimableDepositRequestActualized: bigint;
 
   /**
    * The maximum amount of assets the user can claim from his redeem request
@@ -131,6 +135,7 @@ export class User {
     pendingDepositRequestInShares,
     maxMint,
     maxDeposit,
+    claimableDepositRequestActualized,
     balance,
     balanceInAssets,
     pendingRedeemRequest,
@@ -149,7 +154,8 @@ export class User {
     this.pendingDepositRequestInShares = pendingDepositRequestInShares;
     this.maxMint = maxMint;
     this.maxDeposit = maxDeposit;
-    
+    this.claimableDepositRequestActualized = claimableDepositRequestActualized;
+  
     this.balance = balance;
     this.balanceInAssets = balanceInAssets;
 
@@ -159,6 +165,6 @@ export class User {
     this.maxRedeem = maxRedeem;
     
     this.positionInShares = pendingDepositRequestInShares + maxMint + balance + pendingRedeemRequest + maxRedeem;
-    this.positionInAssets = pendingDepositRequest + maxDeposit + balanceInAssets + pendingRedeemRequestInAssets + maxWithdraw;
+    this.positionInAssets = pendingDepositRequest + claimableDepositRequestActualized + balanceInAssets + pendingRedeemRequestInAssets + maxWithdraw;
   }
 }
