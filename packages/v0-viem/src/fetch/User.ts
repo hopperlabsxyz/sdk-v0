@@ -33,7 +33,7 @@ export async function fetchUser(
     fetchMaxDeposit({ address }, vault, client, parameters),
     fetchMaxRedeem({ address }, vault, client, parameters),
     fetchBalanceOf({ address: vault }, address, client, parameters),
-  ])
+  ]);
   const hasDepositRequestOnboarded = lastDepositRequestId === depositEpochId ? false : pendingDepositRequest > 0n;
   const hasRedeemRequestOnboarded = lastRedeemRequestId === redeemEpochId ? false : pendingRedeemRequest > 0n;
 
@@ -44,6 +44,14 @@ export async function fetchUser(
     convertToAssets({ shares: pendingRedeemRequest }, vault, client, parameters),
     convertToAssets({ shares: balance }, vault, client, parameters),
   ]);
+
+  const claimableDepositRequestActualized = await readContract(client, {
+    ...parameters,
+    address: vault,
+    abi: vaultAbi,
+    functionName: "convertToAssets",
+    args: [maxMint]
+  });
   return new User({
     address,
     vault,
@@ -54,6 +62,7 @@ export async function fetchUser(
     lastDepositRequestId,
     lastRedeemRequestId,
     maxDeposit,
+    claimableDepositRequestActualized,
     maxRedeem,
     pendingDepositRequest,
     pendingDepositRequestInShares,
