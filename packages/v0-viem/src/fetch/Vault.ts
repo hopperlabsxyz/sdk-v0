@@ -5,6 +5,7 @@ import {
   EncodingUtils,
   State,
   Version,
+  feeRegistryAbi_v2,
 } from "@lagoon-protocol/v0-core";
 import {
   decodeFunctionResult,
@@ -60,7 +61,7 @@ export async function fetchVault(
   parameters: FetchParameters = {}
 ): Promise<Vault> {
   {
-    const [vaultResponse, versionResponse] = await Promise.all([
+    const [vaultResponse, versionResponse, protocolRate] = await Promise.all([
       tryCatch(
         (async () =>
           (
@@ -88,10 +89,12 @@ export async function fetchVault(
           functionName: "version",
         })
       ),
+      fetchProtocolRate({ address }, client, parameters),
     ]);
     if (vaultResponse.data) {
       return new Vault({
         address,
+        protocolRate,
         version: versionResponse.data ?? Version.v0_2_0,
         ...decodeFunctionResult({
           abi: GetVault.abi,
@@ -131,6 +134,7 @@ export async function fetchVault(
       state,
       isWhitelistActivated,
       versionResponse,
+      protocolRate
     ] = await Promise.all([
       fetchName({ address }, client, parameters),
       fetchSymbol({ address }, client, parameters),
@@ -166,6 +170,7 @@ export async function fetchVault(
           functionName: "version",
         })
       ),
+      fetchProtocolRate({ address }, client, parameters),
     ]);
     return new Vault({
       address,
@@ -182,6 +187,7 @@ export async function fetchVault(
       ...decimalsData,
       ...totalAssetsTimestamps,
       feeRegistry,
+      protocolRate,
       newRatesTimestamp,
       lastFeeTime,
       highWaterMark,
@@ -878,6 +884,22 @@ export async function fetchFeeRates(
     managementRate: extractUint16(value, 0),
     performanceRate: extractUint16(value, 1),
   };
+}
+
+export async function fetchProtocolRate(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<bigint> {
+  const feeRegistry = await fetchFeeRegistry({ address }, client, params)
+  const protocolRate = await readContract(client, {
+    ...params,
+    address: feeRegistry,
+    abi: feeRegistryAbi_v2,
+    functionName: "protocolRate",
+    args: [address]
+  })
+  return protocolRate;
 }
 
 /**
