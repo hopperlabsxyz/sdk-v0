@@ -81,6 +81,7 @@ export interface IVault extends IToken {
   state: State;
   isWhitelistActivated: boolean;
   version: VersionOrLatest;
+  protocolRate: bigint;
 }
 
 export class Vault extends Token implements IVault {
@@ -197,6 +198,9 @@ export class Vault extends Token implements IVault {
   /** The current fee rates */
   public readonly feeRates: Rates;
 
+  /** The current protocol rate */
+  public readonly protocolRate: bigint;
+
   /// Ownable storage ///
 
   /** The vault admin */
@@ -247,6 +251,7 @@ export class Vault extends Token implements IVault {
   /// Bytecoded ///
   public readonly version: VersionOrLatest;
 
+
   constructor({
     asset,
     underlyingDecimals,
@@ -278,6 +283,7 @@ export class Vault extends Token implements IVault {
     state,
     isWhitelistActivated,
     version,
+    protocolRate,
     ...config
   }: IVault) {
     super({ ...config, decimals: 18 });
@@ -302,6 +308,7 @@ export class Vault extends Token implements IVault {
     this.highWaterMark = highWaterMark;
     this.cooldown = cooldown;
     this.feeRates = feeRates;
+    this.protocolRate = protocolRate;
     this.owner = owner;
     this.pendingOwner = pendingOwner;
     this.whitelistManager = whitelistManager;
