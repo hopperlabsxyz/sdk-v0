@@ -19,8 +19,8 @@
     "bump:patch": "(cd packages/v0-core && bun pm version patch) && (cd packages/v0-viem && bun pm version patch) && (cd packages/v0-computation && bun pm version patch)"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.23",
-    "typescript": "^5.9.2"
+    "@types/bun": "^1.3.2",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@lagoon-protocol/v0-core": "workspace:*",

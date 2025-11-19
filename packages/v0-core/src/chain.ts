@@ -16,6 +16,7 @@ export enum ChainId {
   HyperEVMMainnet = 999,
   LineaMainnet = 59144,
   PlasmaMainnet = 9745,
+  MonadMainnet = 143
 }
 
 export interface ChainMetadata {
@@ -166,6 +167,14 @@ export namespace ChainUtils {
       nativeCurrency: { name: 'XPL', symbol: 'XPL', decimals: 18 },
       explorerUrl: "https://plasmascan.to/",
       identifier: "plasma",
+    },
+
+    [ChainId.MonadMainnet]: {
+      name: "Monad Mainnet",
+      id: ChainId.MonadMainnet,
+      nativeCurrency: { name: 'MON', symbol: 'MON', decimals: 18 },
+      explorerUrl: "https://monadvision.com/",
+      identifier: "monad",
     }
   } as const
 }
