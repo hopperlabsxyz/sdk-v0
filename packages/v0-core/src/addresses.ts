@@ -117,5 +117,11 @@ export const addresses = {
     "v0_5_0": "0x50f30E712D535b796C8543012D0C05218b89c7d5",
     wrappedNative: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
     optinFactory: "0x0C0E287f6e4de685f4b44A5282A3ad4A29D05a91"
+  },
+  [ChainId.MonadMainnet]: {
+    feeRegistry: "0xBf994c358f939011595AB4216AC005147863f9D6",
+    "v0_5_0": "0x870dd43a868C35b036347c46042D97C7247EEa15",
+    wrappedNative: "0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A",
+    optinFactory: "0xcCdC4d06cA12A29C47D5d105fED59a6D07E9cf70"
   }
 } as const
