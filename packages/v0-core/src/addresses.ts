@@ -58,6 +58,7 @@ export const addresses = {
     beaconProxyFactory: "0x57D969B556C6AebB3Ac8f54c98CF3a3f921d5659",
     feeRegistry: "0x47A144e67834408716cB40Fa87fc886D63362ddC",
     "v0_4_0": "0xA7260Cee56B679eC05a736A7b603b8DA8525Dd69",
+    "v0_5_0": "0xC81Dd51239119Db80D5a6E1B7347F3C3BC8674d9",
     wrappedNative: "0x78c1b0C915c4FAA5FffA6CAbf0219DA63d7f4cb8",
     optinFactory: "0xc094c224ce0406bc338e00837b96ad2e265f7287"
   },
@@ -103,6 +104,7 @@ export const addresses = {
   [ChainId.LineaMainnet]: {
     feeRegistry: "0xC81Dd51239119Db80D5a6E1B7347F3C3BC8674d9",
     "v0_4_0": "0xC094C224ce0406BC338E00837B96aD2e265F7287",
+    "v0_5_0": "0xA3C233C61436008e05EDdE6adb3f81a410fa80C2",
     wrappedNative: "0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f",
     optinFactory: "0x8D6f5479B14348186faE9BC7E636e947c260f9B1"
   },
@@ -117,6 +119,12 @@ export const addresses = {
     "v0_5_0": "0x50f30E712D535b796C8543012D0C05218b89c7d5",
     wrappedNative: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
     optinFactory: "0x0C0E287f6e4de685f4b44A5282A3ad4A29D05a91"
+  },
+  [ChainId.Sei]: {
+    feeRegistry: "0xDd954bE514726Ed0C7156fe4aE06C539f7AE6C1c",
+    "v0_5_0": "0x357F1C9754dFFceD7c2EFe086d2114909538047D",
+    wrappedNative: "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
+    optinFactory: "0xDa1d1De87C4D90A07a6462cCD9bE651a0d074362",
   },
   [ChainId.MonadMainnet]: {
     feeRegistry: "0xBf994c358f939011595AB4216AC005147863f9D6",
