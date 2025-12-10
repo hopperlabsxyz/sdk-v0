@@ -1,0 +1,33 @@
+name: Publish to npm
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-version:
+    name: Check Version Change
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
+          cache: 'bun'
+
+      - name: Install dependencies
+        run: bun install
+      
+      - name: Build package
+        run: bun re
+      
+      - name: Publish to npm
+        run: |
+          cd packages/v0-core && bun publish --access public --tag latest
+          cd packages/v0-viem && bun publish --access public --tag latest
+          cd packages/v0-computation && bun publish --access public --tag latest
