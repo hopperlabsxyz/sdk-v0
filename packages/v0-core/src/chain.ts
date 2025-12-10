@@ -17,7 +17,8 @@ export enum ChainId {
   LineaMainnet = 59144,
   PlasmaMainnet = 9745,
 
-  Sei = 1329
+  MonadMainnet = 143,
+  Sei = 1329,
 }
 
 export interface ChainMetadata {
@@ -175,6 +176,13 @@ export namespace ChainUtils {
       nativeCurrency: { name: "Sei", symbol: "SEI", decimals: 18 },
       explorerUrl: "https://seiscan.io/",
       identifier: "sei",
+    },
+    [ChainId.MonadMainnet]: {
+      name: "Monad Mainnet",
+      id: ChainId.MonadMainnet,
+      nativeCurrency: { name: 'MON', symbol: 'MON', decimals: 18 },
+      explorerUrl: "https://monadvision.com/",
+      identifier: "monad",
     }
   } as const
 }

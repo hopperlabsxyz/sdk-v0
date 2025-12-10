@@ -124,6 +124,12 @@ export const addresses = {
     feeRegistry: "0xDd954bE514726Ed0C7156fe4aE06C539f7AE6C1c",
     "v0_5_0": "0x357F1C9754dFFceD7c2EFe086d2114909538047D",
     wrappedNative: "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
-    optinFactory: "0xDa1d1De87C4D90A07a6462cCD9bE651a0d074362"
+    optinFactory: "0xDa1d1De87C4D90A07a6462cCD9bE651a0d074362",
+  },
+  [ChainId.MonadMainnet]: {
+    feeRegistry: "0xBf994c358f939011595AB4216AC005147863f9D6",
+    "v0_5_0": "0x870dd43a868C35b036347c46042D97C7247EEa15",
+    wrappedNative: "0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A",
+    optinFactory: "0xcCdC4d06cA12A29C47D5d105fED59a6D07E9cf70"
   }
 } as const

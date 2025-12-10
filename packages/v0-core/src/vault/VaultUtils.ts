@@ -4,7 +4,9 @@ import type { BigIntish } from "../types.js";
 export namespace VaultUtils {
   export const VIRTUAL_ASSETS = 1n;
   export const BPS = 10_000n;
-
+  export const MAX_MANAGEMENT_RATE = 1_000n;
+  export const MAX_PERFORMANCE_RATE = 5_000n;
+  export const MAX_PROTOCOL_RATE = 3_000n;
   export const ONE_SHARE = 10n ** 18n;
 
   export function decimalsOffset(decimals: BigIntish) {
