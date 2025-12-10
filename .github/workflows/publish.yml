@@ -28,6 +28,6 @@ jobs:
       
       - name: Publish to npm
         run: |
-          cd packages/v0-core && bun publish --access public --tag latest --provenance
-          cd packages/v0-viem && bun publish --access public --tag latest --provenance
-          cd packages/v0-computation && bun publish --access public --tag latest --provenance
+          cd packages/v0-core && bun publish --access public --tag latest
+          cd packages/v0-viem && bun publish --access public --tag latest
+          cd packages/v0-computation && bun publish --access public --tag latest
