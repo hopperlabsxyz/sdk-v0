@@ -61,6 +61,7 @@ export function simulate(
   // We have all the information to compute the new high water mark.
   const highWaterMark = MathLib.max(vault.highWaterMark, netPricePerShare);
 
+  console.log("before period net apr");
   // We have everything to evaluate the past performance and can now compute the APRs.
   const periodNetApr = computeAPR({
     newPrice: netPricePerShare,
@@ -69,6 +70,7 @@ export function simulate(
     oldTimestamp: vault.lastFeeTime,
   });
 
+  console.log("before period gross apr");
   const periodGrossApr = computeAPR({
     newPrice: grossPricePerShare,
     oldPrice: currentPricePerShare,
@@ -77,7 +79,8 @@ export function simulate(
   });
 
   let thirtyDaysNetApr = undefined;
-  if (input.thirtyDay) {
+  if (input.thirtyDay && input.thirtyDay.pricePerShare > 0n) {
+    console.log("before thirty days net apr", input.thirtyDay);
     thirtyDaysNetApr = computeAPR({
       newPrice: netPricePerShare,
       oldPrice: input.thirtyDay.pricePerShare,
@@ -87,7 +90,8 @@ export function simulate(
   }
 
   let inceptionNetApr = undefined;
-  if (input.inception) {
+  if (input.inception && input.inception.pricePerShare > 0n) {
+    console.log("before inception net apr");
     inceptionNetApr = computeAPR({
       newPrice: netPricePerShare,
       oldPrice: input.inception.pricePerShare,
