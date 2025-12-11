@@ -61,7 +61,7 @@ export interface SimulationResult {
   };
   excessReturns: bigint;
   periodNetApr: number;
-  periodGrossApr: number;
+  periodGrossApr?: number;
   thirtyDaysNetApr?: number;
   inceptionNetApr?: number;
   pricePerShare: bigint;
