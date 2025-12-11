@@ -61,7 +61,6 @@ export function simulate(
   // We have all the information to compute the new high water mark.
   const highWaterMark = MathLib.max(vault.highWaterMark, netPricePerShare);
 
-  console.log("before period net apr");
   // We have everything to evaluate the past performance and can now compute the APRs.
   const periodNetApr = computeAPR({
     newPrice: netPricePerShare,
@@ -70,17 +69,19 @@ export function simulate(
     oldTimestamp: vault.lastFeeTime,
   });
 
-  console.log("before period gross apr");
-  const periodGrossApr = computeAPR({
+
+  const periodGrossApr = currentPricePerShare > 0n ? computeAPR({
     newPrice: grossPricePerShare,
     oldPrice: currentPricePerShare,
     newTimestamp: now,
     oldTimestamp: vault.lastFeeTime,
-  });
+  }) : undefined;
 
   let thirtyDaysNetApr = undefined;
-  if (input.thirtyDay && input.thirtyDay.pricePerShare > 0n) {
-    console.log("before thirty days net apr", input.thirtyDay);
+  if (input.thirtyDay) {
+    if (input.thirtyDay.pricePerShare == 0n) 
+      throw new Error("Thirty day price per share must be greater than 0");
+
     thirtyDaysNetApr = computeAPR({
       newPrice: netPricePerShare,
       oldPrice: input.thirtyDay.pricePerShare,
@@ -90,8 +91,10 @@ export function simulate(
   }
 
   let inceptionNetApr = undefined;
-  if (input.inception && input.inception.pricePerShare > 0n) {
-    console.log("before inception net apr");
+  if (input.inception) {
+    if (input.inception.pricePerShare == 0n) 
+      throw new Error("Inception price per share must be greater than 0");
+
     inceptionNetApr = computeAPR({
       newPrice: netPricePerShare,
       oldPrice: input.inception.pricePerShare,
