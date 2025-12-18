@@ -1,6 +1,6 @@
 # Lagoon SDKs
 
-A collection of Software Development Kits to ease interactions with Lagoon Vaults, inspired by ![Morpho's SDK architecture](https://github.com/morpho-org/sdks).
+A collection of Software Development Kits to ease interactions with Lagoon Vaults, inspired by [Morpho's SDK architecture](https://github.com/morpho-org/sdks).
 
 ## Getting Started
 
