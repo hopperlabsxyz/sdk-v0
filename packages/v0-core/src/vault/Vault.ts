@@ -64,6 +64,7 @@ export interface IVault extends IToken {
   highWaterMark: bigint;
   cooldown: bigint;
   feeRates: Rates;
+  upcomingFeeRates: Rates | null;
   totalAssets: bigint;
   newTotalAssets: bigint;
   depositEpochId: number;
@@ -198,6 +199,9 @@ export class Vault extends Token implements IVault {
   /** The current fee rates */
   public readonly feeRates: Rates;
 
+  /** The upcoming fee rates if they differ from current rates */
+  public readonly upcomingFeeRates: Rates | null;
+
   /** The current protocol rate */
   public readonly protocolRate: bigint;
 
@@ -274,6 +278,7 @@ export class Vault extends Token implements IVault {
     highWaterMark,
     cooldown,
     feeRates,
+    upcomingFeeRates,
     owner,
     pendingOwner,
     whitelistManager,
@@ -308,6 +313,7 @@ export class Vault extends Token implements IVault {
     this.highWaterMark = highWaterMark;
     this.cooldown = cooldown;
     this.feeRates = feeRates;
+    this.upcomingFeeRates = upcomingFeeRates ?? null;
     this.protocolRate = protocolRate;
     this.owner = owner;
     this.pendingOwner = pendingOwner;

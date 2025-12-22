@@ -61,7 +61,7 @@ export async function fetchVault(
   parameters: FetchParameters = {}
 ): Promise<Vault> {
   {
-    const [vaultResponse, versionResponse, protocolRate] = await Promise.all([
+    const [vaultResponse, versionResponse, protocolRate, upcomingFeeRates] = await Promise.all([
       tryCatch(
         (async () =>
           (
@@ -90,11 +90,13 @@ export async function fetchVault(
         })
       ),
       fetchProtocolRate({ address }, client, parameters),
+      fetchUpcomingFeeRates({ address }, client, parameters),
     ]);
     if (vaultResponse.data) {
       return new Vault({
         address,
         protocolRate,
+        upcomingFeeRates,
         version: versionResponse.data ?? Version.v0_2_0,
         ...decodeFunctionResult({
           abi: GetVault.abi,
@@ -125,6 +127,7 @@ export async function fetchVault(
       highWaterMark,
       cooldown,
       feeRates,
+      upcomingFeeRates,
       owner,
       pendingOwner,
       whitelistManager,
@@ -154,6 +157,7 @@ export async function fetchVault(
       fetchHighWaterMark({ address }, client, parameters),
       fetchCooldown({ address }, client, parameters),
       fetchFeeRates({ address }, client, parameters),
+      fetchUpcomingFeeRates({ address }, client, parameters),
       fetchOwner({ address }, client, parameters),
       fetchPendingOwner({ address }, client, parameters),
       fetchWhitelistManager({ address }, client, parameters),
@@ -193,6 +197,7 @@ export async function fetchVault(
       highWaterMark,
       cooldown,
       feeRates,
+      upcomingFeeRates,
       owner,
       pendingOwner,
       whitelistManager,
@@ -885,6 +890,43 @@ export async function fetchFeeRates(
     performanceRate: extractUint16(value, 1),
   };
 }
+
+/**
+ * Gets the upcoming fee rates if they differ from current rates
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with { managementRate: number, performanceRate: number } or null if no upcoming changes
+ */
+export async function fetchUpcomingFeeRates(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<{ managementRate: number; performanceRate: number } | null> {
+  const [newRatesTimestamp, block] = await Promise.all([
+    fetchNewRatesTimestamp({ address }, client, params),
+    getBlock(client, params),
+  ]);
+
+  if (!block) throw new BlockFetchError(params.blockNumber ?? params.blockTag);
+
+  if (newRatesTimestamp <= block.timestamp) return null;
+
+  const {
+    slot = getStorageSlot(EncodingUtils.FEE_MANAGER_STORAGE_LOCATION, 5),
+    ...restParams
+  } = params;
+
+  const data = await getStorageAt(client, { slot, address, ...restParams });
+  if (!data) throw new StorageFetchError(slot);
+
+  const value = hexToBigInt(data);
+  return {
+    managementRate: extractUint16(value, 0),
+    performanceRate: extractUint16(value, 1),
+  };
+}
+
 
 export async function fetchProtocolRate(
   { address }: { address: Address },
