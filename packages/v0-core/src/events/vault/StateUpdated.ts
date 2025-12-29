@@ -1,5 +1,5 @@
 import { Log, type ILog } from "../Log";
-import type { State } from "@lagoon-protocol/v0-core";
+import type { State } from "../../vault";
 
 interface IStateUpdated extends ILog {
   state: State;
