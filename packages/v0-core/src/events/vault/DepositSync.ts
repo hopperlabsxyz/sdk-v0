@@ -1,4 +1,4 @@
-import type { Address, BigIntish } from "../types";
+import type { Address, BigIntish } from "../../types";
 import { Log, type ILog } from "../Log";
 
 interface IDepositSync extends ILog {

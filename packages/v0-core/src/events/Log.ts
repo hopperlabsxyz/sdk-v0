@@ -1,5 +1,5 @@
-import type { Address, BigIntish, Hash, Hex } from "./types";
-import { hexToAddress, hexToHash } from "./utils";
+import type { Address, BigIntish, Hash, Hex } from "../types";
+import { hexToAddress, hexToHash } from "../utils";
 
 export interface ILog {
   chainId: number;
