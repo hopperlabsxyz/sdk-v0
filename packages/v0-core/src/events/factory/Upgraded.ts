@@ -1,4 +1,4 @@
-import type { Address } from "../types";
+import type { Address } from "../../types";
 import { Log, type ILog } from "../Log";
 
 interface IUpgraded extends ILog {

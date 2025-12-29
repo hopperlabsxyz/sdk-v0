@@ -1,4 +1,4 @@
-import type { BigIntish } from "../types";
+import type { BigIntish } from "../../types";
 import { Log, type ILog } from "../Log";
 
 interface IHighWaterMarkUpdated extends ILog {
