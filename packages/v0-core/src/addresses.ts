@@ -120,7 +120,7 @@ export const addresses = {
     wrappedNative: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
     optinFactory: "0x0C0E287f6e4de685f4b44A5282A3ad4A29D05a91"
   },
-  [ChainId.Sei]: {
+  [ChainId.SeiMainnet]: {
     feeRegistry: "0xDd954bE514726Ed0C7156fe4aE06C539f7AE6C1c",
     "v0_5_0": "0x357F1C9754dFFceD7c2EFe086d2114909538047D",
     wrappedNative: "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
@@ -131,5 +131,11 @@ export const addresses = {
     "v0_5_0": "0x870dd43a868C35b036347c46042D97C7247EEa15",
     wrappedNative: "0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A",
     optinFactory: "0xcCdC4d06cA12A29C47D5d105fED59a6D07E9cf70"
+  },
+  [ChainId.OptimismMainnet]: {
+    feeRegistry: "0x7AB55B30e3c382451FCCa104521a8B5F45bEeaf9",
+    "v0_5_0": "0xBB2dcC67A94946400a605F2a97933471bE8BC538",
+    wrappedNative: "0x4200000000000000000000000000000000000006",
+    optinFactory: "0xA8E0684887b9475f8942DF6a89bEBa5B25219632"
   }
-} as const
+} as const satisfies Record<ChainId, unknown>;

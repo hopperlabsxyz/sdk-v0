@@ -16,9 +16,8 @@ export enum ChainId {
   HyperEVMMainnet = 999,
   LineaMainnet = 59144,
   PlasmaMainnet = 9745,
-
   MonadMainnet = 143,
-  Sei = 1329,
+  SeiMainnet = 1329,
 }
 
 export interface ChainMetadata {
@@ -170,9 +169,9 @@ export namespace ChainUtils {
       explorerUrl: "https://plasmascan.to/",
       identifier: "plasma",
     },
-    [ChainId.Sei]: {
+    [ChainId.SeiMainnet]: {
       name: "Sei",
-      id: ChainId.Sei,
+      id: ChainId.SeiMainnet,
       nativeCurrency: { name: "Sei", symbol: "SEI", decimals: 18 },
       explorerUrl: "https://seiscan.io/",
       identifier: "sei",
