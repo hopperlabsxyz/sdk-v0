@@ -77,6 +77,7 @@ export const addresses = {
     optinFactory: "0xC094C224ce0406BC338E00837B96aD2e265F7287"
   },
   [ChainId.TacMainnet]: {
+    beaconProxyFactory: "0x3e39E287B4c94aC18831A63E5a6183Aa42cd85c3",
     feeRegistry: "0x3408C51BFc34CBF7112a20Fb3F4Bc9b74aed7982",
     "v0_5_0": "0x11652Aead69716E1D5D132F3bf0848D2fD422b8a",
     wrappedNative: "0xB63B9f0eb4A6E6f191529D71d4D88cc8900Df2C9",
