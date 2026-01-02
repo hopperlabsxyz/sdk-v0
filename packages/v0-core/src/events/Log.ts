@@ -4,7 +4,7 @@ import { hexToAddress, hexToHash } from "../utils";
 export interface ILog {
   chainId: number;
   blockNumber: BigIntish;
-  blockTimestamp?: BigIntish;
+  blockTimestamp?: BigIntish | null;
   blockHash: Hex;
   transactionHash: Hex;
   transactionIndex: number;

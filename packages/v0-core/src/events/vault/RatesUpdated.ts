@@ -4,25 +4,25 @@ import { Log, type ILog } from "../Log";
 
 interface IRatesUpdated extends ILog {
   oldRates: Rates;
-  newRate: Rates;
+  newRates: Rates;
   timestamp: BigIntish;
 }
 
 export class RatesUpdated extends Log {
   public readonly name: 'RatesUpdated' = 'RatesUpdated';
   public readonly oldRates: Rates;
-  public readonly newRate: Rates;
+  public readonly newRates: Rates;
   public readonly timestamp: bigint;
 
   constructor({
     oldRates,
-    newRate,
+    newRates,
     timestamp,
     ...args
   }: IRatesUpdated) {
     super(args);
     this.oldRates = oldRates;
-    this.newRate = newRate;
+    this.newRates = newRates;
     this.timestamp = BigInt(timestamp);
   }
 }

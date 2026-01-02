@@ -3,7 +3,7 @@ import { Log, type ILog } from "../Log";
 
 interface ISettleDeposit extends ILog {
   epochId: number;
-  settleId: number;
+  settledId: number;
   totalAssets: BigIntish;
   totalSupply: BigIntish;
   assetsDeposited: BigIntish;
@@ -13,14 +13,14 @@ interface ISettleDeposit extends ILog {
 export class SettleDeposit extends Log {
   public readonly name: 'SettleDeposit' = 'SettleDeposit';
   public readonly epochId: number;
-  public readonly settleId: number;
+  public readonly settledId: number;
   public readonly totalAssets: bigint;
   public readonly totalSupply: bigint;
   public readonly assetsDeposited: bigint;
   public readonly sharesMinted: bigint;
   constructor({
     epochId,
-    settleId,
+    settledId,
     totalAssets,
     totalSupply,
     assetsDeposited,
@@ -29,7 +29,7 @@ export class SettleDeposit extends Log {
   }: ISettleDeposit) {
     super(args);
     this.epochId = epochId;
-    this.settleId = settleId;
+    this.settledId = settledId;
     this.totalAssets = BigInt(totalAssets);
     this.totalSupply = BigInt(totalSupply);
     this.assetsDeposited = BigInt(assetsDeposited);
