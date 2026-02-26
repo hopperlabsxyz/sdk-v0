@@ -6,6 +6,8 @@ export interface ISettleData {
   totalAssets: BigIntish;
   pendingAssets: BigIntish;
   pendingShares: BigIntish;
+  entryFeeRate?: number;
+  exitFeeRate?: number;
 }
 
 export class SettleData implements ISettleData {
@@ -46,18 +48,32 @@ export class SettleData implements ISettleData {
    */
   public pendingShares: bigint;
 
+  /*
+   * The entry fee rate (v0.6.0+)
+   */
+  public entryFeeRate: number;
+
+  /*
+   * The exit fee rate (v0.6.0+)
+   */
+  public exitFeeRate: number;
+
   constructor({
     settleId,
     totalSupply,
     totalAssets,
     pendingAssets,
-    pendingShares
+    pendingShares,
+    entryFeeRate,
+    exitFeeRate,
   }: ISettleData) {
     this.settleId = settleId;
     this.totalSupply = BigInt(totalSupply);
     this.totalAssets = BigInt(totalAssets);
     this.pendingAssets = BigInt(pendingAssets);
     this.pendingShares = BigInt(pendingShares);
+    this.entryFeeRate = entryFeeRate ?? 0;
+    this.exitFeeRate = exitFeeRate ?? 0;
     SettleData._CACHE[this.settleId] = this;
   }
 }

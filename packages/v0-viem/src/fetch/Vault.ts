@@ -6,6 +6,9 @@ import {
   State,
   Version,
   feeRegistryAbi_v2,
+  type AccessMode,
+  type Guardrails,
+  type Rates,
 } from "@lagoon-protocol/v0-core";
 import {
   decodeFunctionResult,
@@ -23,7 +26,7 @@ import {
 } from "viem";
 import { vaultAbi_v0_5_0 as vaultAbi } from "@lagoon-protocol/v0-core";
 
-import { GetVault, GetSettleData } from "../queries";
+import { GetVault } from "../queries";
 import { call, readContract, getStorageAt, getBlock } from "viem/actions";
 import type { FetchParameters, GetStorageAtParameters } from "../types";
 import {
@@ -93,11 +96,30 @@ export async function fetchVault(
       fetchUpcomingFeeRates({ address }, client, parameters),
     ]);
     if (vaultResponse.data) {
+      const [securityCouncil, superOperator, maxCap, isSyncRedeemAllowed, accessMode, guardrails, guardrailsActivated, externalSanctionsList] = await Promise.all([
+        fetchSecurityCouncil({ address }, client, parameters),
+        fetchSuperOperator({ address }, client, parameters),
+        fetchMaxCap({ address }, client, parameters),
+        fetchIsSyncRedeemAllowed({ address }, client, parameters),
+        fetchAccessMode({ address }, client, parameters),
+        fetchGuardrails({ address }, client, parameters),
+        fetchGuardrailsActivated({ address }, client, parameters),
+        fetchExternalSanctionsList({ address }, client, parameters),
+      ]);
       return new Vault({
         address,
         protocolRate,
         upcomingFeeRates,
         version: versionResponse.data ?? Version.v0_2_0,
+        securityCouncil,
+        superOperator,
+        maxCap,
+        isSyncRedeemAllowed,
+        accessMode,
+        guardrailsActivated,
+        guardrailsUpperRate: guardrails.upperRate,
+        guardrailsLowerRate: guardrails.lowerRate,
+        externalSanctionsList,
         ...decodeFunctionResult({
           abi: GetVault.abi,
           functionName: "query",
@@ -137,7 +159,15 @@ export async function fetchVault(
       state,
       isWhitelistActivated,
       versionResponse,
-      protocolRate
+      protocolRate,
+      securityCouncil,
+      superOperator,
+      maxCap,
+      isSyncRedeemAllowed,
+      accessMode,
+      guardrails,
+      guardrailsActivated,
+      externalSanctionsList,
     ] = await Promise.all([
       fetchName({ address }, client, parameters),
       fetchSymbol({ address }, client, parameters),
@@ -175,6 +205,14 @@ export async function fetchVault(
         })
       ),
       fetchProtocolRate({ address }, client, parameters),
+      fetchSecurityCouncil({ address }, client, parameters),
+      fetchSuperOperator({ address }, client, parameters),
+      fetchMaxCap({ address }, client, parameters),
+      fetchIsSyncRedeemAllowed({ address }, client, parameters),
+      fetchAccessMode({ address }, client, parameters),
+      fetchGuardrails({ address }, client, parameters),
+      fetchGuardrailsActivated({ address }, client, parameters),
+      fetchExternalSanctionsList({ address }, client, parameters),
     ]);
     return new Vault({
       address,
@@ -207,6 +245,15 @@ export async function fetchVault(
       state,
       isWhitelistActivated,
       version: versionResponse.data ?? Version.v0_2_0,
+      securityCouncil,
+      superOperator,
+      maxCap,
+      isSyncRedeemAllowed,
+      accessMode,
+      guardrailsActivated,
+      guardrailsUpperRate: guardrails.upperRate,
+      guardrailsLowerRate: guardrails.lowerRate,
+      externalSanctionsList,
     });
   }
 }
@@ -239,39 +286,6 @@ export async function fetchSettleData(
   delete parameters.revalidate;
 
   {
-    const response = await tryCatch(
-      (async () =>
-        (
-          await call(client, {
-            ...parameters,
-            to: address,
-            data: encodeFunctionData({
-              abi: GetSettleData.abi,
-              functionName: "query",
-              args: [settleId],
-            }),
-            stateOverride: [
-              {
-                address,
-                code: GetSettleData.code,
-              },
-            ],
-          })
-        ).data)()
-    );
-    if (response.data) {
-      return new SettleData({
-        settleId: settleId,
-        ...decodeFunctionResult({
-          abi: GetSettleData.abi,
-          functionName: "query",
-          data: response.data, // raw hex data returned from the call
-        }),
-      });
-    }
-  }
-  // Fallback in case the rpc node does not support state overrides
-  {
     const totalSupplySlot = getMappingSlot(
       getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 4),
       pad(numberToHex(settleId))
@@ -279,7 +293,8 @@ export async function fetchSettleData(
     const totalAssetsSlot = getStorageSlot(totalSupplySlot, 1);
     const pendingAssetsSlot = getStorageSlot(totalSupplySlot, 2);
     const pendingSharesSlot = getStorageSlot(totalSupplySlot, 3);
-    const [totalSupply, totalAssets, pendingAssets, pendingShares] =
+    const feeRatesSlot = getStorageSlot(totalSupplySlot, 4);
+    const [totalSupply, totalAssets, pendingAssets, pendingShares, feeRateData] =
       await Promise.all([
         getStorageAt(client, { slot: totalSupplySlot, address, ...parameters }),
         getStorageAt(client, { slot: totalAssetsSlot, address, ...parameters }),
@@ -293,17 +308,25 @@ export async function fetchSettleData(
           address,
           ...parameters,
         }),
+        getStorageAt(client, {
+          slot: feeRatesSlot,
+          address,
+          ...parameters,
+        }),
       ]);
     if (!totalSupply) throw new StorageFetchError(totalSupplySlot);
     if (!totalAssets) throw new StorageFetchError(totalAssetsSlot);
     if (!pendingAssets) throw new StorageFetchError(pendingAssetsSlot);
     if (!pendingShares) throw new StorageFetchError(pendingSharesSlot);
+    const feeRateValue = feeRateData ? hexToBigInt(feeRateData) : 0n;
     return new SettleData({
       settleId,
       totalSupply,
       totalAssets,
       pendingAssets,
       pendingShares,
+      entryFeeRate: extractUint16(feeRateValue, 0),
+      exitFeeRate: extractUint16(feeRateValue, 1),
     });
   }
 }
@@ -870,7 +893,7 @@ export async function fetchFeeRates(
   { address }: { address: Address },
   client: Client,
   params: GetStorageAtParameters = {}
-): Promise<{ managementRate: number; performanceRate: number }> {
+): Promise<Rates> {
   const [newRatesTimestamp, block] = await Promise.all([
     fetchNewRatesTimestamp({ address }, client, params),
     getBlock(client, params),
@@ -888,6 +911,9 @@ export async function fetchFeeRates(
   return {
     managementRate: extractUint16(value, 0),
     performanceRate: extractUint16(value, 1),
+    entryRate: extractUint16(value, 2),
+    exitRate: extractUint16(value, 3),
+    haircutRate: extractUint16(value, 4),
   };
 }
 
@@ -902,7 +928,7 @@ export async function fetchUpcomingFeeRates(
   { address }: { address: Address },
   client: Client,
   params: GetStorageAtParameters = {}
-): Promise<{ managementRate: number; performanceRate: number } | null> {
+): Promise<Rates | null> {
   const [newRatesTimestamp, block] = await Promise.all([
     fetchNewRatesTimestamp({ address }, client, params),
     getBlock(client, params),
@@ -924,6 +950,9 @@ export async function fetchUpcomingFeeRates(
   return {
     managementRate: extractUint16(value, 0),
     performanceRate: extractUint16(value, 1),
+    entryRate: extractUint16(value, 2),
+    exitRate: extractUint16(value, 3),
+    haircutRate: extractUint16(value, 4),
   };
 }
 
@@ -1086,12 +1115,191 @@ export async function fetchIsWhitelistActivated(
   params: GetStorageAtParameters = {}
 ): Promise<boolean> {
   const {
-    slot = getStorageSlot(EncodingUtils.WHITELISTABLE_STORAGE_LOCATION, 0),
+    slot = getStorageSlot(EncodingUtils.WHITELISTABLE_STORAGE_LOCATION, 1),
     ...restParams
   } = params;
   const data = await getStorageAt(client, { slot, address, ...restParams });
   if (!data) throw new StorageFetchError(slot);
   return hexToBool(data);
+}
+
+/**
+ * Gets the max deposit cap from contract storage (v0.6.0+)
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with max cap as bigint
+ */
+export async function fetchMaxCap(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<bigint> {
+  const {
+    slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 11),
+    ...restParams
+  } = params;
+  const data = await getStorageAt(client, { slot, address, ...restParams });
+  if (!data) throw new StorageFetchError(slot);
+  return hexToBigInt(data);
+}
+
+/**
+ * Gets whether synchronous redeem is allowed (v0.6.0+)
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with boolean
+ */
+export async function fetchIsSyncRedeemAllowed(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<boolean> {
+  const {
+    slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 12),
+    ...restParams
+  } = params;
+  const data = await getStorageAt(client, { slot, address, ...restParams });
+  if (!data) throw new StorageFetchError(slot);
+  return hexToBool(data);
+}
+
+/**
+ * Gets security council address from contract storage (v0.6.0+)
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with security council address
+ */
+export async function fetchSecurityCouncil(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<Address> {
+  const {
+    slot = getStorageSlot(EncodingUtils.ROLES_STORAGE_LOCATION, 5),
+    ...restParams
+  } = params;
+  const data = await getStorageAt(client, { slot, address, ...restParams });
+  if (!data) throw new StorageFetchError(slot);
+  return getAddress(`0x${data.slice(-40)}`);
+}
+
+/**
+ * Gets super operator address from contract storage (v0.6.0+)
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with super operator address
+ */
+export async function fetchSuperOperator(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<Address> {
+  const {
+    slot = getStorageSlot(EncodingUtils.ROLES_STORAGE_LOCATION, 6),
+    ...restParams
+  } = params;
+  const data = await getStorageAt(client, { slot, address, ...restParams });
+  if (!data) throw new StorageFetchError(slot);
+  return getAddress(`0x${data.slice(-40)}`);
+}
+
+/**
+ * Gets access mode from contract storage (v0.6.0+)
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with AccessMode enum value
+ */
+export async function fetchAccessMode(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<AccessMode> {
+  const {
+    slot = getStorageSlot(EncodingUtils.WHITELISTABLE_STORAGE_LOCATION, 1),
+    ...restParams
+  } = params;
+  const data = await getStorageAt(client, { slot, address, ...restParams });
+  if (!data) throw new StorageFetchError(slot);
+  return hexToNumber(data) as AccessMode;
+}
+
+/**
+ * Gets guardrails (upper and lower rates) from contract storage (v0.6.0+)
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with Guardrails object containing upperRate (uint256) and lowerRate (int256, signed)
+ */
+export async function fetchGuardrails(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<Guardrails> {
+  const upperRateSlot = getStorageSlot(EncodingUtils.GUARDRAILS_MANAGER_STORAGE_LOCATION, 0);
+  const lowerRateSlot = getStorageSlot(EncodingUtils.GUARDRAILS_MANAGER_STORAGE_LOCATION, 1);
+  const [upperRateData, lowerRateData] = await Promise.all([
+    getStorageAt(client, { slot: upperRateSlot, address, ...params }),
+    getStorageAt(client, { slot: lowerRateSlot, address, ...params }),
+  ]);
+  if (!upperRateData) throw new StorageFetchError(upperRateSlot);
+  if (!lowerRateData) throw new StorageFetchError(lowerRateSlot);
+  // lowerRate is int256 (signed) — interpret as two's complement
+  const lowerRateUnsigned = hexToBigInt(lowerRateData);
+  const MAX_INT256 = (1n << 255n) - 1n;
+  const lowerRate = lowerRateUnsigned > MAX_INT256
+    ? lowerRateUnsigned - (1n << 256n)
+    : lowerRateUnsigned;
+  return {
+    upperRate: hexToBigInt(upperRateData),
+    lowerRate,
+  };
+}
+
+/**
+ * Gets whether guardrails are activated from contract storage (v0.6.0+)
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with boolean
+ */
+export async function fetchGuardrailsActivated(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<boolean> {
+  const {
+    slot = getStorageSlot(EncodingUtils.GUARDRAILS_MANAGER_STORAGE_LOCATION, 2),
+    ...restParams
+  } = params;
+  const data = await getStorageAt(client, { slot, address, ...restParams });
+  if (!data) throw new StorageFetchError(slot);
+  return hexToBool(data);
+}
+
+/**
+ * Gets external sanctions list address from contract storage (v0.6.0+)
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with external sanctions list address
+ */
+export async function fetchExternalSanctionsList(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<Address> {
+  const {
+    slot = getStorageSlot(EncodingUtils.WHITELISTABLE_STORAGE_LOCATION, 3),
+    ...restParams
+  } = params;
+  const data = await getStorageAt(client, { slot, address, ...restParams });
+  if (!data) throw new StorageFetchError(slot);
+  return getAddress(`0x${data.slice(-40)}`);
 }
 
 /**

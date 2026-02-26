@@ -51,6 +51,14 @@ declare module "@lagoon-protocol/v0-core" {
      */
     let optinProxyWithVaultInitConstructorEncoded: typeof EncodingUtils.optinProxyWithVaultInitConstructorEncodedParams;
 
+    /**
+     * Encodes the initialization call for a v0.6.0 vault.
+     *
+     * @param vault - The vault object containing the initialization parameters.
+     * @returns The encoded initialization call data as a hexadecimal string.
+     */
+    let initializeEncoded_v0_6_0: typeof EncodingUtils.initializeEncodedCall_v0_6_0;
+
   }
 
   /**
@@ -122,6 +130,8 @@ Vault.beaconProxyConstructorEncoded = EncodingUtils.beaconProxyConstructorEncode
 Vault.optinProxyConstructorEncoded = EncodingUtils.optinProxyConstructorEncodedParams
 
 Vault.optinProxyWithVaultInitConstructorEncoded = EncodingUtils.optinProxyWithVaultInitConstructorEncodedParams
+
+Vault.initializeEncoded_v0_6_0 = EncodingUtils.initializeEncodedCall_v0_6_0
 
 // Instance methods
 Vault.prototype.getSafeBalance =
