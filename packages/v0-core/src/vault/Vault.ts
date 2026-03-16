@@ -110,11 +110,13 @@ export interface IVault extends IToken {
   superOperator?: Address;
   maxCap?: bigint;
   isSyncRedeemAllowed?: boolean;
+  isAsyncOnly?: boolean;
   accessMode?: AccessMode;
   guardrailsActivated?: boolean;
   guardrailsUpperRate?: bigint;
   guardrailsLowerRate?: bigint;
   externalSanctionsList?: Address;
+  allowHighWaterMarkReset?: boolean;
 }
 
 export class Vault extends Token implements IVault {
@@ -306,6 +308,9 @@ export class Vault extends Token implements IVault {
   /** Whether synchronous redeem is allowed */
   public readonly isSyncRedeemAllowed: boolean;
 
+  /** Whether async-only mode is activated (one-way, irreversible) */
+  public readonly isAsyncOnly: boolean;
+
   /// GuardrailsManager storage (v0.6.0+) ///
 
   /** Whether guardrails are activated */
@@ -316,6 +321,9 @@ export class Vault extends Token implements IVault {
 
   /** The guardrails lower rate (can be negative) */
   public readonly guardrailsLowerRate: bigint;
+
+  /** Whether the safe can reset the high water mark to current price per share */
+  public readonly allowHighWaterMarkReset: boolean;
 
   /// Bytecoded ///
   public readonly version: VersionOrLatest;
@@ -358,11 +366,13 @@ export class Vault extends Token implements IVault {
     superOperator,
     maxCap,
     isSyncRedeemAllowed,
+    isAsyncOnly,
     accessMode,
     guardrailsActivated,
     guardrailsUpperRate,
     guardrailsLowerRate,
     externalSanctionsList,
+    allowHighWaterMarkReset,
     ...config
   }: IVault) {
     super({ ...config, decimals: 18 });
@@ -403,10 +413,12 @@ export class Vault extends Token implements IVault {
     this.superOperator = superOperator ?? ("0x0000000000000000000000000000000000000000" as Address);
     this.maxCap = maxCap ?? 0n;
     this.isSyncRedeemAllowed = isSyncRedeemAllowed ?? false;
+    this.isAsyncOnly = isAsyncOnly ?? false;
     this.guardrailsActivated = guardrailsActivated ?? false;
     this.guardrailsUpperRate = guardrailsUpperRate ?? 0n;
     this.guardrailsLowerRate = guardrailsLowerRate ?? 0n;
     this.externalSanctionsList = externalSanctionsList ?? ("0x0000000000000000000000000000000000000000" as Address);
+    this.allowHighWaterMarkReset = allowHighWaterMarkReset ?? false;
   }
 
   public convertToAssets(

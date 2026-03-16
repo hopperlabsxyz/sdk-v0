@@ -229,12 +229,13 @@ export namespace EncodingUtils {
       externalSanctionsList: Address,
       initialTotalAssets: bigint,
       superOperator: Address,
+      allowHighWaterMarkReset: boolean,
       wrappedNativeToken: Address,
       feeRegistry: Address,
     }): Hex {
     const initAbiParams = parseAbiParameter([
       'InitStruct init',
-      'struct InitStruct { address underlying; string name; string symbol; address safe; address whitelistManager; address valuationManager; address admin; address feeReceiver; uint16 managementRate; uint16 performanceRate; uint8 accessMode; uint16 entryRate; uint16 exitRate; uint16 haircutRate; address securityCouncil; address externalSanctionsList; uint256 initialTotalAssets; address superOperator; }',
+      'struct InitStruct { address underlying; string name; string symbol; address safe; address whitelistManager; address valuationManager; address admin; address feeReceiver; uint16 managementRate; uint16 performanceRate; uint8 accessMode; uint16 entryRate; uint16 exitRate; uint16 haircutRate; address securityCouncil; address externalSanctionsList; uint256 initialTotalAssets; address superOperator; bool allowHighWaterMarkReset; }',
     ])
 
     const initStructEncoded = encodeAbiParameters(
@@ -259,6 +260,7 @@ export namespace EncodingUtils {
           externalSanctionsList: vault.externalSanctionsList,
           initialTotalAssets: vault.initialTotalAssets,
           superOperator: vault.superOperator,
+          allowHighWaterMarkReset: vault.allowHighWaterMarkReset,
         }
       ]
     );

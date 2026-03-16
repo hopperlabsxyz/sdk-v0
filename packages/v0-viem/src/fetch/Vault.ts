@@ -96,15 +96,17 @@ export async function fetchVault(
       fetchUpcomingFeeRates({ address }, client, parameters),
     ]);
     if (vaultResponse.data) {
-      const [securityCouncil, superOperator, maxCap, isSyncRedeemAllowed, accessMode, guardrails, guardrailsActivated, externalSanctionsList] = await Promise.all([
+      const [securityCouncil, superOperator, maxCap, isSyncRedeemAllowed, isAsyncOnly, accessMode, guardrails, guardrailsActivated, externalSanctionsList, allowHighWaterMarkReset] = await Promise.all([
         fetchSecurityCouncil({ address }, client, parameters),
         fetchSuperOperator({ address }, client, parameters),
         fetchMaxCap({ address }, client, parameters),
         fetchIsSyncRedeemAllowed({ address }, client, parameters),
+        fetchIsAsyncOnly({ address }, client, parameters),
         fetchAccessMode({ address }, client, parameters),
         fetchGuardrails({ address }, client, parameters),
         fetchGuardrailsActivated({ address }, client, parameters),
         fetchExternalSanctionsList({ address }, client, parameters),
+        fetchAllowHighWaterMarkReset({ address }, client, parameters),
       ]);
       return new Vault({
         address,
@@ -115,11 +117,13 @@ export async function fetchVault(
         superOperator,
         maxCap,
         isSyncRedeemAllowed,
+        isAsyncOnly,
         accessMode,
         guardrailsActivated,
         guardrailsUpperRate: guardrails.upperRate,
         guardrailsLowerRate: guardrails.lowerRate,
         externalSanctionsList,
+        allowHighWaterMarkReset,
         ...decodeFunctionResult({
           abi: GetVault.abi,
           functionName: "query",
@@ -164,10 +168,12 @@ export async function fetchVault(
       superOperator,
       maxCap,
       isSyncRedeemAllowed,
+      isAsyncOnly,
       accessMode,
       guardrails,
       guardrailsActivated,
       externalSanctionsList,
+      allowHighWaterMarkReset,
     ] = await Promise.all([
       fetchName({ address }, client, parameters),
       fetchSymbol({ address }, client, parameters),
@@ -209,10 +215,12 @@ export async function fetchVault(
       fetchSuperOperator({ address }, client, parameters),
       fetchMaxCap({ address }, client, parameters),
       fetchIsSyncRedeemAllowed({ address }, client, parameters),
+      fetchIsAsyncOnly({ address }, client, parameters),
       fetchAccessMode({ address }, client, parameters),
       fetchGuardrails({ address }, client, parameters),
       fetchGuardrailsActivated({ address }, client, parameters),
       fetchExternalSanctionsList({ address }, client, parameters),
+      fetchAllowHighWaterMarkReset({ address }, client, parameters),
     ]);
     return new Vault({
       address,
@@ -249,11 +257,13 @@ export async function fetchVault(
       superOperator,
       maxCap,
       isSyncRedeemAllowed,
+      isAsyncOnly,
       accessMode,
       guardrailsActivated,
       guardrailsUpperRate: guardrails.upperRate,
       guardrailsLowerRate: guardrails.lowerRate,
       externalSanctionsList,
+      allowHighWaterMarkReset,
     });
   }
 }
@@ -1158,6 +1168,49 @@ export async function fetchIsSyncRedeemAllowed(
 ): Promise<boolean> {
   const {
     slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 12),
+    ...restParams
+  } = params;
+  const data = await getStorageAt(client, { slot, address, ...restParams });
+  if (!data) throw new StorageFetchError(slot);
+  return hexToBool(data);
+}
+
+/**
+ * Gets whether async-only mode is activated (v0.6.0+)
+ * Packed at byte offset 1 in ERC7540 slot 12 alongside isSyncRedeemAllowed (byte 0)
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with boolean
+ */
+export async function fetchIsAsyncOnly(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<boolean> {
+  const {
+    slot = getStorageSlot(EncodingUtils.ERC7540_STORAGE_LOCATION, 12),
+    ...restParams
+  } = params;
+  const data = await getStorageAt(client, { slot, address, ...restParams });
+  if (!data) throw new StorageFetchError(slot);
+  return ((hexToBigInt(data) >> 8n) & 1n) !== 0n;
+}
+
+/**
+ * Gets whether the safe can reset the high water mark (v0.6.0+)
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with boolean
+ */
+export async function fetchAllowHighWaterMarkReset(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<boolean> {
+  const {
+    slot = getStorageSlot(EncodingUtils.FEE_MANAGER_STORAGE_LOCATION, 7),
     ...restParams
   } = params;
   const data = await getStorageAt(client, { slot, address, ...restParams });
