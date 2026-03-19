@@ -1172,7 +1172,9 @@ export async function fetchIsSyncRedeemAllowed(
   } = params;
   const data = await getStorageAt(client, { slot, address, ...restParams });
   if (!data) throw new StorageFetchError(slot);
-  return hexToBool(data);
+  // Slot 12 packs two bools: isSyncRedeemAllowed (byte 0) and isAsyncOnly (byte 1).
+  // Use bit extraction instead of hexToBool to handle the packed case correctly.
+  return (hexToBigInt(data) & 1n) !== 0n;
 }
 
 /**

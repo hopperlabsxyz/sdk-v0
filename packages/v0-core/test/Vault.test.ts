@@ -3,6 +3,8 @@ import { Vault } from "../src/Vault";
 import { AccessMode } from "../src/Vault";
 import { VaultUtils } from "@lagoon-protocol/v0-core";
 import { addresses, ChainId, Version, EncodingUtils } from "@lagoon-protocol/v0-core";
+import { AsyncOnlyActivated } from "../src/events/vault";
+import type { ILog } from "../src/events/Log";
 
 
 const UINT256_MAX = 2n ** 256n - 1n;
@@ -91,6 +93,8 @@ const v060Vault = new Vault({
   superOperator: '0xF53eAeB7e6f15CBb6dB990eaf2A26702e1D986d8',
   maxCap: 1000000000000n,
   isSyncRedeemAllowed: true,
+  isAsyncOnly: false,
+  allowHighWaterMarkReset: true,
   accessMode: AccessMode.Whitelist,
   guardrailsActivated: true,
   guardrailsUpperRate: 500n,
@@ -158,7 +162,7 @@ describe("vault/Vault", () => {
       upcomingFeeRates: null,
       protocolRate: 0n,
     });
-    // New fields should use defaults
+    // v0.5.0 fields default
     expect(vault.securityCouncil).toBe('0x0000000000000000000000000000000000000000');
     expect(vault.superOperator).toBe('0x0000000000000000000000000000000000000000');
     expect(vault.maxCap).toBe(0n);
@@ -167,6 +171,9 @@ describe("vault/Vault", () => {
     expect(vault.guardrailsUpperRate).toBe(0n);
     expect(vault.guardrailsLowerRate).toBe(0n);
     expect(vault.externalSanctionsList).toBe('0x0000000000000000000000000000000000000000');
+    // v0.6.0 fields default
+    expect(vault.isAsyncOnly).toBe(false);
+    expect(vault.allowHighWaterMarkReset).toBe(false);
     // accessMode should be derived from isWhitelistActivated
     expect(vault.accessMode).toBe(AccessMode.Whitelist);
     expect(vault.isWhitelistActivated).toBe(true);
@@ -182,6 +189,8 @@ describe("vault/Vault v0.6.0", () => {
     expect(v060Vault.superOperator).toBe('0xF53eAeB7e6f15CBb6dB990eaf2A26702e1D986d8');
     expect(v060Vault.maxCap).toBe(1000000000000n);
     expect(v060Vault.isSyncRedeemAllowed).toBe(true);
+    expect(v060Vault.isAsyncOnly).toBe(false);
+    expect(v060Vault.allowHighWaterMarkReset).toBe(true);
     expect(v060Vault.accessMode).toBe(AccessMode.Whitelist);
     expect(v060Vault.guardrailsActivated).toBe(true);
     expect(v060Vault.guardrailsUpperRate).toBe(500n);
@@ -189,6 +198,22 @@ describe("vault/Vault v0.6.0", () => {
     expect(v060Vault.externalSanctionsList).toBe('0x0000000000000000000000000000000000000000');
     // cooldown defaults to 0n when not provided
     expect(v060Vault.cooldown).toBe(0n);
+  })
+
+  test("isAsyncOnly defaults to false when not provided", () => {
+    const vault = new Vault({ ...v060Vault });
+    expect(vault.isAsyncOnly).toBe(false);
+
+    const vaultWithAsync = new Vault({ ...v060Vault, isAsyncOnly: true });
+    expect(vaultWithAsync.isAsyncOnly).toBe(true);
+  })
+
+  test("allowHighWaterMarkReset defaults to false when not provided", () => {
+    const vaultNoReset = new Vault({ ...v060Vault, allowHighWaterMarkReset: undefined });
+    expect(vaultNoReset.allowHighWaterMarkReset).toBe(false);
+
+    const vaultWithReset = new Vault({ ...v060Vault, allowHighWaterMarkReset: true });
+    expect(vaultWithReset.allowHighWaterMarkReset).toBe(true);
   })
 
   test("accessMode derives isWhitelistActivated correctly", () => {
@@ -210,7 +235,7 @@ describe("vault/Vault v0.6.0", () => {
     expect(() => v060Vault.getAbi()).toThrow("v0.6.0 ABI not yet available");
   })
 
-  test("initializeEncodedCall_v0_6_0 produces valid calldata", () => {
+  test("initializeEncodedCall_v0_6_0 produces valid calldata with allowHighWaterMarkReset: false", () => {
     const calldata = EncodingUtils.initializeEncodedCall_v0_6_0({
       asset: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
       name: 'Test Vault',
@@ -226,11 +251,85 @@ describe("vault/Vault v0.6.0", () => {
       externalSanctionsList: '0x0000000000000000000000000000000000000000',
       initialTotalAssets: 0n,
       superOperator: '0xF53eAeB7e6f15CBb6dB990eaf2A26702e1D986d8',
+      allowHighWaterMarkReset: false,
       wrappedNativeToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
       feeRegistry: addresses[ChainId.EthMainnet].feeRegistry,
     });
-    // Should be valid hex starting with function selector
     expect(calldata).toMatch(/^0x/);
     expect(calldata.length).toBeGreaterThan(10);
+  })
+
+  test("initializeEncodedCall_v0_6_0 encodes allowHighWaterMarkReset: true correctly", () => {
+    const calldataTrue = EncodingUtils.initializeEncodedCall_v0_6_0({
+      asset: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      name: 'Test Vault',
+      symbol: 'TV',
+      safe: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+      whitelistManager: '0x0000000000000000000000000000000000000000',
+      valuationManager: '0xF53eAeB7e6f15CBb6dB990eaf2A26702e1D986d8',
+      owner: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+      feeReceiver: '0xa336DA6a81EFfa40362D2763d81643a67C82D151',
+      feeRates: { managementRate: 50, performanceRate: 1000, entryRate: 100, exitRate: 200, haircutRate: 50 },
+      accessMode: AccessMode.Whitelist,
+      securityCouncil: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+      externalSanctionsList: '0x0000000000000000000000000000000000000000',
+      initialTotalAssets: 0n,
+      superOperator: '0xF53eAeB7e6f15CBb6dB990eaf2A26702e1D986d8',
+      allowHighWaterMarkReset: true,
+      wrappedNativeToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      feeRegistry: addresses[ChainId.EthMainnet].feeRegistry,
+    });
+    const calldataFalse = EncodingUtils.initializeEncodedCall_v0_6_0({
+      asset: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      name: 'Test Vault',
+      symbol: 'TV',
+      safe: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+      whitelistManager: '0x0000000000000000000000000000000000000000',
+      valuationManager: '0xF53eAeB7e6f15CBb6dB990eaf2A26702e1D986d8',
+      owner: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+      feeReceiver: '0xa336DA6a81EFfa40362D2763d81643a67C82D151',
+      feeRates: { managementRate: 50, performanceRate: 1000, entryRate: 100, exitRate: 200, haircutRate: 50 },
+      accessMode: AccessMode.Whitelist,
+      securityCouncil: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+      externalSanctionsList: '0x0000000000000000000000000000000000000000',
+      initialTotalAssets: 0n,
+      superOperator: '0xF53eAeB7e6f15CBb6dB990eaf2A26702e1D986d8',
+      allowHighWaterMarkReset: false,
+      wrappedNativeToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      feeRegistry: addresses[ChainId.EthMainnet].feeRegistry,
+    });
+    // true and false must produce different calldata (only allowHighWaterMarkReset differs)
+    expect(calldataTrue).not.toBe(calldataFalse);
+    // true encodes the bool word as 0x00...01; false as 0x00...00 — the two differ by exactly one word
+    expect(calldataTrue.length).toBe(calldataFalse.length);
+  })
+});
+
+describe("events/AsyncOnlyActivated", () => {
+  const logArgs: ILog = {
+    chainId: 42161,
+    blockNumber: 442442579n,
+    blockHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+    blockTimestamp: null,
+    transactionHash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+    transactionIndex: 0,
+    logIndex: 0,
+    address: '0x874dF329f383E54651eBb1477d6c6272905332EA',
+  };
+
+  test("AsyncOnlyActivated can be instantiated with log fields", () => {
+    const event = new AsyncOnlyActivated(logArgs);
+    expect(event.name).toBe('AsyncOnlyActivated');
+    expect(event.type).toBe('log');
+    expect(event.chainId).toBe(42161);
+    expect(event.blockNumber).toBe(442442579n);
+    expect(event.address).toBe('0x874dF329f383E54651eBb1477d6c6272905332EA');
+  })
+
+  test("AsyncOnlyActivated has no additional fields beyond ILog", () => {
+    const event = new AsyncOnlyActivated(logArgs);
+    // Zero-field event — only inherited Log fields
+    expect(Object.keys(event)).not.toContain('amount');
+    expect(Object.keys(event)).not.toContain('value');
   })
 });

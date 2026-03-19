@@ -1,6 +1,6 @@
 import { EncodingUtils, Vault } from "@lagoon-protocol/v0-core";
 
-import { fetchBalanceOf, fetchPendingSiloBalances, fetchVault } from "../fetch";
+import { fetchBalanceOf, fetchPendingSiloBalances, fetchPendingSettlementAssets, fetchPendingSettlementShares, fetchVault } from "../fetch";
 import type { Address, Client } from "viem";
 import type { FetchParameters } from "../types";
 
@@ -82,6 +82,35 @@ declare module "@lagoon-protocol/v0-core" {
     getSiloBalances(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchPendingSiloBalances>;
 
     /**
+     * Gets the pending assets to be deposited in the next settlement
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters
+     * @returns Promise<bigint> - Pending assets amount
+     */
+    getPendingAssets(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchPendingSettlementAssets>;
+
+    /**
+     * Gets the pending shares to be redeemed in the next settlement
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters
+     * @returns Promise<bigint> - Pending shares amount
+     */
+    getPendingShares(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchPendingSettlementShares>;
+
+    /**
+     * Computes the assets the curator needs to gather in the safe to honor redemptions
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters
+     * @returns Promise with assetsToUnwind, pendingAssets, pendingShares, safeAssetBalance
+     */
+    getAssetsToUnwind(client: Client, parameters?: FetchParameters): Promise<{
+      assetsToUnwind: bigint;
+      pendingAssets: bigint;
+      pendingShares: bigint;
+      safeAssetBalance: bigint;
+    }>;
+
+    /**
      * Encodes the initialization call for a vault.
      *
      * @returns The encoded initialization call data as a hexadecimal string.
@@ -142,6 +171,27 @@ Vault.prototype.getSafeBalance =
 Vault.prototype.getSiloBalances =
   async function (client: Client, parameters: FetchParameters = {}) {
     return fetchPendingSiloBalances(this, client, parameters)
+  }
+
+Vault.prototype.getPendingAssets =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchPendingSettlementAssets(this, this.depositSettleId, client, parameters)
+  }
+
+Vault.prototype.getPendingShares =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchPendingSettlementShares(this, this.redeemSettleId, client, parameters)
+  }
+
+Vault.prototype.getAssetsToUnwind =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    const [pendingAssets, pendingShares, safeAssetBalance] = await Promise.all([
+      fetchPendingSettlementAssets(this, this.depositSettleId, client, parameters),
+      fetchPendingSettlementShares(this, this.redeemSettleId, client, parameters),
+      fetchBalanceOf({ address: this.asset }, this.safe, client, parameters),
+    ]);
+    const assetsToUnwind = this.calculateAssetsToUnwind(pendingShares, pendingAssets, safeAssetBalance);
+    return { assetsToUnwind, pendingAssets, pendingShares, safeAssetBalance };
   }
 
 Vault.prototype.initializeEncoded = function () { return EncodingUtils.initializeEncodedCall(this) }
