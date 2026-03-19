@@ -17,7 +17,8 @@ bun install @lagoon-protocol/v0-computation
 ```typescript
 import { simulate } from "@lagoon-protocol/v0-computation";
 
-const simulationResult = await simulate(vault, {
+// vault must include feeRates: { managementRate, performanceRate, entryRate, exitRate }
+const simulationResult = simulate(vault, {
   totalAssetsForSimulation: 1000000000000000000n,
   assetsInSafe: 0n,
   pendingSiloBalances: {
@@ -32,6 +33,14 @@ const simulationResult = await simulate(vault, {
   inception: undefined,
   thirtyDay: undefined,
 });
+
+// simulationResult includes:
+// - managementFees: { inAssets, inShares }
+// - performanceFees: { inAssets, inShares }
+// - entryFees: { inAssets, inShares }
+// - exitFees: { inAssets, inShares }
+// - pricePerShare, grossPricePerShare, highWaterMark, totalAssets, totalSupply, ...
+
 ```
 
 ## Local development:

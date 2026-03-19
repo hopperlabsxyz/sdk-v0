@@ -59,6 +59,14 @@ export interface SimulationResult {
     inAssets: bigint;
     inShares: bigint;
   };
+  entryFees: {
+    inAssets: bigint;
+    inShares: bigint;
+  };
+  exitFees: {
+    inAssets: bigint;
+    inShares: bigint;
+  };
   excessReturns: bigint;
   periodNetApr: number;
   periodGrossApr?: number;

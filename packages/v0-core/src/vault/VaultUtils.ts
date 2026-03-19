@@ -7,8 +7,8 @@ export namespace VaultUtils {
   export const MAX_MANAGEMENT_RATE = 1_000n;
   export const MAX_PERFORMANCE_RATE = 5_000n;
   export const MAX_PROTOCOL_RATE = 3_000n;
-  export const MAX_ENTRY_RATE = 1_000n;
-  export const MAX_EXIT_RATE = 1_000n;
+  export const MAX_ENTRY_RATE = 200n;
+  export const MAX_EXIT_RATE = 200n;
   export const MAX_HAIRCUT_RATE = 2_000n;
   export const ONE_SHARE = 10n ** 18n;
 
