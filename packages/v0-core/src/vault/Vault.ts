@@ -455,7 +455,7 @@ export class Vault extends Token implements IVault {
   public getAbi() {
     switch (this.version) {
       case Version.v0_6_0:
-        throw new Error("v0.6.0 ABI not yet available. Replace placeholder in constants/abis.ts when contracts are deployed.");
+        return vaultAbi_v0_6_0;
       case Version.v0_5_0:
         return vaultAbi_v0_5_0;
       case Version.v0_4_0:

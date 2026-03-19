@@ -231,8 +231,10 @@ describe("vault/Vault v0.6.0", () => {
     expect(blacklistVault.isWhitelistActivated).toBe(false);
   })
 
-  test("getAbi throws for v0.6.0", () => {
-    expect(() => v060Vault.getAbi()).toThrow("v0.6.0 ABI not yet available");
+  test("getAbi returns v0.6.0 ABI", () => {
+    const abi = v060Vault.getAbi();
+    expect(abi).toBeDefined();
+    expect(abi.length).toBeGreaterThan(0);
   })
 
   test("initializeEncodedCall_v0_6_0 produces valid calldata with allowHighWaterMarkReset: false", () => {
