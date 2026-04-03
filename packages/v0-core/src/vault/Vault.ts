@@ -3,6 +3,7 @@ import {
   vaultAbi_v0_3_0,
   vaultAbi_v0_4_0,
   vaultAbi_v0_5_0,
+  vaultAbi_v0_5_1,
   vaultAbi_v0_6_0,
 } from "../constants/abis";
 import { type RoundingDirection } from "../math";
@@ -12,6 +13,7 @@ import { VaultUtils } from "./VaultUtils";
 
 export enum Version {
   v0_6_0 = "v0.6.0",
+  v0_5_1 = "v0.5.1",
   v0_5_0 = "v0.5.0",
   v0_4_0 = "v0.4.0",
   v0_3_0 = "v0.3.0",
@@ -30,6 +32,7 @@ export function resolveVersion(version: VersionOrLatest): Version {
 export function isValidVersion(version: string): version is Version {
   switch (version) {
     case Version.v0_6_0:
+    case Version.v0_5_1:
     case Version.v0_5_0:
     case Version.v0_4_0:
     case Version.v0_3_0:
@@ -456,6 +459,8 @@ export class Vault extends Token implements IVault {
     switch (this.version) {
       case Version.v0_6_0:
         return vaultAbi_v0_6_0;
+      case Version.v0_5_1:
+        return vaultAbi_v0_5_1;
       case Version.v0_5_0:
         return vaultAbi_v0_5_0;
       case Version.v0_4_0:
