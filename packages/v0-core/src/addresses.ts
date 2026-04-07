@@ -138,5 +138,11 @@ export const addresses = {
     "v0_5_0": "0xBB2dcC67A94946400a605F2a97933471bE8BC538",
     wrappedNative: "0x4200000000000000000000000000000000000006",
     optinFactory: "0xA8E0684887b9475f8942DF6a89bEBa5B25219632"
+  },
+  [ChainId.HemiMainnet]: {
+    feeRegistry: "0x35723a53cCB5AdecFBcf50Cd1b190e15D896c389",
+    "v0_5_0": "0xE35901b2a7D8d38A0E49D9BC9dE7F4f9dF31Cc6d",
+    wrappedNative: "0x4200000000000000000000000000000000000006",
+    optinFactory: "0xB457e9C025A8Af99E32b03668e34f80D20A71d2C"
   }
 } as const satisfies Record<ChainId, unknown>;
