@@ -1,5 +1,5 @@
 import { createViemTest } from "@morpho-org/test/vitest";
-import { mainnet } from "viem/chains";
+import { mainnet, arbitrum } from "viem/chains";
 
 // Kill process using port 10005
 // lsof -ti:10005 | xargs kill -9
@@ -19,3 +19,14 @@ export const test3 = createViemTest(mainnet, {
   forkBlockNumber: 22_868_385,
 });
 
+// v0.6.0 vault on Arbitrum — block at deployment
+export const testArbitrumV060Deploy = createViemTest(arbitrum, {
+  forkUrl: process.env.ARBITRUM_RPC_URL,
+  forkBlockNumber: 442_440_547,
+});
+
+// v0.6.0 vault on Arbitrum — block after post-deployment config updates
+export const testArbitrumV060PostDeploy = createViemTest(arbitrum, {
+  forkUrl: process.env.ARBITRUM_RPC_URL,
+  forkBlockNumber: 442_442_579,
+});

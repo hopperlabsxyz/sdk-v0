@@ -2,7 +2,7 @@ import { describe, expect } from "vitest";
 import { Vault } from "../src/augment/Vault";
 import { addresses, ChainId, SettleData, Version } from "@lagoon-protocol/v0-core";
 import { fetchSettleData } from "../src/fetch";
-import { test, test2, test3 } from "./setup";
+import { test, test2, test3, testArbitrumV060Deploy, testArbitrumV060PostDeploy } from "./setup";
 import {
   fetchTotalAssets,
   fetchNewTotalAssets,
@@ -29,7 +29,14 @@ import {
   fetchSafe,
   fetchValuationManager,
   fetchState,
-  fetchIsWhitelistActivated
+  fetchIsWhitelistActivated,
+  fetchIsAsyncOnly,
+  fetchAllowHighWaterMarkReset,
+  fetchIsSyncRedeemAllowed,
+  fetchGuardrails,
+  fetchGuardrailsActivated,
+  fetchMaxCap,
+  fetchAccessMode,
 } from "../src/fetch";
 import { testFetchVaultWithStorageFetchers } from "./utils";
 import { getAddress } from "viem";
@@ -73,8 +80,52 @@ const tacUSN = new Vault({
   state: 0,
   isWhitelistActivated: false,
   version: Version.v0_4_0,
-  totalSupply: 0n
+  totalSupply: 0n,
+  upcomingFeeRates: null,
+  protocolRate: 0n,
 })
+
+// Same as tacUSN but with full feeRates shape returned by storage fetchers (entryRate/exitRate/haircutRate = 0 for v0.4.0)
+const tacUSNFromStorage = new Vault({
+  address: '0x7895A046b26CC07272B022a0C9BAFC046E6F6396',
+  name: 'Noon tacUSN',
+  symbol: 'tacUSN',
+  decimals: 18,
+  price: undefined,
+  asset: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+  underlyingDecimals: 6,
+  totalAssets: 0n,
+  newTotalAssets: UINT256_MAX,
+  depositEpochId: 1,
+  depositSettleId: 1,
+  lastDepositEpochIdSettled: 0,
+  redeemEpochId: 2,
+  redeemSettleId: 2,
+  lastRedeemEpochIdSettled: 0,
+  pendingSilo: '0x65D57bb5fB43fc227518D7c983e83388D4017687',
+  wrappedNativeToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+  decimalsOffset: 12,
+  totalAssetsExpiration: 0n,
+  totalAssetsLifespan: 0n,
+  feeRegistry: addresses[ChainId.EthMainnet].feeRegistry,
+  newRatesTimestamp: 1744463627n,
+  lastFeeTime: 0n,
+  highWaterMark: 1000000n,
+  cooldown: 0n,
+  feeRates: { managementRate: 50, performanceRate: 1000, entryRate: 0, exitRate: 0, haircutRate: 0 },
+  owner: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+  pendingOwner: '0x0000000000000000000000000000000000000000',
+  whitelistManager: '0x0000000000000000000000000000000000000000',
+  feeReceiver: '0xa336DA6a81EFfa40362D2763d81643a67C82D151',
+  safe: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+  valuationManager: '0xF53eAeB7e6f15CBb6dB990eaf2A26702e1D986d8',
+  state: 0,
+  isWhitelistActivated: false,
+  version: Version.v0_4_0,
+  totalSupply: 0n,
+  upcomingFeeRates: null,
+  protocolRate: 0n,
+});
 
 const tacUSNAddress = "0x7895A046b26CC07272B022a0C9BAFC046E6F6396";
 const testUserAddress = "0x1234567890123456789012345678901234567890";
@@ -89,7 +140,7 @@ describe("augment/Vault", () => {
   });
 
   test.sequential("should output the same result if fetched from storage", async ({ client }) => {
-    const expectedValue = tacUSN;
+    const expectedValue = tacUSNFromStorage;
     const value = await testFetchVaultWithStorageFetchers("0x7895A046b26CC07272B022a0C9BAFC046E6F6396", client);
     expect(value).toStrictEqual(expectedValue);
   });
@@ -320,7 +371,7 @@ describe("Storage fetch functions", () => {
   });
 
   test.sequential("should fetch fee rates", async ({ client }) => {
-    const expectedValue = { managementRate: 50, performanceRate: 1000 };
+    const expectedValue = { managementRate: 50, performanceRate: 1000, entryRate: 0, exitRate: 0, haircutRate: 0 };
     const value = await fetchFeeRates({ address: tacUSNAddress }, client);
     expect(value).toStrictEqual(expectedValue);
   });
@@ -371,5 +422,80 @@ describe("Storage fetch functions", () => {
     const expectedValue = false;
     const value = await fetchIsWhitelistActivated({ address: tacUSNAddress }, client);
     expect(value).toStrictEqual(expectedValue);
+  });
+});
+
+const v060Address = "0x874dF329f383E54651eBb1477d6c6272905332EA";
+
+describe("v0.6.0 storage fetchers — deployment block (442440547)", () => {
+  testArbitrumV060Deploy.sequential("fetchIsAsyncOnly is false at deployment", async ({ client }) => {
+    const value = await fetchIsAsyncOnly({ address: v060Address }, client);
+    expect(value).toBe(false);
+  });
+
+  testArbitrumV060Deploy.sequential("fetchAllowHighWaterMarkReset is true at deployment", async ({ client }) => {
+    const value = await fetchAllowHighWaterMarkReset({ address: v060Address }, client);
+    expect(value).toBe(true);
+  });
+
+  testArbitrumV060Deploy.sequential("fetchIsSyncRedeemAllowed is false at deployment", async ({ client }) => {
+    const value = await fetchIsSyncRedeemAllowed({ address: v060Address }, client);
+    expect(value).toBe(false);
+  });
+
+  testArbitrumV060Deploy.sequential("fetchAccessMode is Whitelist (1) at deployment", async ({ client }) => {
+    const value = await fetchAccessMode({ address: v060Address }, client);
+    expect(value).toBe(1); // AccessMode.Whitelist
+  });
+
+  testArbitrumV060Deploy.sequential("fetchFeeRates has correct entry/exit/haircut at deployment", async ({ client }) => {
+    const value = await fetchFeeRates({ address: v060Address }, client);
+    expect(value.entryRate).toBe(50);
+    expect(value.exitRate).toBe(100);
+    expect(value.haircutRate).toBe(25);
+  });
+
+  testArbitrumV060Deploy.sequential("fetchGuardrails are zero at deployment", async ({ client }) => {
+    const value = await fetchGuardrails({ address: v060Address }, client);
+    expect(value.upperRate).toBe(0n);
+    expect(value.lowerRate).toBe(0n);
+  });
+
+  testArbitrumV060Deploy.sequential("fetchGuardrailsActivated is false at deployment", async ({ client }) => {
+    const value = await fetchGuardrailsActivated({ address: v060Address }, client);
+    expect(value).toBe(false);
+  });
+});
+
+describe("v0.6.0 storage fetchers — post-deployment block (442442579)", () => {
+  testArbitrumV060PostDeploy.sequential("fetchIsAsyncOnly is true after update", async ({ client }) => {
+    const value = await fetchIsAsyncOnly({ address: v060Address }, client);
+    expect(value).toBe(true);
+  });
+
+  testArbitrumV060PostDeploy.sequential("fetchAllowHighWaterMarkReset remains true after update", async ({ client }) => {
+    const value = await fetchAllowHighWaterMarkReset({ address: v060Address }, client);
+    expect(value).toBe(true);
+  });
+
+  testArbitrumV060PostDeploy.sequential("fetchIsSyncRedeemAllowed is true after update", async ({ client }) => {
+    const value = await fetchIsSyncRedeemAllowed({ address: v060Address }, client);
+    expect(value).toBe(true);
+  });
+
+  testArbitrumV060PostDeploy.sequential("fetchMaxCap is 1000000000000 after update", async ({ client }) => {
+    const value = await fetchMaxCap({ address: v060Address }, client);
+    expect(value).toBe(1000000000000n);
+  });
+
+  testArbitrumV060PostDeploy.sequential("fetchGuardrails are set after update", async ({ client }) => {
+    const value = await fetchGuardrails({ address: v060Address }, client);
+    expect(value.upperRate).toBe(5000n);
+    expect(value.lowerRate).toBe(-3000n);
+  });
+
+  testArbitrumV060PostDeploy.sequential("fetchGuardrailsActivated is true after update", async ({ client }) => {
+    const value = await fetchGuardrailsActivated({ address: v060Address }, client);
+    expect(value).toBe(true);
   });
 });

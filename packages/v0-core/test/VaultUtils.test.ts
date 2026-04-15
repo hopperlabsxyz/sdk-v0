@@ -31,7 +31,7 @@ describe("vault/VaultUtils", () => {
     const totalSupply = 1_000_000n * 10n ** shareDecimals;
     const decimalsOffset = VaultUtils.decimalsOffset(assetDecimals);
     const pricePerShare = VaultUtils.convertToAssets(VaultUtils.ONE_SHARE, { totalAssets, totalSupply, decimalsOffset })
-    const value = VaultUtils.calculateShareValue(pricePerShare, { supplyShares: totalSupply, decimals: shareDecimals })
+    const value = VaultUtils.calculateShareValue(pricePerShare, { totalSupply, decimals: shareDecimals })
     const expectedValue = totalAssets
     expect(value).toStrictEqual(expectedValue);
   })

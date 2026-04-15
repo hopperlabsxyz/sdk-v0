@@ -1,5 +1,7 @@
 import { resolveVersion, VaultUtils } from "@lagoon-protocol/v0-core";
-import type { Version, VersionOrLatest } from "@lagoon-protocol/v0-core";
+import type {  VersionOrLatest } from "@lagoon-protocol/v0-core";
+import  { Version } from "@lagoon-protocol/v0-core";
+
 import { SECONDS_PER_YEAR } from "../constants";
 
 /**
@@ -87,7 +89,7 @@ export function computeFees(
   );
 
   const performanceFeesInShares = VaultUtils.convertToShares(
-    managementFeesInAssets,
+    performanceFeesInAssets.value,
     {
       totalAssets: totalAssetsForSimulation,
       totalSupply: totalSupplyAfterFees,
@@ -127,6 +129,7 @@ export function simulateManagementFees(
     totalAssets,
     lastFeeTime,
     managementRate,
+    version,
   }: {
     totalAssets: bigint;
     lastFeeTime: bigint;
@@ -134,6 +137,11 @@ export function simulateManagementFees(
     version: Version;
   }): bigint {
   if (managementRate === 0) return 0n;
+  if (version === Version.v0_6_0) {
+    // v0.6.0 uses the average of the total assets of the vault and the proposed total assets
+    // we can safely edit proposedTotalAssets because it is not a reference but a value
+    proposedTotalAssets = (totalAssets + proposedTotalAssets) / 2n;
+  }
   const nowUnix = BigInt(Math.trunc(Date.now() / 1000));
   const timeElapsed = nowUnix - BigInt(lastFeeTime);
   const annualRate = BigInt(managementRate);

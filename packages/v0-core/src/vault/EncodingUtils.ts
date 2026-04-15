@@ -1,5 +1,5 @@
 import { encodeAbiParameters, encodeFunctionData, parseAbiParameter, parseAbiParameters, type Address, type Hex } from "viem";
-import type { Rates } from "./Vault";
+import type { AccessMode, Rates } from "./Vault";
 
 export namespace EncodingUtils {
   export const ERC20_STORAGE_LOCATION = '0x52c63247e1f47db19d5ce0460030c497f067ca4cebf71ba98eeadabe20bace00';
@@ -11,6 +11,7 @@ export namespace EncodingUtils {
   export const ROLES_STORAGE_LOCATION = '0x7c302ed2c673c3d6b4551cf74a01ee649f887e14fd20d13dbca1b6099534d900';
   export const VAULT_STORAGE_LOCATION = '0x0e6b3200a60a991c539f47dddaca04a18eb4bcf2b53906fb44751d827f001400';
   export const WHITELISTABLE_STORAGE_LOCATION = '0x083cc98ab296d1a1f01854b5f7a2f47df4425a56ba7b35f7faa3a336067e4800';
+  export const GUARDRAILS_MANAGER_STORAGE_LOCATION = '0xd851cf94ad565ef91472fd51daf3f5f2311d4c6801bf4d880e94a7f28b854800';
   export const EIP1967_PROXY_IMPLEMENTATION_SLOT = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'
 
   /**
@@ -204,5 +205,82 @@ export namespace EncodingUtils {
       parseAbiParameters('address initialOwner, uint256 initialDelay'),
       [params.initialOwner, params.initialDelay]
     );
+  }
+
+  /**
+   * Encodes the initialization call for a v0.6.0 vault.
+   *
+   * @param vault - The vault object containing the initialization parameters.
+   * @returns The encoded initialization call data as a hexadecimal string.
+   */
+  export function initializeEncodedCall_v0_6_0(
+    vault: {
+      asset: Address,
+      name?: string,
+      symbol?: string,
+      safe: Address,
+      whitelistManager: Address,
+      valuationManager: Address,
+      owner: Address,
+      feeReceiver: Address,
+      feeRates: Rates,
+      accessMode: AccessMode,
+      securityCouncil: Address,
+      externalSanctionsList: Address,
+      initialTotalAssets: bigint,
+      superOperator: Address,
+      allowHighWaterMarkReset: boolean,
+      wrappedNativeToken: Address,
+      feeRegistry: Address,
+    }): Hex {
+    const initAbiParams = parseAbiParameter([
+      'InitStruct init',
+      'struct InitStruct { address underlying; string name; string symbol; address safe; address whitelistManager; address valuationManager; address admin; address feeReceiver; uint16 managementRate; uint16 performanceRate; uint8 accessMode; uint16 entryRate; uint16 exitRate; uint16 haircutRate; address securityCouncil; address externalSanctionsList; uint256 initialTotalAssets; address superOperator; bool allowHighWaterMarkReset; }',
+    ])
+
+    const initStructEncoded = encodeAbiParameters(
+      [initAbiParams],
+      [
+        {
+          underlying: vault.asset,
+          name: vault.name ?? "",
+          symbol: vault.symbol ?? "",
+          safe: vault.safe,
+          whitelistManager: vault.whitelistManager,
+          valuationManager: vault.valuationManager,
+          admin: vault.owner,
+          feeReceiver: vault.feeReceiver,
+          managementRate: vault.feeRates.managementRate,
+          performanceRate: vault.feeRates.performanceRate,
+          accessMode: vault.accessMode,
+          entryRate: vault.feeRates.entryRate ?? 0,
+          exitRate: vault.feeRates.exitRate ?? 0,
+          haircutRate: vault.feeRates.haircutRate ?? 0,
+          securityCouncil: vault.securityCouncil,
+          externalSanctionsList: vault.externalSanctionsList,
+          initialTotalAssets: vault.initialTotalAssets,
+          superOperator: vault.superOperator,
+          allowHighWaterMarkReset: vault.allowHighWaterMarkReset,
+        }
+      ]
+    );
+
+    return encodeFunctionData({
+      abi: [
+        {
+          type: 'function',
+          name: 'initialize',
+          stateMutability: 'nonpayable',
+          inputs: [
+            { name: 'initStruct', type: 'bytes' },
+            { name: 'registry', type: 'address' },
+            { name: 'wrappedNative', type: 'address' },
+          ],
+          outputs: [],
+        },
+      ],
+      functionName: 'initialize',
+      args: [initStructEncoded, vault.feeRegistry, vault.wrappedNativeToken],
+    });
   }
 }

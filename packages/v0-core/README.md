@@ -51,7 +51,7 @@ const tacUSN = new Vault({
   lastFeeTime: 0n,
   highWaterMark: 1000000n,
   cooldown: 0n,
-  feeRates: { managementRate: 50, performanceRate: 1000 },
+  feeRates: { managementRate: 50, performanceRate: 1000, entryRate: 0, exitRate: 0, haircutRate: 0 },
   owner: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
   pendingOwner: '0x0000000000000000000000000000000000000000',
   whitelistManager: '0x0000000000000000000000000000000000000000',
@@ -65,7 +65,7 @@ const tacUSN = new Vault({
 })
 
 tacUSN.name // Noon tacUSN
-tacUSN.simbol // tacUSN
+tacUSN.symbol // tacUSN
 
 tacUSN.convertToShares(BigInt(10 ** tacUSN.underlyingDecimals));
 tacUSN.convertToAssets(VaultUtils.ONE_SHARE);

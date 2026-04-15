@@ -18,5 +18,4 @@ describe("fetch/Token", () => {
     const value = await fetchBalanceOf({ address: usdc }, vitalik, client);
     expect(value).toStrictEqual(expectedValue);
   });
-
 });

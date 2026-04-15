@@ -3,6 +3,8 @@ import {
   vaultAbi_v0_3_0,
   vaultAbi_v0_4_0,
   vaultAbi_v0_5_0,
+  vaultAbi_v0_5_1,
+  vaultAbi_v0_6_0,
 } from "../constants/abis";
 import { type RoundingDirection } from "../math";
 import { type IToken, Token } from "../token/Token";
@@ -10,6 +12,8 @@ import { type Address, type BigIntish } from "../types";
 import { VaultUtils } from "./VaultUtils";
 
 export enum Version {
+  v0_6_0 = "v0.6.0",
+  v0_5_1 = "v0.5.1",
   v0_5_0 = "v0.5.0",
   v0_4_0 = "v0.4.0",
   v0_3_0 = "v0.3.0",
@@ -17,7 +21,7 @@ export enum Version {
   v0_1_0 = "v0.1.0",
 }
 
-export const LATEST_VERSION = Version.v0_5_0;
+export const LATEST_VERSION = Version.v0_6_0;
 
 export type VersionOrLatest = Version | "latest";
 
@@ -27,6 +31,8 @@ export function resolveVersion(version: VersionOrLatest): Version {
 
 export function isValidVersion(version: string): version is Version {
   switch (version) {
+    case Version.v0_6_0:
+    case Version.v0_5_1:
     case Version.v0_5_0:
     case Version.v0_4_0:
     case Version.v0_3_0:
@@ -44,9 +50,29 @@ export enum State {
   Closed,
 }
 
+export enum AccessMode {
+  Blacklist = 0,
+  Whitelist = 1,
+}
+
+export enum FeeType {
+  Management = 0,
+  Performance = 1,
+  Entry = 2,
+  Exit = 3,
+}
+
+export interface Guardrails {
+  upperRate: bigint;
+  lowerRate: bigint;
+}
+
 export interface Rates {
   managementRate: number;
   performanceRate: number;
+  entryRate?: number;
+  exitRate?: number;
+  haircutRate?: number;
 }
 
 export interface IVault extends IToken {
@@ -62,7 +88,7 @@ export interface IVault extends IToken {
   newRatesTimestamp: bigint;
   lastFeeTime: bigint;
   highWaterMark: bigint;
-  cooldown: bigint;
+  cooldown?: bigint;
   feeRates: Rates;
   upcomingFeeRates: Rates | null;
   totalAssets: bigint;
@@ -83,6 +109,17 @@ export interface IVault extends IToken {
   isWhitelistActivated: boolean;
   version: VersionOrLatest;
   protocolRate: bigint;
+  securityCouncil?: Address;
+  superOperator?: Address;
+  maxCap?: bigint;
+  isSyncRedeemAllowed?: boolean;
+  isAsyncOnly?: boolean;
+  accessMode?: AccessMode;
+  guardrailsActivated?: boolean;
+  guardrailsUpperRate?: bigint;
+  guardrailsLowerRate?: bigint;
+  externalSanctionsList?: Address;
+  allowHighWaterMarkReset?: boolean;
 }
 
 export class Vault extends Token implements IVault {
@@ -252,6 +289,45 @@ export class Vault extends Token implements IVault {
    */
   public readonly isWhitelistActivated: boolean;
 
+  /** The access mode of the vault (Blacklist or Whitelist) */
+  public readonly accessMode: AccessMode;
+
+  /** The external sanctions list address */
+  public readonly externalSanctionsList: Address;
+
+  /// Roles storage (v0.6.0+) ///
+
+  /** The security council address */
+  public readonly securityCouncil: Address;
+
+  /** The super operator address */
+  public readonly superOperator: Address;
+
+  /// ERC7540 storage (v0.6.0+) ///
+
+  /** The maximum deposit cap */
+  public readonly maxCap: bigint;
+
+  /** Whether synchronous redeem is allowed */
+  public readonly isSyncRedeemAllowed: boolean;
+
+  /** Whether async-only mode is activated (one-way, irreversible) */
+  public readonly isAsyncOnly: boolean;
+
+  /// GuardrailsManager storage (v0.6.0+) ///
+
+  /** Whether guardrails are activated */
+  public readonly guardrailsActivated: boolean;
+
+  /** The guardrails upper rate */
+  public readonly guardrailsUpperRate: bigint;
+
+  /** The guardrails lower rate (can be negative) */
+  public readonly guardrailsLowerRate: bigint;
+
+  /** Whether the safe can reset the high water mark to current price per share */
+  public readonly allowHighWaterMarkReset: boolean;
+
   /// Bytecoded ///
   public readonly version: VersionOrLatest;
 
@@ -289,6 +365,17 @@ export class Vault extends Token implements IVault {
     isWhitelistActivated,
     version,
     protocolRate,
+    securityCouncil,
+    superOperator,
+    maxCap,
+    isSyncRedeemAllowed,
+    isAsyncOnly,
+    accessMode,
+    guardrailsActivated,
+    guardrailsUpperRate,
+    guardrailsLowerRate,
+    externalSanctionsList,
+    allowHighWaterMarkReset,
     ...config
   }: IVault) {
     super({ ...config, decimals: 18 });
@@ -311,7 +398,7 @@ export class Vault extends Token implements IVault {
     this.newRatesTimestamp = newRatesTimestamp;
     this.lastFeeTime = lastFeeTime;
     this.highWaterMark = highWaterMark;
-    this.cooldown = cooldown;
+    this.cooldown = cooldown ?? 0n;
     this.feeRates = feeRates;
     this.upcomingFeeRates = upcomingFeeRates ?? null;
     this.protocolRate = protocolRate;
@@ -322,8 +409,19 @@ export class Vault extends Token implements IVault {
     this.safe = safe;
     this.valuationManager = valuationManager;
     this.state = state;
-    this.isWhitelistActivated = isWhitelistActivated;
+    this.accessMode = accessMode ?? (isWhitelistActivated ? AccessMode.Whitelist : AccessMode.Blacklist);
+    this.isWhitelistActivated = this.accessMode === AccessMode.Whitelist;
     this.version = version;
+    this.securityCouncil = securityCouncil ?? ("0x0000000000000000000000000000000000000000" as Address);
+    this.superOperator = superOperator ?? ("0x0000000000000000000000000000000000000000" as Address);
+    this.maxCap = maxCap ?? 0n;
+    this.isSyncRedeemAllowed = isSyncRedeemAllowed ?? false;
+    this.isAsyncOnly = isAsyncOnly ?? false;
+    this.guardrailsActivated = guardrailsActivated ?? false;
+    this.guardrailsUpperRate = guardrailsUpperRate ?? 0n;
+    this.guardrailsLowerRate = guardrailsLowerRate ?? 0n;
+    this.externalSanctionsList = externalSanctionsList ?? ("0x0000000000000000000000000000000000000000" as Address);
+    this.allowHighWaterMarkReset = allowHighWaterMarkReset ?? false;
   }
 
   public convertToAssets(
@@ -359,6 +457,10 @@ export class Vault extends Token implements IVault {
 
   public getAbi() {
     switch (this.version) {
+      case Version.v0_6_0:
+        return vaultAbi_v0_6_0;
+      case Version.v0_5_1:
+        return vaultAbi_v0_5_1;
       case Version.v0_5_0:
         return vaultAbi_v0_5_0;
       case Version.v0_4_0:

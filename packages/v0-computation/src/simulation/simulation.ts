@@ -22,7 +22,7 @@ export function simulate(
     totalAssets: bigint;
     highWaterMark: bigint;
     lastFeeTime: bigint;
-    feeRates: { managementRate: number; performanceRate: number };
+    feeRates: { managementRate: number; performanceRate: number; entryRate: number; exitRate: number };
     version: VersionOrLatest;
   },
   input: SimulationInput
@@ -113,6 +113,7 @@ export function simulate(
     totalAssets: input.totalAssetsForSimulation,
     totalSupply: totalSupplyAfterFees,
     decimalsOffset,
+    entryRate: vault.feeRates.entryRate,
   });
 
   // Same for the shares redeemed if there is a settlement and
@@ -124,6 +125,7 @@ export function simulate(
     totalAssets: input.totalAssetsForSimulation,
     totalSupply: totalSupplyAfterFees,
     decimalsOffset,
+    exitRate: vault.feeRates.exitRate,
   });
 
   // We can compute the assets to unwind.
@@ -160,6 +162,8 @@ export function simulate(
   return {
     managementFees,
     performanceFees,
+    entryFees: assetsDepositedIfSettle.entryFees,
+    exitFees: sharesRedeemedIfSettle.exitFees,
     pricePerShare: netPricePerShare,
     grossPricePerShare,
     highWaterMark,
@@ -265,6 +269,7 @@ function computeAssetsDepositedIfSettle({
   totalAssets,
   totalSupply,
   decimalsOffset,
+  entryRate,
 }: {
   settleDeposit: boolean;
   canSettle: boolean;
@@ -277,9 +282,11 @@ function computeAssetsDepositedIfSettle({
   totalAssets: bigint;
   totalSupply: bigint;
   decimalsOffset: number;
+  entryRate: number;
 }): {
   inShares: bigint;
   inAssets: bigint;
+  entryFees: { inShares: bigint; inAssets: bigint };
 } {
   let assetsDepositedIfSettle = 0n;
 
@@ -289,16 +296,31 @@ function computeAssetsDepositedIfSettle({
       // A valuation has been proposed, if we settle now we will settle the next settle deposit value
       assetsDepositedIfSettle = pendingSettlement.assets;
     } else assetsDepositedIfSettle = pendingSiloBalances.assets;
-    // if no valuation has been propose, we will first need to propose a valuaiton then we will be able to settle silo asset balance
+    // if no valuation has been propose, we will first need to propose a valuation then we will be able to settle silo asset balance
   }
+
+  const totalShares = VaultUtils.convertToShares(assetsDepositedIfSettle, {
+    totalAssets: totalAssets,
+    totalSupply: totalSupply,
+    decimalsOffset,
+  });
+
+  const entryFeeShares = 
+ (totalShares * BigInt(entryRate)) / VaultUtils.BPS;
+
+  const entryFeeAssets = VaultUtils.convertToAssets(entryFeeShares, {
+    totalAssets: totalAssets,
+    totalSupply: totalSupply,
+    decimalsOffset,
+  });
 
   return {
     inAssets: assetsDepositedIfSettle,
-    inShares: VaultUtils.convertToShares(assetsDepositedIfSettle, {
-      totalAssets: totalAssets,
-      totalSupply: totalSupply,
-      decimalsOffset,
-    }),
+    inShares: totalShares,
+    entryFees: {
+      inShares: entryFeeShares,
+      inAssets: entryFeeAssets,
+    },
   };
 }
 
@@ -321,6 +343,7 @@ function computeSharesRedeemsIfSettle({
   totalAssets,
   totalSupply,
   decimalsOffset,
+  exitRate,
 }: {
   canSettle: boolean;
   pendingSettlement: {
@@ -332,9 +355,11 @@ function computeSharesRedeemsIfSettle({
   totalAssets: bigint;
   totalSupply: bigint;
   decimalsOffset: number;
+  exitRate: number;
 }): {
   inShares: bigint;
   inAssets: bigint;
+  exitFees: { inShares: bigint; inAssets: bigint };
 } {
   let sharesRedeemedIfSettle = pendingSiloBalances.shares;
   if (canSettle) {
@@ -343,12 +368,27 @@ function computeSharesRedeemsIfSettle({
     sharesRedeemedIfSettle = pendingSettlement.shares;
   }
 
+  // Deduct exit fee from shares before converting to assets, matching the contract's
+  // settleRedeem logic in ERC7540Lib.sol
+  const exitFeeShares = (sharesRedeemedIfSettle * BigInt(exitRate)) / VaultUtils.BPS;
+  const netShares = sharesRedeemedIfSettle - exitFeeShares;
+
+  const exitFeeAssets = VaultUtils.convertToAssets(exitFeeShares, {
+    totalAssets: totalAssets,
+    totalSupply: totalSupply,
+    decimalsOffset,
+  });
+
   return {
-    inShares: sharesRedeemedIfSettle,
-    inAssets: VaultUtils.convertToAssets(sharesRedeemedIfSettle, {
+    inShares: netShares,
+    inAssets: VaultUtils.convertToAssets(netShares, {
       totalAssets: totalAssets,
       totalSupply: totalSupply,
       decimalsOffset,
     }),
+    exitFees: {
+      inShares: exitFeeShares,
+      inAssets: exitFeeAssets,
+    },
   };
 }
