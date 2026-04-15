@@ -153,6 +153,7 @@ export const addresses = {
   [ChainId.HemiMainnet]: {
     feeRegistry: "0x35723a53cCB5AdecFBcf50Cd1b190e15D896c389",
     "v0_5_0": "0xE35901b2a7D8d38A0E49D9BC9dE7F4f9dF31Cc6d",
+    "v0_6_0": "0xfA032DE1214fD89b465c306BF46F778318bDe357",
     wrappedNative: "0x4200000000000000000000000000000000000006",
     optinFactory: "0xB457e9C025A8Af99E32b03668e34f80D20A71d2C"
   }
