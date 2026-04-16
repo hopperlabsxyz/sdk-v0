@@ -160,7 +160,7 @@ export class User {
     this.balanceInAssets = balanceInAssets;
 
     this.pendingRedeemRequestInAssets = pendingRedeemRequestInAssets;
-    this.pendingRedeemRequest = pendingDepositRequest
+    this.pendingRedeemRequest = pendingRedeemRequest;
     this.maxWithdraw = maxWithdraw;
     this.maxRedeem = maxRedeem;
     
