@@ -116,3 +116,36 @@ test("simulation should compute exit fees when exitRate > 0", () => {
     expect(result.entryFees.inShares).toBe(0n);
     expect(result.entryFees.inAssets).toBe(0n);
 });
+
+// Pre-first-valuation: shares minted but totalAssets = 0 → currentPricePerShare rounds to 0n.
+// simulate() must not throw "Division by zero" and APRs must be undefined for that period.
+test("simulation should not throw when currentPricePerShare is 0n", () => {
+    const simulationInput: SimulationInput = {
+      totalAssetsForSimulation: 260_000_000_511_285n, // ~260M USDC (6 decimals)
+      assetsInSafe: 0n,
+      pendingSiloBalances: { assets: 0n, shares: 0n },
+      pendingSettlement: { assets: 0n, shares: 0n },
+      settleDeposit: true,
+      inception: { timestamp: 1765267664, pricePerShare: 0n },
+      thirtyDay: { timestamp: 1765267664, pricePerShare: 0n },
+    };
+
+    const vault = {
+      decimals: 18,
+      underlyingDecimals: 6,
+      newTotalAssets: 2n ** 256n - 1n, // canSettle = false (MAX_UINT_256)
+      totalAssets: 0n,
+      totalSupply: 26_511_259_000_000_000_000n, // ~26.5 shares minted, no NAV yet
+      highWaterMark: 0n,
+      lastFeeTime: BigInt(Math.floor(Date.now() / 1000)) - 3600n,
+      feeRates: { managementRate: 0, performanceRate: 0, entryRate: 0, exitRate: 0 },
+      version: Version.v0_6_0,
+    };
+
+    const result = simulate(vault, simulationInput);
+
+    expect(result.periodNetApr).toBeUndefined();
+    expect(result.periodGrossApr).toBeUndefined();
+    expect(result.thirtyDaysNetApr).toBeUndefined();
+    expect(result.inceptionNetApr).toBeUndefined();
+});
