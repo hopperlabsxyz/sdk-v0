@@ -62,6 +62,8 @@ export function simulate(
   const highWaterMark = MathLib.max(vault.highWaterMark, netPricePerShare);
 
   // We have everything to evaluate the past performance and can now compute the APRs.
+  // computeAPR returns undefined when the baseline price is 0n (e.g. pre-first-valuation:
+  // shares minted but totalAssets = 0) — callers should treat that as "APR not applicable".
   const periodNetApr = computeAPR({
     newPrice: netPricePerShare,
     oldPrice: currentPricePerShare,
@@ -69,19 +71,15 @@ export function simulate(
     oldTimestamp: vault.lastFeeTime,
   });
 
-
-  const periodGrossApr = currentPricePerShare > 0n ? computeAPR({
+  const periodGrossApr = computeAPR({
     newPrice: grossPricePerShare,
     oldPrice: currentPricePerShare,
     newTimestamp: now,
     oldTimestamp: vault.lastFeeTime,
-  }) : undefined;
+  });
 
-  let thirtyDaysNetApr = undefined;
+  let thirtyDaysNetApr: number | undefined = undefined;
   if (input.thirtyDay) {
-    if (input.thirtyDay.pricePerShare == 0n) 
-      throw new Error("Thirty day price per share must be greater than 0");
-
     thirtyDaysNetApr = computeAPR({
       newPrice: netPricePerShare,
       oldPrice: input.thirtyDay.pricePerShare,
@@ -90,11 +88,8 @@ export function simulate(
     });
   }
 
-  let inceptionNetApr = undefined;
+  let inceptionNetApr: number | undefined = undefined;
   if (input.inception) {
-    if (input.inception.pricePerShare == 0n) 
-      throw new Error("Inception price per share must be greater than 0");
-
     inceptionNetApr = computeAPR({
       newPrice: netPricePerShare,
       oldPrice: input.inception.pricePerShare,

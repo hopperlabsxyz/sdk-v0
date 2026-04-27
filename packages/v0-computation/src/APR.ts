@@ -17,9 +17,9 @@ export function computeAPR({
   oldPrice: bigint;
   newTimestamp: bigint;
   oldTimestamp: bigint;
-}): number {
-  if (oldPrice < 0 || newPrice < 0) {
-    throw new Error("Prices must be greater than zero.");
+}): number | undefined {
+  if (oldPrice < 0n || newPrice < 0n) {
+    throw new Error("Prices must be non-negative.");
   }
   if (oldTimestamp > newTimestamp) {
     throw new Error("oldestTimestamp must be less than newestTimestamp.");
@@ -27,6 +27,9 @@ export function computeAPR({
   const periodSeconds = newTimestamp - oldTimestamp;
 
   if (periodSeconds === 0n) return 0;
+  // No baseline price (e.g. pre-first-valuation: shares minted but totalAssets = 0):
+  // APR is undefined for the period — let the caller decide how to display it.
+  if (oldPrice === 0n) return undefined;
 
   const gain = newPrice - oldPrice;
   const decimals = 18;

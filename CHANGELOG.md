@@ -83,6 +83,24 @@ All new fields except `upcomingFeeRates` are optional and default to zero/false.
   });
 ```
 
+### `computeAPR` return type widened to `number | undefined`
+
+`computeAPR` now returns `undefined` when `oldPrice === 0n` (no baseline price → APR is undefined for the period). Previously it threw `RangeError: Division by zero`.
+
+```diff
+- function computeAPR(...): number
++ function computeAPR(...): number | undefined
+```
+
+`SimulationResult.periodNetApr` widened the same way (it was already `number`; now `number | undefined`, matching `periodGrossApr`).
+
+Consumer code that does `apr.toFixed(2)` or assigns to `number` must handle the undefined case:
+
+```diff
+- aprValue: result.periodNetApr.toFixed(2)
++ aprValue: result.periodNetApr?.toFixed(2) ?? '0.00'
+```
+
 ---
 
 ## New Features
@@ -154,6 +172,12 @@ All are automatically called by `fetchVault()`.
 ### Management fee calculation updated for v0.6.0
 
 v0.6.0 uses the **average** of current and proposed total assets for management fee computation, matching the updated contract logic.
+
+### `simulate()` no longer throws on pre-first-valuation vaults
+
+Vaults with shares minted but `totalAssets = 0` (e.g. between initialization and first NAV proposal) caused `convertToAssets()` to round `currentPricePerShare` to `0n`. `simulate()` then called `computeAPR()` and threw `RangeError: Division by zero`, breaking the manage page exactly when curators tried to propose the first valuation.
+
+`simulate()` now returns successfully in this state with `periodNetApr`, `periodGrossApr`, `thirtyDaysNetApr`, and `inceptionNetApr` set to `undefined` whenever the corresponding baseline price is `0n`.
 
 ---
 
