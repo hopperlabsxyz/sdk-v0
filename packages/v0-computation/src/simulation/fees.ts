@@ -20,6 +20,7 @@ export function computeFees(
     highWaterMark: bigint;
     lastFeeTime: bigint;
     feeRates: { managementRate: number; performanceRate: number };
+    protocolRate: bigint;
     version: VersionOrLatest;
   },
   totalAssetsForSimulation: bigint,
@@ -32,10 +33,14 @@ export function computeFees(
   managementFees: {
     inAssets: bigint;
     inShares: bigint;
+    managerShares: bigint;
+    protocolShares: bigint;
   };
   performanceFees: {
     inAssets: bigint;
     inShares: bigint;
+    managerShares: bigint;
+    protocolShares: bigint;
   };
   excessReturns: bigint;
 } {
@@ -100,6 +105,9 @@ export function computeFees(
     }
   );
 
+  const managementProtocolShares = MathLib.mulDivUp(managementFeesInShares, vault.protocolRate, VaultUtils.BPS);
+  const performanceProtocolShares = MathLib.mulDivUp(performanceFeesInShares, vault.protocolRate, VaultUtils.BPS);
+
   return {
     totalFees: {
       inShares: totalFeesInShares,
@@ -108,10 +116,14 @@ export function computeFees(
     managementFees: {
       inAssets: managementFeesInAssets,
       inShares: managementFeesInShares,
+      managerShares: managementFeesInShares - managementProtocolShares,
+      protocolShares: managementProtocolShares,
     },
     performanceFees: {
       inAssets: performanceFeesInAssets.value,
       inShares: performanceFeesInShares,
+      managerShares: performanceFeesInShares - performanceProtocolShares,
+      protocolShares: performanceProtocolShares,
     },
     excessReturns: performanceFeesInAssets.excessReturns,
   };

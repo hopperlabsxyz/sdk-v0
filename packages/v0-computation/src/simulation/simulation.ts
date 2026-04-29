@@ -23,6 +23,7 @@ export function simulate(
     highWaterMark: bigint;
     lastFeeTime: bigint;
     feeRates: { managementRate: number; performanceRate: number; entryRate: number; exitRate: number };
+    protocolRate: bigint;
     version: VersionOrLatest;
   },
   input: SimulationInput
@@ -109,6 +110,7 @@ export function simulate(
     totalSupply: totalSupplyAfterFees,
     decimalsOffset,
     entryRate: vault.feeRates.entryRate,
+    protocolRate: vault.protocolRate,
   });
 
   // Same for the shares redeemed if there is a settlement and
@@ -121,6 +123,7 @@ export function simulate(
     totalSupply: totalSupplyAfterFees,
     decimalsOffset,
     exitRate: vault.feeRates.exitRate,
+    protocolRate: vault.protocolRate,
   });
 
   // We can compute the assets to unwind.
@@ -265,6 +268,7 @@ function computeAssetsDepositedIfSettle({
   totalSupply,
   decimalsOffset,
   entryRate,
+  protocolRate,
 }: {
   settleDeposit: boolean;
   canSettle: boolean;
@@ -278,10 +282,11 @@ function computeAssetsDepositedIfSettle({
   totalSupply: bigint;
   decimalsOffset: number;
   entryRate: number;
+  protocolRate: bigint;
 }): {
   inShares: bigint;
   inAssets: bigint;
-  entryFees: { inShares: bigint; inAssets: bigint };
+  entryFees: { inShares: bigint; inAssets: bigint; managerShares: bigint; protocolShares: bigint };
 } {
   let assetsDepositedIfSettle = 0n;
 
@@ -308,12 +313,16 @@ function computeAssetsDepositedIfSettle({
     decimalsOffset,
   });
 
+  const entryProtocolShares = MathLib.mulDivUp(entryFeeShares, protocolRate, VaultUtils.BPS);
+
   return {
     inAssets: assetsDepositedIfSettle,
     inShares: totalShares,
     entryFees: {
       inShares: entryFeeShares,
       inAssets: entryFeeAssets,
+      managerShares: entryFeeShares - entryProtocolShares,
+      protocolShares: entryProtocolShares,
     },
   };
 }
@@ -338,6 +347,7 @@ function computeSharesRedeemsIfSettle({
   totalSupply,
   decimalsOffset,
   exitRate,
+  protocolRate,
 }: {
   canSettle: boolean;
   pendingSettlement: {
@@ -350,10 +360,11 @@ function computeSharesRedeemsIfSettle({
   totalSupply: bigint;
   decimalsOffset: number;
   exitRate: number;
+  protocolRate: bigint;
 }): {
   inShares: bigint;
   inAssets: bigint;
-  exitFees: { inShares: bigint; inAssets: bigint };
+  exitFees: { inShares: bigint; inAssets: bigint; managerShares: bigint; protocolShares: bigint };
 } {
   let sharesRedeemedIfSettle = pendingSiloBalances.shares;
   if (canSettle) {
@@ -373,6 +384,8 @@ function computeSharesRedeemsIfSettle({
     decimalsOffset,
   });
 
+  const exitProtocolShares = MathLib.mulDivUp(exitFeeShares, protocolRate, VaultUtils.BPS);
+
   return {
     inShares: netShares,
     inAssets: VaultUtils.convertToAssets(netShares, {
@@ -383,6 +396,8 @@ function computeSharesRedeemsIfSettle({
     exitFees: {
       inShares: exitFeeShares,
       inAssets: exitFeeAssets,
+      managerShares: exitFeeShares - exitProtocolShares,
+      protocolShares: exitProtocolShares,
     },
   };
 }

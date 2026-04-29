@@ -37,6 +37,7 @@ test("simulation should not throw an error", () => {
       lastFeeTime: 1765267664n,
       feeRates: { managementRate: 5, performanceRate: 20, entryRate: 0, exitRate: 0 },
       version: Version.v0_5_0,
+      protocolRate: 0n,
     };
 
     simulate(vaultForSimulation, simulationInput);
@@ -67,6 +68,7 @@ test("simulation should compute entry fees when entryRate > 0", () => {
       lastFeeTime: BigInt(Math.floor(Date.now() / 1000)),
       feeRates: { managementRate: 0, performanceRate: 0, entryRate: 100, exitRate: 0 }, // 1% entry
       version: Version.v0_6_0,
+      protocolRate: 0n,
     };
 
     const result = simulate(vault, simulationInput);
@@ -105,6 +107,7 @@ test("simulation should compute exit fees when exitRate > 0", () => {
       lastFeeTime: BigInt(Math.floor(Date.now() / 1000)),
       feeRates: { managementRate: 0, performanceRate: 0, entryRate: 0, exitRate: 100 }, // 1% exit
       version: Version.v0_6_0,
+      protocolRate: 0n,
     };
 
     const result = simulate(vault, simulationInput);
@@ -140,6 +143,7 @@ test("simulation should not throw when currentPricePerShare is 0n", () => {
       lastFeeTime: BigInt(Math.floor(Date.now() / 1000)) - 3600n,
       feeRates: { managementRate: 0, performanceRate: 0, entryRate: 0, exitRate: 0 },
       version: Version.v0_6_0,
+      protocolRate: 0n,
     };
 
     const result = simulate(vault, simulationInput);
