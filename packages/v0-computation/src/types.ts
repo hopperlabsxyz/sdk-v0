@@ -7,6 +7,7 @@
  * @param settleDeposit - Whether the curator wants to settle the deposits
  * @param inception - The params to use to compute the inception net APR
  * @param thirtyDay - The params to use to compute the 30 days net APR
+ * @param simulationTimestamp - Unix timestamp (seconds) at which to simulate. Falls back to Date.now() when omitted.
  */
 export interface SimulationInput {
   totalAssetsForSimulation: bigint;
@@ -28,6 +29,7 @@ export interface SimulationInput {
     timestamp: number;
     pricePerShare: bigint;
   };
+  simulationTimestamp?: bigint;
 }
 
 /**
@@ -52,20 +54,20 @@ export interface SimulationResult {
   totalAssets: bigint;
   totalSupply: bigint;
   managementFees: {
-    inAssets: bigint;
-    inShares: bigint;
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
   };
   performanceFees: {
-    inAssets: bigint;
-    inShares: bigint;
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
   };
   entryFees: {
-    inAssets: bigint;
-    inShares: bigint;
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
   };
   exitFees: {
-    inAssets: bigint;
-    inShares: bigint;
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
   };
   excessReturns: bigint;
   periodNetApr?: number;

@@ -23,13 +23,14 @@ export function simulate(
     highWaterMark: bigint;
     lastFeeTime: bigint;
     feeRates: { managementRate: number; performanceRate: number; entryRate: number; exitRate: number };
+    protocolRate: bigint;
     version: VersionOrLatest;
   },
   input: SimulationInput
 ): SimulationResult {
   const decimalsOffset = vault.decimals - vault.underlyingDecimals;
   const oneShare = 10n ** BigInt(vault.decimals);
-  const now = BigInt(Math.trunc(new Date().getTime() / 1000));
+  const now = input.simulationTimestamp ?? BigInt(Math.trunc(new Date().getTime() / 1000));
 
   // We first compute the gross price per share. This is the price per share before the fees.
   const grossPricePerShare = VaultUtils.convertToAssets(oneShare, {
@@ -46,7 +47,7 @@ export function simulate(
 
   // We then compute the fees
   const { totalFees, performanceFees, managementFees, excessReturns } =
-    computeFees(vault, input.totalAssetsForSimulation);
+    computeFees(vault, input.totalAssetsForSimulation, input.simulationTimestamp);
 
   const canSettle = vault.newTotalAssets != MathLib.MAX_UINT_256;
   const totalSupplyAfterFees = vault.totalSupply + totalFees.inShares;
@@ -109,6 +110,7 @@ export function simulate(
     totalSupply: totalSupplyAfterFees,
     decimalsOffset,
     entryRate: vault.feeRates.entryRate,
+    protocolRate: vault.protocolRate,
   });
 
   // Same for the shares redeemed if there is a settlement and
@@ -121,6 +123,7 @@ export function simulate(
     totalSupply: totalSupplyAfterFees,
     decimalsOffset,
     exitRate: vault.feeRates.exitRate,
+    protocolRate: vault.protocolRate,
   });
 
   // We can compute the assets to unwind.
@@ -265,6 +268,7 @@ function computeAssetsDepositedIfSettle({
   totalSupply,
   decimalsOffset,
   entryRate,
+  protocolRate,
 }: {
   settleDeposit: boolean;
   canSettle: boolean;
@@ -278,10 +282,14 @@ function computeAssetsDepositedIfSettle({
   totalSupply: bigint;
   decimalsOffset: number;
   entryRate: number;
+  protocolRate: bigint;
 }): {
   inShares: bigint;
   inAssets: bigint;
-  entryFees: { inShares: bigint; inAssets: bigint };
+  entryFees: {
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
+  };
 } {
   let assetsDepositedIfSettle = 0n;
 
@@ -298,23 +306,27 @@ function computeAssetsDepositedIfSettle({
     totalAssets: totalAssets,
     totalSupply: totalSupply,
     decimalsOffset,
-  });
+  }, "Down");
 
-  const entryFeeShares = 
- (totalShares * BigInt(entryRate)) / VaultUtils.BPS;
+  const entryFeeShares = MathLib.mulDivUp(totalShares, BigInt(entryRate), VaultUtils.BPS);
 
-  const entryFeeAssets = VaultUtils.convertToAssets(entryFeeShares, {
-    totalAssets: totalAssets,
-    totalSupply: totalSupply,
-    decimalsOffset,
-  });
+  const entryProtocolShares = MathLib.mulDivUp(entryFeeShares, protocolRate, VaultUtils.BPS);
+  const entryManagerShares = entryFeeShares - entryProtocolShares;
+
+  const conversion = { totalAssets, totalSupply, decimalsOffset };
 
   return {
     inAssets: assetsDepositedIfSettle,
     inShares: totalShares,
     entryFees: {
-      inShares: entryFeeShares,
-      inAssets: entryFeeAssets,
+      manager: {
+        inShares: entryManagerShares,
+        inAssets: VaultUtils.convertToAssets(entryManagerShares, conversion),
+      },
+      protocol: {
+        inShares: entryProtocolShares,
+        inAssets: VaultUtils.convertToAssets(entryProtocolShares, conversion),
+      },
     },
   };
 }
@@ -339,6 +351,7 @@ function computeSharesRedeemsIfSettle({
   totalSupply,
   decimalsOffset,
   exitRate,
+  protocolRate,
 }: {
   canSettle: boolean;
   pendingSettlement: {
@@ -351,10 +364,14 @@ function computeSharesRedeemsIfSettle({
   totalSupply: bigint;
   decimalsOffset: number;
   exitRate: number;
+  protocolRate: bigint;
 }): {
   inShares: bigint;
   inAssets: bigint;
-  exitFees: { inShares: bigint; inAssets: bigint };
+  exitFees: {
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
+  };
 } {
   let sharesRedeemedIfSettle = pendingSiloBalances.shares;
   if (canSettle) {
@@ -365,25 +382,26 @@ function computeSharesRedeemsIfSettle({
 
   // Deduct exit fee from shares before converting to assets, matching the contract's
   // settleRedeem logic in ERC7540Lib.sol
-  const exitFeeShares = (sharesRedeemedIfSettle * BigInt(exitRate)) / VaultUtils.BPS;
+  const exitFeeShares = MathLib.mulDivUp(sharesRedeemedIfSettle, BigInt(exitRate), VaultUtils.BPS);
   const netShares = sharesRedeemedIfSettle - exitFeeShares;
 
-  const exitFeeAssets = VaultUtils.convertToAssets(exitFeeShares, {
-    totalAssets: totalAssets,
-    totalSupply: totalSupply,
-    decimalsOffset,
-  });
+  const exitProtocolShares = MathLib.mulDivUp(exitFeeShares, protocolRate, VaultUtils.BPS);
+  const exitManagerShares = exitFeeShares - exitProtocolShares;
+
+  const conversion = { totalAssets, totalSupply, decimalsOffset };
 
   return {
     inShares: netShares,
-    inAssets: VaultUtils.convertToAssets(netShares, {
-      totalAssets: totalAssets,
-      totalSupply: totalSupply,
-      decimalsOffset,
-    }),
+    inAssets: VaultUtils.convertToAssets(netShares, conversion),
     exitFees: {
-      inShares: exitFeeShares,
-      inAssets: exitFeeAssets,
+      manager: {
+        inShares: exitManagerShares,
+        inAssets: VaultUtils.convertToAssets(exitManagerShares, conversion),
+      },
+      protocol: {
+        inShares: exitProtocolShares,
+        inAssets: VaultUtils.convertToAssets(exitProtocolShares, conversion),
+      },
     },
   };
 }

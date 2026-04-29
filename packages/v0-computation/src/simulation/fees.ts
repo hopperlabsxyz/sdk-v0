@@ -1,4 +1,4 @@
-import { resolveVersion, VaultUtils } from "@lagoon-protocol/v0-core";
+import { MathLib, resolveVersion, VaultUtils } from "@lagoon-protocol/v0-core";
 import type {  VersionOrLatest } from "@lagoon-protocol/v0-core";
 import  { Version } from "@lagoon-protocol/v0-core";
 
@@ -20,21 +20,23 @@ export function computeFees(
     highWaterMark: bigint;
     lastFeeTime: bigint;
     feeRates: { managementRate: number; performanceRate: number };
+    protocolRate: bigint;
     version: VersionOrLatest;
   },
-  totalAssetsForSimulation: bigint
+  totalAssetsForSimulation: bigint,
+  simulationTimestamp?: bigint
 ): {
   totalFees: {
     inShares: bigint;
     inAssets: bigint;
   };
   managementFees: {
-    inAssets: bigint;
-    inShares: bigint;
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
   };
   performanceFees: {
-    inAssets: bigint;
-    inShares: bigint;
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
   };
   excessReturns: bigint;
 } {
@@ -46,6 +48,7 @@ export function computeFees(
     lastFeeTime: vault.lastFeeTime,
     managementRate: vault.feeRates.managementRate,
     version: resolveVersion(vault.version),
+    simulationTimestamp,
   });
 
   const pricePerShareAfterManagementFees = VaultUtils.convertToAssets(
@@ -54,7 +57,8 @@ export function computeFees(
       decimalsOffset,
       totalAssets: totalAssetsForSimulation - managementFeesInAssets,
       totalSupply: vault.totalSupply,
-    }
+    },
+    "Up"
   );
 
   const performanceFeesInAssets = simulatePerformanceFee(
@@ -97,19 +101,38 @@ export function computeFees(
     }
   );
 
+  const splitFee = (
+    feeShares: bigint
+  ): {
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
+  } => {
+    const protocolShares = MathLib.mulDivUp(feeShares, vault.protocolRate, VaultUtils.BPS);
+    const managerShares = feeShares - protocolShares;
+    const conversion = {
+      totalAssets: totalAssetsForSimulation,
+      totalSupply: totalSupplyAfterFees,
+      decimalsOffset,
+    };
+    return {
+      manager: {
+        inShares: managerShares,
+        inAssets: VaultUtils.convertToAssets(managerShares, conversion),
+      },
+      protocol: {
+        inShares: protocolShares,
+        inAssets: VaultUtils.convertToAssets(protocolShares, conversion),
+      },
+    };
+  };
+
   return {
     totalFees: {
       inShares: totalFeesInShares,
       inAssets: totalFeesInAssets,
     },
-    managementFees: {
-      inAssets: managementFeesInAssets,
-      inShares: managementFeesInShares,
-    },
-    performanceFees: {
-      inAssets: performanceFeesInAssets.value,
-      inShares: performanceFeesInShares,
-    },
+    managementFees: splitFee(managementFeesInShares),
+    performanceFees: splitFee(performanceFeesInShares),
     excessReturns: performanceFeesInAssets.excessReturns,
   };
 }
@@ -130,11 +153,13 @@ export function simulateManagementFees(
     lastFeeTime,
     managementRate,
     version,
+    simulationTimestamp,
   }: {
     totalAssets: bigint;
     lastFeeTime: bigint;
     managementRate: number;
     version: Version;
+    simulationTimestamp?: bigint;
   }): bigint {
   if (managementRate === 0) return 0n;
   if (version === Version.v0_6_0) {
@@ -142,11 +167,11 @@ export function simulateManagementFees(
     // we can safely edit proposedTotalAssets because it is not a reference but a value
     proposedTotalAssets = (totalAssets + proposedTotalAssets) / 2n;
   }
-  const nowUnix = BigInt(Math.trunc(Date.now() / 1000));
+  const nowUnix = simulationTimestamp ?? BigInt(Math.trunc(Date.now() / 1000));
   const timeElapsed = nowUnix - BigInt(lastFeeTime);
   const annualRate = BigInt(managementRate);
-  const annualFee = (proposedTotalAssets * annualRate) / VaultUtils.BPS;
-  return (annualFee * timeElapsed) / BigInt(SECONDS_PER_YEAR);
+  const annualFee = MathLib.mulDivUp(proposedTotalAssets, annualRate, VaultUtils.BPS);
+  return MathLib.mulDivUp(annualFee, timeElapsed, BigInt(SECONDS_PER_YEAR));
 }
 
 /**
@@ -177,10 +202,13 @@ export function simulatePerformanceFee(
   if (pricePerShare > highWaterMark) {
     profitPerShare = pricePerShare - highWaterMark;
   }
-  const excessReturns =
-    (profitPerShare * totalSupply) / 10n ** BigInt(vaultDecimals);
+  const excessReturns = MathLib.mulDivUp(
+    profitPerShare,
+    totalSupply,
+    10n ** BigInt(vaultDecimals)
+  );
   return {
     excessReturns,
-    value: (excessReturns * BigInt(rate)) / VaultUtils.BPS,
+    value: MathLib.mulDivUp(excessReturns, BigInt(rate), VaultUtils.BPS),
   };
 }
