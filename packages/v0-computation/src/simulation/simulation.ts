@@ -29,7 +29,7 @@ export function simulate(
 ): SimulationResult {
   const decimalsOffset = vault.decimals - vault.underlyingDecimals;
   const oneShare = 10n ** BigInt(vault.decimals);
-  const now = BigInt(Math.trunc(new Date().getTime() / 1000));
+  const now = input.simulationTimestamp ?? BigInt(Math.trunc(new Date().getTime() / 1000));
 
   // We first compute the gross price per share. This is the price per share before the fees.
   const grossPricePerShare = VaultUtils.convertToAssets(oneShare, {
@@ -46,7 +46,7 @@ export function simulate(
 
   // We then compute the fees
   const { totalFees, performanceFees, managementFees, excessReturns } =
-    computeFees(vault, input.totalAssetsForSimulation);
+    computeFees(vault, input.totalAssetsForSimulation, input.simulationTimestamp);
 
   const canSettle = vault.newTotalAssets != MathLib.MAX_UINT_256;
   const totalSupplyAfterFees = vault.totalSupply + totalFees.inShares;
@@ -298,10 +298,9 @@ function computeAssetsDepositedIfSettle({
     totalAssets: totalAssets,
     totalSupply: totalSupply,
     decimalsOffset,
-  });
+  }, "Down");
 
-  const entryFeeShares = 
- (totalShares * BigInt(entryRate)) / VaultUtils.BPS;
+  const entryFeeShares = MathLib.mulDivUp(totalShares, BigInt(entryRate), VaultUtils.BPS);
 
   const entryFeeAssets = VaultUtils.convertToAssets(entryFeeShares, {
     totalAssets: totalAssets,
@@ -365,7 +364,7 @@ function computeSharesRedeemsIfSettle({
 
   // Deduct exit fee from shares before converting to assets, matching the contract's
   // settleRedeem logic in ERC7540Lib.sol
-  const exitFeeShares = (sharesRedeemedIfSettle * BigInt(exitRate)) / VaultUtils.BPS;
+  const exitFeeShares = MathLib.mulDivUp(sharesRedeemedIfSettle, BigInt(exitRate), VaultUtils.BPS);
   const netShares = sharesRedeemedIfSettle - exitFeeShares;
 
   const exitFeeAssets = VaultUtils.convertToAssets(exitFeeShares, {
