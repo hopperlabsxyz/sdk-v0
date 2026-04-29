@@ -73,13 +73,17 @@ test("simulation should compute entry fees when entryRate > 0", () => {
 
     const result = simulate(vault, simulationInput);
 
-    // Entry fee should be non-zero
-    expect(result.entryFees.inShares).toBeGreaterThan(0n);
-    expect(result.entryFees.inAssets).toBeGreaterThan(0n);
+    // Entry fee should be non-zero (protocolRate=0 → all goes to manager)
+    expect(result.entryFees.manager.inShares).toBeGreaterThan(0n);
+    expect(result.entryFees.manager.inAssets).toBeGreaterThan(0n);
+    expect(result.entryFees.protocol.inShares).toBe(0n);
+    expect(result.entryFees.protocol.inAssets).toBe(0n);
 
     // Exit fees should be zero (no redemptions, exitRate = 0)
-    expect(result.exitFees.inShares).toBe(0n);
-    expect(result.exitFees.inAssets).toBe(0n);
+    expect(result.exitFees.manager.inShares).toBe(0n);
+    expect(result.exitFees.manager.inAssets).toBe(0n);
+    expect(result.exitFees.protocol.inShares).toBe(0n);
+    expect(result.exitFees.protocol.inAssets).toBe(0n);
 });
 
 test("simulation should compute exit fees when exitRate > 0", () => {
@@ -112,12 +116,16 @@ test("simulation should compute exit fees when exitRate > 0", () => {
 
     const result = simulate(vault, simulationInput);
 
-    // Exit fee should be non-zero
-    expect(result.exitFees.inShares).toBeGreaterThan(0n);
-    expect(result.exitFees.inAssets).toBeGreaterThan(0n);
+    // Exit fee should be non-zero (protocolRate=0 → all goes to manager)
+    expect(result.exitFees.manager.inShares).toBeGreaterThan(0n);
+    expect(result.exitFees.manager.inAssets).toBeGreaterThan(0n);
+    expect(result.exitFees.protocol.inShares).toBe(0n);
+    expect(result.exitFees.protocol.inAssets).toBe(0n);
     // Entry fees should be zero (no deposits)
-    expect(result.entryFees.inShares).toBe(0n);
-    expect(result.entryFees.inAssets).toBe(0n);
+    expect(result.entryFees.manager.inShares).toBe(0n);
+    expect(result.entryFees.manager.inAssets).toBe(0n);
+    expect(result.entryFees.protocol.inShares).toBe(0n);
+    expect(result.entryFees.protocol.inAssets).toBe(0n);
 });
 
 // Pre-first-valuation: shares minted but totalAssets = 0 → currentPricePerShare rounds to 0n.

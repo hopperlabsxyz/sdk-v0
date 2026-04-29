@@ -54,28 +54,20 @@ export interface SimulationResult {
   totalAssets: bigint;
   totalSupply: bigint;
   managementFees: {
-    inAssets: bigint;
-    inShares: bigint;
-    managerShares: bigint;
-    protocolShares: bigint;
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
   };
   performanceFees: {
-    inAssets: bigint;
-    inShares: bigint;
-    managerShares: bigint;
-    protocolShares: bigint;
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
   };
   entryFees: {
-    inAssets: bigint;
-    inShares: bigint;
-    managerShares: bigint;
-    protocolShares: bigint;
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
   };
   exitFees: {
-    inAssets: bigint;
-    inShares: bigint;
-    managerShares: bigint;
-    protocolShares: bigint;
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
   };
   excessReturns: bigint;
   periodNetApr?: number;

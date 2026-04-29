@@ -31,16 +31,12 @@ export function computeFees(
     inAssets: bigint;
   };
   managementFees: {
-    inAssets: bigint;
-    inShares: bigint;
-    managerShares: bigint;
-    protocolShares: bigint;
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
   };
   performanceFees: {
-    inAssets: bigint;
-    inShares: bigint;
-    managerShares: bigint;
-    protocolShares: bigint;
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
   };
   excessReturns: bigint;
 } {
@@ -105,26 +101,38 @@ export function computeFees(
     }
   );
 
-  const managementProtocolShares = MathLib.mulDivUp(managementFeesInShares, vault.protocolRate, VaultUtils.BPS);
-  const performanceProtocolShares = MathLib.mulDivUp(performanceFeesInShares, vault.protocolRate, VaultUtils.BPS);
+  const splitFee = (
+    feeShares: bigint
+  ): {
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
+  } => {
+    const protocolShares = MathLib.mulDivUp(feeShares, vault.protocolRate, VaultUtils.BPS);
+    const managerShares = feeShares - protocolShares;
+    const conversion = {
+      totalAssets: totalAssetsForSimulation,
+      totalSupply: totalSupplyAfterFees,
+      decimalsOffset,
+    };
+    return {
+      manager: {
+        inShares: managerShares,
+        inAssets: VaultUtils.convertToAssets(managerShares, conversion),
+      },
+      protocol: {
+        inShares: protocolShares,
+        inAssets: VaultUtils.convertToAssets(protocolShares, conversion),
+      },
+    };
+  };
 
   return {
     totalFees: {
       inShares: totalFeesInShares,
       inAssets: totalFeesInAssets,
     },
-    managementFees: {
-      inAssets: managementFeesInAssets,
-      inShares: managementFeesInShares,
-      managerShares: managementFeesInShares - managementProtocolShares,
-      protocolShares: managementProtocolShares,
-    },
-    performanceFees: {
-      inAssets: performanceFeesInAssets.value,
-      inShares: performanceFeesInShares,
-      managerShares: performanceFeesInShares - performanceProtocolShares,
-      protocolShares: performanceProtocolShares,
-    },
+    managementFees: splitFee(managementFeesInShares),
+    performanceFees: splitFee(performanceFeesInShares),
     excessReturns: performanceFeesInAssets.excessReturns,
   };
 }

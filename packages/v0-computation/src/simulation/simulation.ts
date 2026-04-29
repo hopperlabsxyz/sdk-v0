@@ -286,7 +286,10 @@ function computeAssetsDepositedIfSettle({
 }): {
   inShares: bigint;
   inAssets: bigint;
-  entryFees: { inShares: bigint; inAssets: bigint; managerShares: bigint; protocolShares: bigint };
+  entryFees: {
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
+  };
 } {
   let assetsDepositedIfSettle = 0n;
 
@@ -307,22 +310,23 @@ function computeAssetsDepositedIfSettle({
 
   const entryFeeShares = MathLib.mulDivUp(totalShares, BigInt(entryRate), VaultUtils.BPS);
 
-  const entryFeeAssets = VaultUtils.convertToAssets(entryFeeShares, {
-    totalAssets: totalAssets,
-    totalSupply: totalSupply,
-    decimalsOffset,
-  });
-
   const entryProtocolShares = MathLib.mulDivUp(entryFeeShares, protocolRate, VaultUtils.BPS);
+  const entryManagerShares = entryFeeShares - entryProtocolShares;
+
+  const conversion = { totalAssets, totalSupply, decimalsOffset };
 
   return {
     inAssets: assetsDepositedIfSettle,
     inShares: totalShares,
     entryFees: {
-      inShares: entryFeeShares,
-      inAssets: entryFeeAssets,
-      managerShares: entryFeeShares - entryProtocolShares,
-      protocolShares: entryProtocolShares,
+      manager: {
+        inShares: entryManagerShares,
+        inAssets: VaultUtils.convertToAssets(entryManagerShares, conversion),
+      },
+      protocol: {
+        inShares: entryProtocolShares,
+        inAssets: VaultUtils.convertToAssets(entryProtocolShares, conversion),
+      },
     },
   };
 }
@@ -364,7 +368,10 @@ function computeSharesRedeemsIfSettle({
 }): {
   inShares: bigint;
   inAssets: bigint;
-  exitFees: { inShares: bigint; inAssets: bigint; managerShares: bigint; protocolShares: bigint };
+  exitFees: {
+    manager: { inShares: bigint; inAssets: bigint };
+    protocol: { inShares: bigint; inAssets: bigint };
+  };
 } {
   let sharesRedeemedIfSettle = pendingSiloBalances.shares;
   if (canSettle) {
@@ -378,26 +385,23 @@ function computeSharesRedeemsIfSettle({
   const exitFeeShares = MathLib.mulDivUp(sharesRedeemedIfSettle, BigInt(exitRate), VaultUtils.BPS);
   const netShares = sharesRedeemedIfSettle - exitFeeShares;
 
-  const exitFeeAssets = VaultUtils.convertToAssets(exitFeeShares, {
-    totalAssets: totalAssets,
-    totalSupply: totalSupply,
-    decimalsOffset,
-  });
-
   const exitProtocolShares = MathLib.mulDivUp(exitFeeShares, protocolRate, VaultUtils.BPS);
+  const exitManagerShares = exitFeeShares - exitProtocolShares;
+
+  const conversion = { totalAssets, totalSupply, decimalsOffset };
 
   return {
     inShares: netShares,
-    inAssets: VaultUtils.convertToAssets(netShares, {
-      totalAssets: totalAssets,
-      totalSupply: totalSupply,
-      decimalsOffset,
-    }),
+    inAssets: VaultUtils.convertToAssets(netShares, conversion),
     exitFees: {
-      inShares: exitFeeShares,
-      inAssets: exitFeeAssets,
-      managerShares: exitFeeShares - exitProtocolShares,
-      protocolShares: exitProtocolShares,
+      manager: {
+        inShares: exitManagerShares,
+        inAssets: VaultUtils.convertToAssets(exitManagerShares, conversion),
+      },
+      protocol: {
+        inShares: exitProtocolShares,
+        inAssets: VaultUtils.convertToAssets(exitProtocolShares, conversion),
+      },
     },
   };
 }
