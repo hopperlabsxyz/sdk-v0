@@ -111,6 +111,8 @@ export interface IVault extends IToken {
   protocolRate: bigint;
   securityCouncil?: Address;
   superOperator?: Address;
+  safeLocked?: boolean;
+  superOperatorLocked?: boolean;
   maxCap?: bigint;
   isSyncRedeemAllowed?: boolean;
   isAsyncOnly?: boolean;
@@ -303,6 +305,12 @@ export class Vault extends Token implements IVault {
   /** The super operator address */
   public readonly superOperator: Address;
 
+  /** Whether the safe address update is permanently locked */
+  public readonly safeLocked: boolean;
+
+  /** Whether the super operator update is permanently locked */
+  public readonly superOperatorLocked: boolean;
+
   /// ERC7540 storage (v0.6.0+) ///
 
   /** The maximum deposit cap */
@@ -367,6 +375,8 @@ export class Vault extends Token implements IVault {
     protocolRate,
     securityCouncil,
     superOperator,
+    safeLocked,
+    superOperatorLocked,
     maxCap,
     isSyncRedeemAllowed,
     isAsyncOnly,
@@ -414,6 +424,8 @@ export class Vault extends Token implements IVault {
     this.version = version;
     this.securityCouncil = securityCouncil ?? ("0x0000000000000000000000000000000000000000" as Address);
     this.superOperator = superOperator ?? ("0x0000000000000000000000000000000000000000" as Address);
+    this.safeLocked = safeLocked ?? false;
+    this.superOperatorLocked = superOperatorLocked ?? false;
     this.maxCap = maxCap ?? 0n;
     this.isSyncRedeemAllowed = isSyncRedeemAllowed ?? false;
     this.isAsyncOnly = isAsyncOnly ?? false;
