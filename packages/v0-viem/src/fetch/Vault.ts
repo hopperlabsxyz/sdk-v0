@@ -96,9 +96,11 @@ export async function fetchVault(
       fetchUpcomingFeeRates({ address }, client, parameters),
     ]);
     if (vaultResponse.data) {
-      const [securityCouncil, superOperator, maxCap, isSyncRedeemAllowed, isAsyncOnly, accessMode, guardrails, guardrailsActivated, externalSanctionsList, allowHighWaterMarkReset] = await Promise.all([
+      const [securityCouncil, superOperator, safeLocked, superOperatorLocked, maxCap, isSyncRedeemAllowed, isAsyncOnly, accessMode, guardrails, guardrailsActivated, externalSanctionsList, allowHighWaterMarkReset] = await Promise.all([
         fetchSecurityCouncil({ address }, client, parameters),
         fetchSuperOperator({ address }, client, parameters),
+        fetchSafeLocked({ address }, client, parameters),
+        fetchSuperOperatorLocked({ address }, client, parameters),
         fetchMaxCap({ address }, client, parameters),
         fetchIsSyncRedeemAllowed({ address }, client, parameters),
         fetchIsAsyncOnly({ address }, client, parameters),
@@ -115,6 +117,8 @@ export async function fetchVault(
         version: versionResponse.data ?? Version.v0_2_0,
         securityCouncil,
         superOperator,
+        safeLocked,
+        superOperatorLocked,
         maxCap,
         isSyncRedeemAllowed,
         isAsyncOnly,
@@ -166,6 +170,8 @@ export async function fetchVault(
       protocolRate,
       securityCouncil,
       superOperator,
+      safeLocked,
+      superOperatorLocked,
       maxCap,
       isSyncRedeemAllowed,
       isAsyncOnly,
@@ -213,6 +219,8 @@ export async function fetchVault(
       fetchProtocolRate({ address }, client, parameters),
       fetchSecurityCouncil({ address }, client, parameters),
       fetchSuperOperator({ address }, client, parameters),
+      fetchSafeLocked({ address }, client, parameters),
+      fetchSuperOperatorLocked({ address }, client, parameters),
       fetchMaxCap({ address }, client, parameters),
       fetchIsSyncRedeemAllowed({ address }, client, parameters),
       fetchIsAsyncOnly({ address }, client, parameters),
@@ -255,6 +263,8 @@ export async function fetchVault(
       version: versionResponse.data ?? Version.v0_2_0,
       securityCouncil,
       superOperator,
+      safeLocked,
+      superOperatorLocked,
       maxCap,
       isSyncRedeemAllowed,
       isAsyncOnly,
@@ -1260,6 +1270,50 @@ export async function fetchSuperOperator(
   const data = await getStorageAt(client, { slot, address, ...restParams });
   if (!data) throw new StorageFetchError(slot);
   return getAddress(`0x${data.slice(-40)}`);
+}
+
+/**
+ * Gets whether the safe address update is permanently locked (v0.6.0+)
+ * Packed at byte offset 0 in Roles slot 7 alongside superOperatorLocked (byte 1)
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with boolean
+ */
+export async function fetchSafeLocked(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<boolean> {
+  const {
+    slot = getStorageSlot(EncodingUtils.ROLES_STORAGE_LOCATION, 7),
+    ...restParams
+  } = params;
+  const data = await getStorageAt(client, { slot, address, ...restParams });
+  if (!data) throw new StorageFetchError(slot);
+  return (hexToBigInt(data) & 1n) !== 0n;
+}
+
+/**
+ * Gets whether the super operator update is permanently locked (v0.6.0+)
+ * Packed at byte offset 1 in Roles slot 7 alongside safeLocked (byte 0)
+ * @param address - Contract address
+ * @param client - Viem client
+ * @param params - Storage parameters including slot
+ * @returns Promise with boolean
+ */
+export async function fetchSuperOperatorLocked(
+  { address }: { address: Address },
+  client: Client,
+  params: GetStorageAtParameters = {}
+): Promise<boolean> {
+  const {
+    slot = getStorageSlot(EncodingUtils.ROLES_STORAGE_LOCATION, 7),
+    ...restParams
+  } = params;
+  const data = await getStorageAt(client, { slot, address, ...restParams });
+  if (!data) throw new StorageFetchError(slot);
+  return ((hexToBigInt(data) >> 8n) & 1n) !== 0n;
 }
 
 /**

@@ -37,6 +37,8 @@ import {
   fetchGuardrailsActivated,
   fetchMaxCap,
   fetchAccessMode,
+  fetchSafeLocked,
+  fetchSuperOperatorLocked,
 } from "../src/fetch";
 import { testFetchVaultWithStorageFetchers } from "./utils";
 import { getAddress } from "viem";
@@ -463,6 +465,16 @@ describe("v0.6.0 storage fetchers — deployment block (442440547)", () => {
 
   testArbitrumV060Deploy.sequential("fetchGuardrailsActivated is false at deployment", async ({ client }) => {
     const value = await fetchGuardrailsActivated({ address: v060Address }, client);
+    expect(value).toBe(false);
+  });
+
+  testArbitrumV060Deploy.sequential("fetchSafeLocked is false at deployment", async ({ client }) => {
+    const value = await fetchSafeLocked({ address: v060Address }, client);
+    expect(value).toBe(false);
+  });
+
+  testArbitrumV060Deploy.sequential("fetchSuperOperatorLocked is false at deployment", async ({ client }) => {
+    const value = await fetchSuperOperatorLocked({ address: v060Address }, client);
     expect(value).toBe(false);
   });
 });
