@@ -8,7 +8,7 @@ export const addresses = {
   [ChainId.EthMainnet]: {
     beaconProxyFactory: "0x09C8803f7Dc251f9FaAE5f56E3B91f8A6d0b70ee",
     feeRegistry: "0x6dA4D1859bA1d02D095D2246142CdAd52233e27C",
-    "v0_6_0": "0xf8ce398f05849a00a962de8de16a0af6aff60eb1",
+    "v0_6_0": "0x70274C69Ef1fA492506394D982391c6f3008e785",
     "v0_5_0": "0xe50554ec802375c9c3f9c087a8a7bb8c26d3dedf",
     wrappedNative: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     optinFactory: "0x8D6f5479B14348186faE9BC7E636e947c260f9B1"
@@ -16,7 +16,7 @@ export const addresses = {
   [ChainId.ArbitrumMainnet]: {
     beaconProxyFactory: "0x58a7729125acA9e5E9C687018E66bfDd5b2D4490",
     feeRegistry: "0x6dA4D1859bA1d02D095D2246142CdAd52233e27C",
-    "v0_6_0": "0xdf56ee5b276e51be4a7c8fd781fc77dbe4cee6ba",
+    "v0_6_0": "0xE0eDaAcF50Ec49aEe917b0ef6b1615ECdccaF64D",
     "v0_5_0": "0xE50554ec802375C9c3F9c087a8a7bb8C26d3DEDf",
     wrappedNative: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
     /**
@@ -31,7 +31,7 @@ export const addresses = {
   [ChainId.BaseMainnet]: {
     beaconProxyFactory: "0xC953Fd298FdfA8Ed0D38ee73772D3e21Bf19c61b",
     feeRegistry: "0x6dA4D1859bA1d02D095D2246142CdAd52233e27C",
-    "v0_6_0": "0x332db9557fef23ddbc0dba48f261a93ac9ee4a75",
+    "v0_6_0": "0x49c6690a9e909a0d23F20DB416706EBc069B3DC7",
     "v0_5_0": "0xE50554ec802375C9c3F9c087a8a7bb8C26d3DEDf",
     wrappedNative: "0x4200000000000000000000000000000000000006",
     optinFactory: "0x6FC0F2320483fa03FBFdF626DDbAE2CC4B112b51"
@@ -78,7 +78,7 @@ export const addresses = {
   [ChainId.AvalancheMainnet]: {
     beaconProxyFactory: "0x5e231c6d030a5c0f51fa7d0f891d3f50a928c685",
     feeRegistry: "0xD7F69ba99c6981Eab5579Aa16871Ae94c509d578",
-    "v0_6_0": "0xfa74576133e64c84e24f3a8205c9c69a02053e1c",
+    "v0_6_0": "0x1e17e7848b2F56F75b16550471F455071a9F955f",
     "v0_5_0": "0x33F65C8D025b5418C7f8dd248C2Ec1d31881D465",
     wrappedNative: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
     optinFactory: "0xC094C224ce0406BC338E00837B96aD2e265F7287"
