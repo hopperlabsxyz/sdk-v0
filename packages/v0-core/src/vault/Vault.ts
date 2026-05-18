@@ -75,6 +75,53 @@ export interface Rates {
   haircutRate?: number;
 }
 
+/**
+ * v0.5.x vault `initialize` payload — mirrors `InitStruct` in
+ * `lagoon-v0/src/v0.5.1/Vault.sol`. Field order is part of the ABI
+ * encoding contract and must not be reordered.
+ */
+export interface InitStruct {
+  underlying: Address;
+  name: string;
+  symbol: string;
+  safe: Address;
+  whitelistManager: Address;
+  valuationManager: Address;
+  admin: Address;
+  feeReceiver: Address;
+  managementRate: number;
+  performanceRate: number;
+  enableWhitelist: boolean;
+  rateUpdateCooldown: bigint;
+}
+
+/**
+ * v0.6.0 vault `initialize` payload — mirrors `InitStruct` in
+ * `lagoon-v0/src/v0.6.0/vault/Vault-v0.6.0.sol`. Field order is part of
+ * the ABI encoding contract and must not be reordered.
+ */
+export interface InitStruct_v0_6_0 {
+  underlying: Address;
+  name: string;
+  symbol: string;
+  safe: Address;
+  whitelistManager: Address;
+  valuationManager: Address;
+  admin: Address;
+  feeReceiver: Address;
+  managementRate: number;
+  performanceRate: number;
+  accessMode: AccessMode;
+  entryRate: number;
+  exitRate: number;
+  haircutRate: number;
+  securityCouncil: Address;
+  externalSanctionsList: Address;
+  initialTotalAssets: bigint;
+  superOperator: Address;
+  allowHighWaterMarkReset: boolean;
+}
+
 export interface IVault extends IToken {
   asset: Address;
   underlyingDecimals: number;

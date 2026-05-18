@@ -2,9 +2,10 @@ import { test, describe, expect } from "bun:test";
 import { Vault } from "../src/Vault";
 import { AccessMode } from "../src/Vault";
 import { VaultUtils } from "@lagoon-protocol/v0-core";
-import { addresses, ChainId, Version, EncodingUtils } from "@lagoon-protocol/v0-core";
+import { addresses, ChainId, Version, EncodingUtils, factoryAbi_v3, vaultAbi_v0_6_0, vaultAbi_v0_5_1, type InitStruct, type InitStruct_v0_6_0 } from "@lagoon-protocol/v0-core";
 import { AsyncOnlyActivated } from "../src/events/vault";
 import type { ILog } from "../src/events/Log";
+import { decodeAbiParameters, decodeFunctionData, encodeFunctionData, parseAbiParameter, type Hex } from "viem";
 
 
 const UINT256_MAX = 2n ** 256n - 1n;
@@ -304,6 +305,214 @@ describe("vault/Vault v0.6.0", () => {
     expect(calldataTrue).not.toBe(calldataFalse);
     // true encodes the bool word as 0x00...01; false as 0x00...00 — the two differ by exactly one word
     expect(calldataTrue.length).toBe(calldataFalse.length);
+  })
+
+  test("InitStruct_v0_6_0 round-trips through initializeEncodedCall_v0_6_0", () => {
+    const init: InitStruct_v0_6_0 = {
+      underlying: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      name: 'Round Trip',
+      symbol: 'RT',
+      safe: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+      whitelistManager: '0x1111111111111111111111111111111111111111',
+      valuationManager: '0xF53eAeB7e6f15CBb6dB990eaf2A26702e1D986d8',
+      admin: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+      feeReceiver: '0xa336DA6a81EFfa40362D2763d81643a67C82D151',
+      managementRate: 50,
+      performanceRate: 1000,
+      accessMode: AccessMode.Whitelist,
+      entryRate: 100,
+      exitRate: 200,
+      haircutRate: 50,
+      securityCouncil: '0x2222222222222222222222222222222222222222',
+      externalSanctionsList: '0x3333333333333333333333333333333333333333',
+      initialTotalAssets: 123n,
+      superOperator: '0x4444444444444444444444444444444444444444',
+      allowHighWaterMarkReset: true,
+    };
+    const wrappedNativeToken = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+    const feeRegistry = addresses[ChainId.EthMainnet].feeRegistry;
+
+    const calldata = EncodingUtils.initializeEncodedCall_v0_6_0({
+      asset: init.underlying,
+      name: init.name,
+      symbol: init.symbol,
+      safe: init.safe,
+      whitelistManager: init.whitelistManager,
+      valuationManager: init.valuationManager,
+      owner: init.admin,
+      feeReceiver: init.feeReceiver,
+      feeRates: {
+        managementRate: init.managementRate,
+        performanceRate: init.performanceRate,
+        entryRate: init.entryRate,
+        exitRate: init.exitRate,
+        haircutRate: init.haircutRate,
+      },
+      accessMode: init.accessMode,
+      securityCouncil: init.securityCouncil,
+      externalSanctionsList: init.externalSanctionsList,
+      initialTotalAssets: init.initialTotalAssets,
+      superOperator: init.superOperator,
+      allowHighWaterMarkReset: init.allowHighWaterMarkReset,
+      wrappedNativeToken,
+      feeRegistry,
+    });
+
+    const decoded = decodeFunctionData({ abi: vaultAbi_v0_6_0, data: calldata });
+    expect(decoded.functionName).toBe('initialize');
+    const [data, registryArg, wrappedNativeArg] = decoded.args as [Hex, `0x${string}`, `0x${string}`];
+    expect(registryArg.toLowerCase()).toBe(feeRegistry.toLowerCase());
+    expect(wrappedNativeArg.toLowerCase()).toBe(wrappedNativeToken.toLowerCase());
+
+    const initStructParam = parseAbiParameter([
+      'InitStructTestV06 init',
+      'struct InitStructTestV06 { address underlying; string name; string symbol; address safe; address whitelistManager; address valuationManager; address admin; address feeReceiver; uint16 managementRate; uint16 performanceRate; uint8 accessMode; uint16 entryRate; uint16 exitRate; uint16 haircutRate; address securityCouncil; address externalSanctionsList; uint256 initialTotalAssets; address superOperator; bool allowHighWaterMarkReset; }',
+    ]);
+    const [decodedInit] = decodeAbiParameters([initStructParam], data) as unknown as [InitStruct_v0_6_0];
+
+    expect(decodedInit.underlying.toLowerCase()).toBe(init.underlying.toLowerCase());
+    expect(decodedInit.name).toBe(init.name);
+    expect(decodedInit.symbol).toBe(init.symbol);
+    expect(decodedInit.safe.toLowerCase()).toBe(init.safe.toLowerCase());
+    expect(decodedInit.whitelistManager.toLowerCase()).toBe(init.whitelistManager.toLowerCase());
+    expect(decodedInit.valuationManager.toLowerCase()).toBe(init.valuationManager.toLowerCase());
+    expect(decodedInit.admin.toLowerCase()).toBe(init.admin.toLowerCase());
+    expect(decodedInit.feeReceiver.toLowerCase()).toBe(init.feeReceiver.toLowerCase());
+    expect(decodedInit.managementRate).toBe(init.managementRate);
+    expect(decodedInit.performanceRate).toBe(init.performanceRate);
+    expect(decodedInit.accessMode).toBe(init.accessMode);
+    expect(decodedInit.entryRate).toBe(init.entryRate);
+    expect(decodedInit.exitRate).toBe(init.exitRate);
+    expect(decodedInit.haircutRate).toBe(init.haircutRate);
+    expect(decodedInit.securityCouncil.toLowerCase()).toBe(init.securityCouncil.toLowerCase());
+    expect(decodedInit.externalSanctionsList.toLowerCase()).toBe(init.externalSanctionsList.toLowerCase());
+    expect(decodedInit.initialTotalAssets).toBe(init.initialTotalAssets);
+    expect(decodedInit.superOperator.toLowerCase()).toBe(init.superOperator.toLowerCase());
+    expect(decodedInit.allowHighWaterMarkReset).toBe(init.allowHighWaterMarkReset);
+  })
+
+  test("InitStruct (v0.5) round-trips through initializeEncodedCall", () => {
+    const init: InitStruct = {
+      underlying: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      name: 'Round Trip v0.5',
+      symbol: 'RT5',
+      safe: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+      whitelistManager: '0x1111111111111111111111111111111111111111',
+      valuationManager: '0xF53eAeB7e6f15CBb6dB990eaf2A26702e1D986d8',
+      admin: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+      feeReceiver: '0xa336DA6a81EFfa40362D2763d81643a67C82D151',
+      managementRate: 75,
+      performanceRate: 1500,
+      enableWhitelist: true,
+      rateUpdateCooldown: 86400n,
+    };
+    const wrappedNativeToken = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+    const feeRegistry = addresses[ChainId.EthMainnet].feeRegistry;
+
+    const calldata = EncodingUtils.initializeEncodedCall({
+      asset: init.underlying,
+      name: init.name,
+      symbol: init.symbol,
+      safe: init.safe,
+      whitelistManager: init.whitelistManager,
+      valuationManager: init.valuationManager,
+      owner: init.admin,
+      feeReceiver: init.feeReceiver,
+      feeRates: { managementRate: init.managementRate, performanceRate: init.performanceRate },
+      isWhitelistActivated: init.enableWhitelist,
+      cooldown: init.rateUpdateCooldown,
+      wrappedNativeToken,
+      feeRegistry,
+    });
+
+    const decoded = decodeFunctionData({ abi: vaultAbi_v0_5_1, data: calldata });
+    expect(decoded.functionName).toBe('initialize');
+    const [data] = decoded.args as [Hex, `0x${string}`, `0x${string}`];
+
+    const initStructParam = parseAbiParameter([
+      'InitStructTestV05 init',
+      'struct InitStructTestV05 { address underlying; string name; string symbol; address safe; address whitelistManager; address valuationManager; address admin; address feeReceiver; uint16 managementRate; uint16 performanceRate; bool enableWhitelist; uint256 rateUpdateCooldown; }',
+    ]);
+    const [decodedInit] = decodeAbiParameters([initStructParam], data) as unknown as [InitStruct];
+
+    expect(decodedInit.underlying.toLowerCase()).toBe(init.underlying.toLowerCase());
+    expect(decodedInit.name).toBe(init.name);
+    expect(decodedInit.symbol).toBe(init.symbol);
+    expect(decodedInit.managementRate).toBe(init.managementRate);
+    expect(decodedInit.performanceRate).toBe(init.performanceRate);
+    expect(decodedInit.enableWhitelist).toBe(init.enableWhitelist);
+    expect(decodedInit.rateUpdateCooldown).toBe(init.rateUpdateCooldown);
+  })
+
+  test("factoryAbi_v3 encodes both createVaultProxy overloads", () => {
+    const logic = '0x0000000000000000000000000000000000000a11' as const;
+    const initialOwner = '0x0000000000000000000000000000000000000b22' as const;
+    const initialDelay = 3600n;
+    const salt = '0x0000000000000000000000000000000000000000000000000000000000000001' as const;
+
+    const init: InitStruct_v0_6_0 = {
+      underlying: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      name: 'v3 typed',
+      symbol: 'V3T',
+      safe: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+      whitelistManager: '0x0000000000000000000000000000000000000000',
+      valuationManager: '0xF53eAeB7e6f15CBb6dB990eaf2A26702e1D986d8',
+      admin: '0xA766CdA5848FfD7D33cE3861f6dc0A5EE38f3550',
+      feeReceiver: '0xa336DA6a81EFfa40362D2763d81643a67C82D151',
+      managementRate: 50,
+      performanceRate: 1000,
+      accessMode: AccessMode.Whitelist,
+      entryRate: 0,
+      exitRate: 0,
+      haircutRate: 0,
+      securityCouncil: '0x0000000000000000000000000000000000000000',
+      externalSanctionsList: '0x0000000000000000000000000000000000000000',
+      initialTotalAssets: 0n,
+      superOperator: '0x0000000000000000000000000000000000000000',
+      allowHighWaterMarkReset: false,
+    };
+
+    const typedCalldata = encodeFunctionData({
+      abi: factoryAbi_v3,
+      functionName: 'createVaultProxy',
+      args: [logic, initialOwner, initialDelay, init, salt],
+    });
+    expect(typedCalldata).toMatch(/^0x/);
+
+    const initializeBytes = EncodingUtils.initializeEncodedCall_v0_6_0({
+      asset: init.underlying,
+      name: init.name,
+      symbol: init.symbol,
+      safe: init.safe,
+      whitelistManager: init.whitelistManager,
+      valuationManager: init.valuationManager,
+      owner: init.admin,
+      feeReceiver: init.feeReceiver,
+      feeRates: {
+        managementRate: init.managementRate,
+        performanceRate: init.performanceRate,
+        entryRate: init.entryRate,
+        exitRate: init.exitRate,
+        haircutRate: init.haircutRate,
+      },
+      accessMode: init.accessMode,
+      securityCouncil: init.securityCouncil,
+      externalSanctionsList: init.externalSanctionsList,
+      initialTotalAssets: init.initialTotalAssets,
+      superOperator: init.superOperator,
+      allowHighWaterMarkReset: init.allowHighWaterMarkReset,
+      wrappedNativeToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      feeRegistry: addresses[ChainId.EthMainnet].feeRegistry,
+    });
+
+    const bytesCalldata = encodeFunctionData({
+      abi: factoryAbi_v3,
+      functionName: 'createVaultProxy',
+      args: [logic, initialOwner, initialDelay, initializeBytes, salt],
+    });
+    expect(bytesCalldata).toMatch(/^0x/);
+    // The two overloads share the function name but have distinct selectors.
+    expect(typedCalldata.slice(0, 10)).not.toBe(bytesCalldata.slice(0, 10));
   })
 });
 

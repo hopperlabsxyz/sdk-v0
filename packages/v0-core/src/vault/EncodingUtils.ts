@@ -1,5 +1,5 @@
 import { encodeAbiParameters, encodeFunctionData, parseAbiParameter, parseAbiParameters, type Address, type Hex } from "viem";
-import type { AccessMode, Rates } from "./Vault";
+import type { AccessMode, InitStruct, InitStruct_v0_6_0, Rates } from "./Vault";
 
 export namespace EncodingUtils {
   export const ERC20_STORAGE_LOCATION = '0x52c63247e1f47db19d5ce0460030c497f067ca4cebf71ba98eeadabe20bace00';
@@ -36,30 +36,31 @@ export namespace EncodingUtils {
       wrappedNativeToken: Address,
       feeRegistry: Address
     }): Hex {
+    // Struct name disambiguated from the v0.6.0 encoder to avoid a viem
+    // parameterCache collision: the cache key for `parseAbiParameter` drops
+    // the struct shape when no `type` option is passed, so two encoders that
+    // both used the name `InitStruct` would alias on the first-parsed shape.
     const initAbiParams = parseAbiParameter([
-      'InitStruct init',
-      'struct InitStruct { address underlying; string name; string symbol; address safe; address whitelistManager; address valuationManager; address admin; address feeReceiver; uint16 managementRate; uint16 performanceRate; bool enableWhitelist; uint256 rateUpdateCooldown; }',
+      'InitStructV05 init',
+      'struct InitStructV05 { address underlying; string name; string symbol; address safe; address whitelistManager; address valuationManager; address admin; address feeReceiver; uint16 managementRate; uint16 performanceRate; bool enableWhitelist; uint256 rateUpdateCooldown; }',
     ])
 
-    const initStructEncoded = encodeAbiParameters(
-      [initAbiParams],
-      [
-        {
-          underlying: vault.asset,
-          name: vault.name ?? "",
-          symbol: vault.symbol ?? "",
-          safe: vault.safe,
-          whitelistManager: vault.whitelistManager,
-          valuationManager: vault.valuationManager,
-          admin: vault.owner,
-          feeReceiver: vault.feeReceiver,
-          managementRate: vault.feeRates.managementRate,
-          performanceRate: vault.feeRates.performanceRate,
-          enableWhitelist: vault.isWhitelistActivated,
-          rateUpdateCooldown: vault.cooldown,
-        }
-      ]
-    );
+    const init: InitStruct = {
+      underlying: vault.asset,
+      name: vault.name ?? "",
+      symbol: vault.symbol ?? "",
+      safe: vault.safe,
+      whitelistManager: vault.whitelistManager,
+      valuationManager: vault.valuationManager,
+      admin: vault.owner,
+      feeReceiver: vault.feeReceiver,
+      managementRate: vault.feeRates.managementRate,
+      performanceRate: vault.feeRates.performanceRate,
+      enableWhitelist: vault.isWhitelistActivated,
+      rateUpdateCooldown: vault.cooldown,
+    };
+
+    const initStructEncoded = encodeAbiParameters([initAbiParams], [init]);
 
     return encodeFunctionData({
       abi: [
@@ -233,37 +234,37 @@ export namespace EncodingUtils {
       wrappedNativeToken: Address,
       feeRegistry: Address,
     }): Hex {
+    // See note in initializeEncodedCall about the InitStructV05 rename: same
+    // reason here, the v0.6.0 encoder uses InitStructV06 so the viem cache
+    // does not alias it with the v0.5 shape.
     const initAbiParams = parseAbiParameter([
-      'InitStruct init',
-      'struct InitStruct { address underlying; string name; string symbol; address safe; address whitelistManager; address valuationManager; address admin; address feeReceiver; uint16 managementRate; uint16 performanceRate; uint8 accessMode; uint16 entryRate; uint16 exitRate; uint16 haircutRate; address securityCouncil; address externalSanctionsList; uint256 initialTotalAssets; address superOperator; bool allowHighWaterMarkReset; }',
+      'InitStructV06 init',
+      'struct InitStructV06 { address underlying; string name; string symbol; address safe; address whitelistManager; address valuationManager; address admin; address feeReceiver; uint16 managementRate; uint16 performanceRate; uint8 accessMode; uint16 entryRate; uint16 exitRate; uint16 haircutRate; address securityCouncil; address externalSanctionsList; uint256 initialTotalAssets; address superOperator; bool allowHighWaterMarkReset; }',
     ])
 
-    const initStructEncoded = encodeAbiParameters(
-      [initAbiParams],
-      [
-        {
-          underlying: vault.asset,
-          name: vault.name ?? "",
-          symbol: vault.symbol ?? "",
-          safe: vault.safe,
-          whitelistManager: vault.whitelistManager,
-          valuationManager: vault.valuationManager,
-          admin: vault.owner,
-          feeReceiver: vault.feeReceiver,
-          managementRate: vault.feeRates.managementRate,
-          performanceRate: vault.feeRates.performanceRate,
-          accessMode: vault.accessMode,
-          entryRate: vault.feeRates.entryRate ?? 0,
-          exitRate: vault.feeRates.exitRate ?? 0,
-          haircutRate: vault.feeRates.haircutRate ?? 0,
-          securityCouncil: vault.securityCouncil,
-          externalSanctionsList: vault.externalSanctionsList,
-          initialTotalAssets: vault.initialTotalAssets,
-          superOperator: vault.superOperator,
-          allowHighWaterMarkReset: vault.allowHighWaterMarkReset,
-        }
-      ]
-    );
+    const init: InitStruct_v0_6_0 = {
+      underlying: vault.asset,
+      name: vault.name ?? "",
+      symbol: vault.symbol ?? "",
+      safe: vault.safe,
+      whitelistManager: vault.whitelistManager,
+      valuationManager: vault.valuationManager,
+      admin: vault.owner,
+      feeReceiver: vault.feeReceiver,
+      managementRate: vault.feeRates.managementRate,
+      performanceRate: vault.feeRates.performanceRate,
+      accessMode: vault.accessMode,
+      entryRate: vault.feeRates.entryRate ?? 0,
+      exitRate: vault.feeRates.exitRate ?? 0,
+      haircutRate: vault.feeRates.haircutRate ?? 0,
+      securityCouncil: vault.securityCouncil,
+      externalSanctionsList: vault.externalSanctionsList,
+      initialTotalAssets: vault.initialTotalAssets,
+      superOperator: vault.superOperator,
+      allowHighWaterMarkReset: vault.allowHighWaterMarkReset,
+    };
+
+    const initStructEncoded = encodeAbiParameters([initAbiParams], [init]);
 
     return encodeFunctionData({
       abi: [
