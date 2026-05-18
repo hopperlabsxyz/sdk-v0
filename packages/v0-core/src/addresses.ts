@@ -11,7 +11,8 @@ export const addresses = {
     "v0_6_0": "0x0000000000000000000000000000000000000000",
     "v0_5_0": "0xe50554ec802375c9c3f9c087a8a7bb8c26d3dedf",
     wrappedNative: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    optinFactory: "0x8D6f5479B14348186faE9BC7E636e947c260f9B1"
+    optinFactory: "0x8D6f5479B14348186faE9BC7E636e947c260f9B1",
+    isOptinFactoryV3: true,
   },
   [ChainId.ArbitrumMainnet]: {
     beaconProxyFactory: "0x58a7729125acA9e5E9C687018E66bfDd5b2D4490",
@@ -26,7 +27,8 @@ export const addresses = {
       beaconProxyFactory: "0x29f3dba953C57814A5579e08462724B9C760333e",
       feeRegistry: "0x45BA44B8899D39abdc383a25bB17fcD18240c6Bc",
     },
-    optinFactory: "0x9De724B0efEe0FbA07FE21a16B9Bf9bBb5204Fb4"
+    optinFactory: "0x9De724B0efEe0FbA07FE21a16B9Bf9bBb5204Fb4",
+    isOptinFactoryV3: true,
   },
   [ChainId.BaseMainnet]: {
     beaconProxyFactory: "0xC953Fd298FdfA8Ed0D38ee73772D3e21Bf19c61b",
@@ -34,7 +36,8 @@ export const addresses = {
     "v0_6_0": "0x0000000000000000000000000000000000000000",
     "v0_5_0": "0xE50554ec802375C9c3F9c087a8a7bb8C26d3DEDf",
     wrappedNative: "0x4200000000000000000000000000000000000006",
-    optinFactory: "0x6FC0F2320483fa03FBFdF626DDbAE2CC4B112b51"
+    optinFactory: "0x6FC0F2320483fa03FBFdF626DDbAE2CC4B112b51",
+    isOptinFactoryV3: true,
   },
   [ChainId.UnichainMainnet]: {
     beaconProxyFactory: "0xaba1A2e157Dae248f8630cA550bd826725Ff745c",
@@ -42,14 +45,16 @@ export const addresses = {
     "v0_6_0": "0x0000000000000000000000000000000000000000",
     "v0_5_0": "0xE50554ec802375C9c3F9c087a8a7bb8C26d3DEDf",
     wrappedNative: "0x4200000000000000000000000000000000000006",
-    optinFactory: "0x6FC0F2320483fa03FBFdF626DDbAE2CC4B112b51"
+    optinFactory: "0x6FC0F2320483fa03FBFdF626DDbAE2CC4B112b51",
+    isOptinFactoryV3: false,
   },
   [ChainId.BerachainMainnet]: {
     beaconProxyFactory: "0x7cf8cf276450bd568187fdc0b0959d30ec599853",
     feeRegistry: "0xaba1A2e157Dae248f8630cA550bd826725Ff745c",
     "v0_5_0": "0xE50554ec802375C9c3F9c087a8a7bb8C26d3DEDf",
     wrappedNative: "0x6969696969696969696969696969696969696969",
-    optinFactory: "0x245d1C095a0fFa6f1Af0f7Df81818DeFc9Cfc69D"
+    optinFactory: "0x245d1C095a0fFa6f1Af0f7Df81818DeFc9Cfc69D",
+    isOptinFactoryV3: false,
   },
   [ChainId.SonicMainnet]: {
     beaconProxyFactory: "0x99CD0b8b32B15922f0754Fddc21323b5278c5261",
@@ -57,7 +62,8 @@ export const addresses = {
     "v0_6_0": "0x0000000000000000000000000000000000000000",
     "v0_5_0": "0xE50554ec802375C9c3F9c087a8a7bb8C26d3DEDf",
     wrappedNative: "0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38",
-    optinFactory: "0x6FC0F2320483fa03FBFdF626DDbAE2CC4B112b51"
+    optinFactory: "0x6FC0F2320483fa03FBFdF626DDbAE2CC4B112b51",
+    isOptinFactoryV3: false,
   },
   [ChainId.MantleMainnet]: {
     beaconProxyFactory: "0x57D969B556C6AebB3Ac8f54c98CF3a3f921d5659",
@@ -65,7 +71,8 @@ export const addresses = {
     "v0_4_0": "0xA7260Cee56B679eC05a736A7b603b8DA8525Dd69",
     "v0_5_0": "0xC81Dd51239119Db80D5a6E1B7347F3C3BC8674d9",
     wrappedNative: "0x78c1b0C915c4FAA5FffA6CAbf0219DA63d7f4cb8",
-    optinFactory: "0xc094c224ce0406bc338e00837b96ad2e265f7287"
+    optinFactory: "0xc094c224ce0406bc338e00837b96ad2e265f7287",
+    isOptinFactoryV3: false,
   },
   [ChainId.WorldChainMainnet]: {
     beaconProxyFactory: "0x600fA26581771F56221FC9847A834B3E5fd34AF7",
@@ -73,7 +80,8 @@ export const addresses = {
     "v0_6_0": "0x0000000000000000000000000000000000000000",
     "v0_5_0": "0x1D42DbDde553F4099691A25F712bbd8f2686E355",
     wrappedNative: "0x4200000000000000000000000000000000000006",
-    optinFactory: "0xC094C224ce0406BC338E00837B96aD2e265F7287"
+    optinFactory: "0xC094C224ce0406BC338E00837B96aD2e265F7287",
+    isOptinFactoryV3: false,
   },
   [ChainId.AvalancheMainnet]: {
     beaconProxyFactory: "0x5e231c6d030a5c0f51fa7d0f891d3f50a928c685",
@@ -81,34 +89,39 @@ export const addresses = {
     "v0_6_0": "0x0000000000000000000000000000000000000000",
     "v0_5_0": "0x33F65C8D025b5418C7f8dd248C2Ec1d31881D465",
     wrappedNative: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
-    optinFactory: "0xC094C224ce0406BC338E00837B96aD2e265F7287"
+    optinFactory: "0xC094C224ce0406BC338E00837B96aD2e265F7287",
+    isOptinFactoryV3: true,
   },
   [ChainId.TacMainnet]: {
     beaconProxyFactory: "0x3e39E287B4c94aC18831A63E5a6183Aa42cd85c3",
     feeRegistry: "0x3408C51BFc34CBF7112a20Fb3F4Bc9b74aed7982",
     "v0_5_0": "0x11652Aead69716E1D5D132F3bf0848D2fD422b8a",
     wrappedNative: "0xB63B9f0eb4A6E6f191529D71d4D88cc8900Df2C9",
-    optinFactory: "0x66Ab87A9282dF99E38C148114F815a9C073ECA8D"
+    optinFactory: "0x66Ab87A9282dF99E38C148114F815a9C073ECA8D",
+    isOptinFactoryV3: false,
   },
   [ChainId.KatanaMainnet]: {
     beaconProxyFactory: "0x37f4b3f0102fdc1ff0c7ef644751052fb276dc6e",
     feeRegistry: "0xC0Ef4c34A118a1bEc0912B8Ba8C6424F871A1628",
     "v0_5_0": "0x7fe0c16eAa18562f1E37E6f6B205fDA70164e2fb",
     wrappedNative: "0x4200000000000000000000000000000000000006",
-    optinFactory: "0xC094C224ce0406BC338E00837B96aD2e265F7287"
+    optinFactory: "0xC094C224ce0406BC338E00837B96aD2e265F7287",
+    isOptinFactoryV3: false,
   },
   [ChainId.BscMainnet]: {
     feeRegistry: "0x9c275714Fb882988FbbFfdc39a162E0cc9feA64c",
     "v0_6_0": "0x0000000000000000000000000000000000000000",
     "v0_5_0": "0x7175E7E5C246e2E5c8C54Ede2ee0180e39fcA879",
     wrappedNative: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-    optinFactory: "0x3f680aB9E51EEED9381dE5275f4995611Ff884d5"
+    optinFactory: "0x3f680aB9E51EEED9381dE5275f4995611Ff884d5",
+    isOptinFactoryV3: false,
   },
   [ChainId.HyperEVMMainnet]: {
     feeRegistry: "0xd70937AA2B73A8a2100932c4f5a8D32c9bE8b80f",
     "v0_5_0": "0xC1D5F01A6491b97B94F3670Aed4BEcB897293CF8",
     wrappedNative: "0x5555555555555555555555555555555555555555",
-    optinFactory: "0x90beB507A1BA7D64633540cbce615B574224CD84"
+    optinFactory: "0x90beB507A1BA7D64633540cbce615B574224CD84",
+    isOptinFactoryV3: false,
   },
   [ChainId.LineaMainnet]: {
     feeRegistry: "0xC81Dd51239119Db80D5a6E1B7347F3C3BC8674d9",
@@ -116,45 +129,52 @@ export const addresses = {
     "v0_6_0": "0x0000000000000000000000000000000000000000",
     "v0_5_0": "0xA3C233C61436008e05EDdE6adb3f81a410fa80C2",
     wrappedNative: "0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f",
-    optinFactory: "0x8D6f5479B14348186faE9BC7E636e947c260f9B1"
+    optinFactory: "0x8D6f5479B14348186faE9BC7E636e947c260f9B1",
+    isOptinFactoryV3: false,
   },
   [ChainId.PlasmaMainnet]: {
     feeRegistry: "0xfd9fa4986C6cB8cbce6b632DD7c587EBCcaEDb7A",
     "v0_5_0": "0xa61FAEB94249F08e05e7eD7502D6Ec86297Bc9e4",
     wrappedNative: "0x6100E367285b01F48D07953803A2d8dCA5D19873",
-    optinFactory: "0xF838E8Bd649fc6fBC48D44E9D87273c0519C45c9"
+    optinFactory: "0xF838E8Bd649fc6fBC48D44E9D87273c0519C45c9",
+    isOptinFactoryV3: false,
   },
   [ChainId.PolygonMainnet]: {
     feeRegistry: "0x744F9cA26CD9F6Be5cf79A00b1Ad457145D9F691",
     "v0_6_0": "0x0000000000000000000000000000000000000000",
     "v0_5_0": "0x50f30E712D535b796C8543012D0C05218b89c7d5",
     wrappedNative: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
-    optinFactory: "0x0C0E287f6e4de685f4b44A5282A3ad4A29D05a91"
+    optinFactory: "0x0C0E287f6e4de685f4b44A5282A3ad4A29D05a91",
+    isOptinFactoryV3: false,
   },
   [ChainId.SeiMainnet]: {
     feeRegistry: "0xDd954bE514726Ed0C7156fe4aE06C539f7AE6C1c",
     "v0_5_0": "0x357F1C9754dFFceD7c2EFe086d2114909538047D",
     wrappedNative: "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
     optinFactory: "0xDa1d1De87C4D90A07a6462cCD9bE651a0d074362",
+    isOptinFactoryV3: false,
   },
   [ChainId.MonadMainnet]: {
     feeRegistry: "0xBf994c358f939011595AB4216AC005147863f9D6",
     "v0_5_0": "0x870dd43a868C35b036347c46042D97C7247EEa15",
     wrappedNative: "0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A",
-    optinFactory: "0xcCdC4d06cA12A29C47D5d105fED59a6D07E9cf70"
+    optinFactory: "0xcCdC4d06cA12A29C47D5d105fED59a6D07E9cf70",
+    isOptinFactoryV3: false,
   },
   [ChainId.OptimismMainnet]: {
     feeRegistry: "0x7AB55B30e3c382451FCCa104521a8B5F45bEeaf9",
     "v0_6_0": "0x0000000000000000000000000000000000000000",
     "v0_5_0": "0xBB2dcC67A94946400a605F2a97933471bE8BC538",
     wrappedNative: "0x4200000000000000000000000000000000000006",
-    optinFactory: "0xA8E0684887b9475f8942DF6a89bEBa5B25219632"
+    optinFactory: "0xA8E0684887b9475f8942DF6a89bEBa5B25219632",
+    isOptinFactoryV3: false,
   },
   [ChainId.HemiMainnet]: {
     feeRegistry: "0x35723a53cCB5AdecFBcf50Cd1b190e15D896c389",
     "v0_5_0": "0xE35901b2a7D8d38A0E49D9BC9dE7F4f9dF31Cc6d",
     "v0_6_0": "0x0000000000000000000000000000000000000000",
     wrappedNative: "0x4200000000000000000000000000000000000006",
-    optinFactory: "0xB457e9C025A8Af99E32b03668e34f80D20A71d2C"
+    optinFactory: "0xB457e9C025A8Af99E32b03668e34f80D20A71d2C",
+    isOptinFactoryV3: false,
   }
 } as const satisfies Record<ChainId, unknown>;

@@ -144,6 +144,18 @@ declare module "@lagoon-protocol/v0-core" {
       initialOwner: Address;
       initialDelay: bigint;
     }): ReturnType<typeof EncodingUtils.optinProxyWithVaultInitConstructorEncodedParams>;
+
+    /**
+     * Encodes the initialization call for a v0.6.0 vault — i.e. the
+     * `bytes call_data` argument expected by the v3 OptinProxyFactory's
+     * bytes-overload `createVaultProxy`.
+     *
+     * @param params - The deploy-time inputs not carried on the Vault instance.
+     * @returns The encoded initialization call data as a hexadecimal string.
+     */
+    initializeEncoded_v0_6_0(params: {
+      initialTotalAssets: bigint;
+    }): ReturnType<typeof EncodingUtils.initializeEncodedCall_v0_6_0>;
   }
 }
 
@@ -207,6 +219,10 @@ Vault.prototype.optinProxyWithVaultInitConstructorEncoded = function (params: {
   initialDelay: bigint;
 }) {
   return EncodingUtils.optinProxyWithVaultInitConstructorEncodedParams(this, params)
+}
+
+Vault.prototype.initializeEncoded_v0_6_0 = function (params: { initialTotalAssets: bigint }) {
+  return EncodingUtils.initializeEncodedCall_v0_6_0({ ...this, ...params })
 }
 
 export { Vault }
