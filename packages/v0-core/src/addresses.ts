@@ -176,5 +176,12 @@ export const addresses = {
     wrappedNative: "0x4200000000000000000000000000000000000006",
     optinFactory: "0xB457e9C025A8Af99E32b03668e34f80D20A71d2C",
     isOptinFactoryV3: false,
+  },
+  [ChainId.RaylsMainnet]: {
+    feeRegistry: "0x70cfb8860933C7aB2e3C92c942f403AF0941F96B",
+    "v0_5_1": "0xfF04a00Cb539617ff2AbBF23AEE037A1C52Bc5d5",
+    wrappedNative: "0x0000000000000000000000000000000000000400",
+    optinFactory: "0xfA032DE1214fD89b465c306BF46F778318bDe357",
+    isOptinFactoryV3: true,
   }
 } as const satisfies Record<ChainId, unknown>;

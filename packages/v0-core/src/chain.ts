@@ -19,6 +19,7 @@ export enum ChainId {
   MonadMainnet = 143,
   SeiMainnet = 1329,
   HemiMainnet = 43111,
+  RaylsMainnet = 72957,
 }
 
 export interface ChainMetadata {
@@ -190,6 +191,13 @@ export namespace ChainUtils {
       nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
       explorerUrl: "https://explorer.hemi.xyz",
       identifier: "hemi",
+    },
+    [ChainId.RaylsMainnet]: {
+      name: "Rayls",
+      id: ChainId.RaylsMainnet,
+      nativeCurrency: { name: "USD Rayls", symbol: "USDr", decimals: 18 },
+      explorerUrl: "https://explorer.rayls.com",
+      identifier: "rayls",
     }
   } as const
 }
