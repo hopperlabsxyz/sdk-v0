@@ -122,7 +122,7 @@ export const addresses = {
     "v0_5_0": "0xC1D5F01A6491b97B94F3670Aed4BEcB897293CF8",
     wrappedNative: "0x5555555555555555555555555555555555555555",
     optinFactory: "0x90beB507A1BA7D64633540cbce615B574224CD84",
-    isOptinFactoryV3: false,
+    isOptinFactoryV3: true,
   },
   [ChainId.LineaMainnet]: {
     feeRegistry: "0xC81Dd51239119Db80D5a6E1B7347F3C3BC8674d9",
