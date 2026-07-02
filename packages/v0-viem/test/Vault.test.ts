@@ -191,6 +191,19 @@ describe("augment/Vault", () => {
     expect(value).toStrictEqual(expectedValue);
   });
 
+  test2("getPendingSettlementAssets/Shares match the deprecated aliases", async ({ client }) => {
+    const flagship9sEth = await Vault.fetch("0x07ed467acd4ffd13023046968b0859781cb90d9b", client);
+    expect(await flagship9sEth?.getPendingSettlementAssets(client)).toStrictEqual(await flagship9sEth?.getPendingAssets(client));
+    expect(await flagship9sEth?.getPendingSettlementShares(client)).toStrictEqual(await flagship9sEth?.getPendingShares(client));
+  });
+
+  test.sequential("getTotalPending{Assets,Shares} equal the silo balances", async ({ client }) => {
+    const flagship9sEth = await Vault.fetch("0x07ed467acd4ffd13023046968b0859781cb90d9b", client);
+    const silo = await flagship9sEth?.getSiloBalances(client);
+    expect(await flagship9sEth?.getTotalPendingAssets(client)).toStrictEqual(silo?.assets);
+    expect(await flagship9sEth?.getTotalPendingShares(client)).toStrictEqual(silo?.shares);
+  });
+
   test2("should fetch 0 assets to unwind", async ({ client }) => {
     const expectedValue = {
       assetsToUnwind: 0n,

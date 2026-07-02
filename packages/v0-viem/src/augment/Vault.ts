@@ -74,26 +74,72 @@ declare module "@lagoon-protocol/v0-core" {
     getSafeBalance(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchBalanceOf>;
 
     /**
-     * Gets share and asset balances in the vault's pending silo
+     * Gets share and asset balances currently held in the vault's pending silo,
+     * i.e. everything queued across all not-yet-processed settlements.
+     * This is the total pending amount — the raw silo balances.
      * @param client - Viem client for blockchain interactions
      * @param parameters - Optional fetch parameters (block number, state overrides, etc.) include revalidata to bypass cache
      * @returns Promise<{shares: BigInt, assets: BigInt}> - Silo balances
+     * @see getTotalPendingAssets / getTotalPendingShares for the individual values
+     * @see getPendingSettlementAssets / getPendingSettlementShares for the next-settlement slice
      */
     getSiloBalances(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchPendingSiloBalances>;
 
     /**
-     * Gets the pending assets to be deposited in the next settlement
+     * Gets the assets pending to be deposited in the NEXT settlement only.
+     * Once a valuation has been proposed this returns that settlement's slice,
+     * which excludes deposits queued afterwards — use getTotalPendingAssets for
+     * the full silo balance.
      * @param client - Viem client for blockchain interactions
      * @param parameters - Optional fetch parameters
-     * @returns Promise<bigint> - Pending assets amount
+     * @returns Promise<bigint> - Next-settlement pending assets amount
+     * @see getTotalPendingAssets for everything queued in the silo
+     */
+    getPendingSettlementAssets(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchPendingSettlementAssets>;
+
+    /**
+     * Gets the shares pending to be redeemed in the NEXT settlement only.
+     * Once a valuation has been proposed this returns that settlement's slice,
+     * which excludes redemptions queued afterwards — use getTotalPendingShares
+     * for the full silo balance.
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters
+     * @returns Promise<bigint> - Next-settlement pending shares amount
+     * @see getTotalPendingShares for everything queued in the silo
+     */
+    getPendingSettlementShares(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchPendingSettlementShares>;
+
+    /**
+     * Gets the total assets currently pending in the silo (all unsettled deposits).
+     * This is what you usually want to answer "how much is pending right now".
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters
+     * @returns Promise<bigint> - Silo asset balance
+     * @see getPendingSettlementAssets for the next-settlement slice only
+     */
+    getTotalPendingAssets(client: Client, parameters?: FetchParameters): Promise<bigint>;
+
+    /**
+     * Gets the total shares currently pending in the silo (all unsettled redemptions).
+     * This is what you usually want to answer "how much is pending right now".
+     * @param client - Viem client for blockchain interactions
+     * @param parameters - Optional fetch parameters
+     * @returns Promise<bigint> - Silo share balance
+     * @see getPendingSettlementShares for the next-settlement slice only
+     */
+    getTotalPendingShares(client: Client, parameters?: FetchParameters): Promise<bigint>;
+
+    /**
+     * @deprecated Renamed to {@link getPendingSettlementAssets} — this only returns
+     * the NEXT settlement's slice. For the full silo balance use getTotalPendingAssets.
+     * Will be removed in the next major version.
      */
     getPendingAssets(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchPendingSettlementAssets>;
 
     /**
-     * Gets the pending shares to be redeemed in the next settlement
-     * @param client - Viem client for blockchain interactions
-     * @param parameters - Optional fetch parameters
-     * @returns Promise<bigint> - Pending shares amount
+     * @deprecated Renamed to {@link getPendingSettlementShares} — this only returns
+     * the NEXT settlement's slice. For the full silo balance use getTotalPendingShares.
+     * Will be removed in the next major version.
      */
     getPendingShares(client: Client, parameters?: FetchParameters): ReturnType<typeof fetchPendingSettlementShares>;
 
@@ -185,11 +231,34 @@ Vault.prototype.getSiloBalances =
     return fetchPendingSiloBalances(this, client, parameters)
   }
 
+Vault.prototype.getPendingSettlementAssets =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchPendingSettlementAssets(this, this.depositSettleId, client, parameters)
+  }
+
+Vault.prototype.getPendingSettlementShares =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchPendingSettlementShares(this, this.redeemSettleId, client, parameters)
+  }
+
+// ponytail: single silo balanceOf each; use getSiloBalances() to fetch both at once.
+Vault.prototype.getTotalPendingAssets =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchBalanceOf({ address: this.asset }, this.pendingSilo, client, parameters)
+  }
+
+Vault.prototype.getTotalPendingShares =
+  async function (client: Client, parameters: FetchParameters = {}) {
+    return fetchBalanceOf({ address: this.address }, this.pendingSilo, client, parameters)
+  }
+
+/** @deprecated use getPendingSettlementAssets */
 Vault.prototype.getPendingAssets =
   async function (client: Client, parameters: FetchParameters = {}) {
     return fetchPendingSettlementAssets(this, this.depositSettleId, client, parameters)
   }
 
+/** @deprecated use getPendingSettlementShares */
 Vault.prototype.getPendingShares =
   async function (client: Client, parameters: FetchParameters = {}) {
     return fetchPendingSettlementShares(this, this.redeemSettleId, client, parameters)
