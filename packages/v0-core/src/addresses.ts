@@ -184,5 +184,12 @@ export const addresses = {
     wrappedNative: "0x0000000000000000000000000000000000000400",
     optinFactory: "0xfA032DE1214fD89b465c306BF46F778318bDe357",
     isOptinFactoryV3: true,
+  },
+  [ChainId.FlareMainnet]: {
+    feeRegistry: "0x2dFc451aB2a4b9c95E68B480fbC2C759BaE68887",
+    "v0_6_0": "0x46940275d230fd2bb734fd1ced451b260b3bd7f8",
+    wrappedNative: "0x1D80c49BbBCd1C0911346656B529DF9E5c2F783d",
+    optinFactory: "0x70274C69Ef1fA492506394D982391c6f3008e785",
+    isOptinFactoryV3: true,
   }
 } as const satisfies Record<ChainId, unknown>;
