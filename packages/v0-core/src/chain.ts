@@ -20,6 +20,7 @@ export enum ChainId {
   SeiMainnet = 1329,
   HemiMainnet = 43111,
   RaylsMainnet = 72957,
+  FlareMainnet = 14,
 }
 
 export interface ChainMetadata {
@@ -198,6 +199,13 @@ export namespace ChainUtils {
       nativeCurrency: { name: "USD Rayls", symbol: "USDr", decimals: 18 },
       explorerUrl: "https://explorer.rayls.com",
       identifier: "rayls",
+    },
+    [ChainId.FlareMainnet]: {
+      name: "Flare",
+      id: ChainId.FlareMainnet,
+      nativeCurrency: { name: "Flare", symbol: "FLR", decimals: 18 },
+      explorerUrl: "https://flare-explorer.flare.network",
+      identifier: "flare",
     }
   } as const
 }
