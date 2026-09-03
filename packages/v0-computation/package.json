@@ -1,7 +1,7 @@
 {
   "name": "@lagoon-protocol/v0-computation",
   "description": "Computation package that defines some Lagoon related computations utilities",
-  "version": "0.18.10",
+  "version": "0.18.11",
   "license": "MIT",
   "type": "module",
   "main": "./dist/cjs/index.cjs",
@@ -38,7 +38,7 @@
     "vitest": "^3.2.3"
   },
   "peerDependencies": {
-    "@lagoon-protocol/v0-core": "^0.19.19",
+    "@lagoon-protocol/v0-core": "^0.19.20",
     "viem": "^2.0.0"
   },
   "private": false,
