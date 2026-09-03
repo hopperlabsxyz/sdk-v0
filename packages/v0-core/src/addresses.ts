@@ -167,7 +167,7 @@ export const addresses = {
     "v0_6_0": "0x0000000000000000000000000000000000000000",
     "v0_5_0": "0xBB2dcC67A94946400a605F2a97933471bE8BC538",
     wrappedNative: "0x4200000000000000000000000000000000000006",
-    optinFactory: "0xA8E0684887b9475f8942DF6a89bEBa5B25219632",
+    optinFactory: "0xb8245e23eb213994f057cfb2fd7d60a6f4424485",
     isOptinFactoryV3: false,
   },
   [ChainId.HemiMainnet]: {
