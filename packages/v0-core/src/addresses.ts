@@ -191,5 +191,12 @@ export const addresses = {
     wrappedNative: "0x1D80c49BbBCd1C0911346656B529DF9E5c2F783d",
     optinFactory: "0x70274C69Ef1fA492506394D982391c6f3008e785",
     isOptinFactoryV3: true,
+  },
+  [ChainId.RobinhoodMainnet]: {
+    feeRegistry: "0xF29514C94Db6d5780f2B6372abAeB0f1f5460070",
+    "v0_6_0": "0xAAcb8fF09bF4cF3897F13e4b33d12001fb70579A",
+    wrappedNative: "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+    optinFactory: "0x1e17e7848b2F56F75b16550471F455071a9F955f",
+    isOptinFactoryV3: true,
   }
 } as const satisfies Record<ChainId, unknown>;

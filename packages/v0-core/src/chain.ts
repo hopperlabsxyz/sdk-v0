@@ -21,6 +21,7 @@ export enum ChainId {
   HemiMainnet = 43111,
   RaylsMainnet = 72957,
   FlareMainnet = 14,
+  RobinhoodMainnet = 4663,
 }
 
 export interface ChainMetadata {
@@ -206,6 +207,13 @@ export namespace ChainUtils {
       nativeCurrency: { name: "Flare", symbol: "FLR", decimals: 18 },
       explorerUrl: "https://flare-explorer.flare.network",
       identifier: "flare",
+    },
+    [ChainId.RobinhoodMainnet]: {
+      name: "Robinhood Chain",
+      id: ChainId.RobinhoodMainnet,
+      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+      explorerUrl: "https://robinhoodchain.blockscout.com",
+      identifier: "robinhood",
     }
   } as const
 }
