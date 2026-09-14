@@ -22,6 +22,7 @@ export enum ChainId {
   RaylsMainnet = 72957,
   FlareMainnet = 14,
   RobinhoodMainnet = 4663,
+  ArcMainnet = 5042,
 }
 
 export interface ChainMetadata {
@@ -214,6 +215,13 @@ export namespace ChainUtils {
       nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
       explorerUrl: "https://robinhoodchain.blockscout.com",
       identifier: "robinhood",
+    },
+    [ChainId.ArcMainnet]: {
+      name: "Arc",
+      id: ChainId.ArcMainnet,
+      nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
+      explorerUrl: "https://explorer.arc.io",
+      identifier: "arc",
     }
   } as const
 }

@@ -198,5 +198,13 @@ export const addresses = {
     wrappedNative: "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
     optinFactory: "0x1e17e7848b2F56F75b16550471F455071a9F955f",
     isOptinFactoryV3: true,
+  },
+  [ChainId.ArcMainnet]: {
+    feeRegistry: "0xAAcb8fF09bF4cF3897F13e4b33d12001fb70579A",
+    "v0_6_0": "0xfa74576133e64c84E24F3a8205c9C69a02053e1C",
+    // Arc has no wrapped native: USDC is the gas token, so the factory stores the zero address.
+    wrappedNative: "0x0000000000000000000000000000000000000000",
+    optinFactory: "0xf185b0083fd2446d3742FE3f4C3175B7e306752b",
+    isOptinFactoryV3: true,
   }
 } as const satisfies Record<ChainId, unknown>;
