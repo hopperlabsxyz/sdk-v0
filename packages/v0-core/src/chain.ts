@@ -220,7 +220,7 @@ export namespace ChainUtils {
       name: "Arc",
       id: ChainId.ArcMainnet,
       nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
-      explorerUrl: "https://arcscan.app",
+      explorerUrl: "https://explorer.arc.io",
       identifier: "arc",
     }
   } as const
