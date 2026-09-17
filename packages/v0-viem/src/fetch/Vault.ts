@@ -749,8 +749,9 @@ export async function fetchTotalAssetsTimestamps(
   const data = await getStorageAt(client, { slot, address, ...restParams });
   if (!data) throw new StorageFetchError(slot);
   const value = hexToBigInt(data);
-  const totalAssetsLifespan = extractUint128(value, 0);
-  const totalAssetsExpiration = extractUint128(value, 1);
+  // The struct declares the expiration first, so it sits in the low 128 bits.
+  const totalAssetsExpiration = extractUint128(value, 0);
+  const totalAssetsLifespan = extractUint128(value, 1);
   return { totalAssetsExpiration, totalAssetsLifespan };
 }
 
