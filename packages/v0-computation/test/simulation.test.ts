@@ -1,5 +1,7 @@
 import { expect, test } from "vitest";
-import { simulate } from "../src/simulation";
+import { FeesExceedTotalAssetsError, simulate } from "../src/simulation";
+import { SECONDS_PER_YEAR } from "../src/constants";
+import { computeTotalAssetsAtHighWaterMark } from "../src/totalAssetsAtHighWaterMark";
 import { SimulationInput } from "../src/types";
 import { Version } from "@lagoon-protocol/v0-core";
 
@@ -160,4 +162,45 @@ test("simulation should not throw when currentPricePerShare is 0n", () => {
     expect(result.periodGrossApr).toBeUndefined();
     expect(result.thirtyDaysNetApr).toBeUndefined();
     expect(result.inceptionNetApr).toBeUndefined();
+});
+
+// close(0) reverts on-chain: fees accrued since lastFeeTime exceed the proposal.
+const closingVault = {
+  decimals: 18,
+  underlyingDecimals: 6,
+  newTotalAssets: 0n,
+  totalAssets: 90_000_000n,
+  totalSupply: 90_000_000_000_000_000_000n,
+  highWaterMark: 1_000_000n,
+  lastFeeTime: 1780305935n,
+  feeRates: { managementRate: 200, performanceRate: 0, entryRate: 0, exitRate: 0 },
+  version: Version.v0_6_0,
+  protocolRate: 0n,
+};
+const settlementAt = (totalAssetsForSimulation: bigint): SimulationInput => ({
+  totalAssetsForSimulation,
+  assetsInSafe: 0n,
+  pendingSiloBalances: { assets: 0n, shares: 0n },
+  pendingSettlement: { assets: 0n, shares: 0n },
+  settleDeposit: true,
+  simulationTimestamp: 1790334000n,
+});
+
+test("simulation throws the settlement's revert when fees exceed the proposed total assets", () => {
+  expect(() => simulate(closingVault, settlementAt(0n))).toThrow(FeesExceedTotalAssetsError);
+  expect(() => simulate(closingVault, settlementAt(90_000_000n))).not.toThrow();
+});
+
+test("fees equal to the proposed total assets settle, one unit less reverts", () => {
+  // One year at 2% on the average of 1000 and the proposal: 11 for a proposal of 10 or 11.
+  const vault = { ...closingVault, totalAssets: 1000n, totalSupply: 10n ** 15n, lastFeeTime: 0n };
+  const at = (proposed: bigint) => ({ ...settlementAt(proposed), simulationTimestamp: BigInt(SECONDS_PER_YEAR) });
+  expect(() => simulate(vault, at(11n))).not.toThrow();
+  expect(() => simulate(vault, at(10n))).toThrow(FeesExceedTotalAssetsError);
+});
+
+test("a proposed total assets of 0 is a proposal, not a missing value", () => {
+  expect(computeTotalAssetsAtHighWaterMark({ ...closingVault }, 0n)).not.toBe(
+    computeTotalAssetsAtHighWaterMark({ ...closingVault })
+  );
 });
