@@ -4,6 +4,17 @@ import  { Version } from "@lagoon-protocol/v0-core";
 
 import { SECONDS_PER_YEAR } from "../constants";
 
+/** Thrown when fees exceed the proposed total assets, where settlement reverts. */
+export class FeesExceedTotalAssetsError extends Error {
+  constructor(
+    readonly fees: bigint,
+    readonly totalAssets: bigint
+  ) {
+    super(`Fees (${fees}) exceed the proposed total assets (${totalAssets}): the settlement would revert.`);
+    this.name = "FeesExceedTotalAssetsError";
+  }
+}
+
 /**
  * Computes the fees for a vault
  * @param vault - The vault to compute the fees for
@@ -74,6 +85,11 @@ export function computeFees(
 
   const totalFeesInAssets =
     performanceFeesInAssets.value + managementFeesInAssets;
+
+  // The contract's `_totalAssets - totalFees` is checked arithmetic: it reverts (Panic 0x11) here.
+  if (totalFeesInAssets > totalAssetsForSimulation) {
+    throw new FeesExceedTotalAssetsError(totalFeesInAssets, totalAssetsForSimulation);
+  }
 
   const totalFeesInShares = VaultUtils.convertToShares(totalFeesInAssets, {
     decimalsOffset,

@@ -33,7 +33,7 @@ export function computeTotalAssetsAtHighWaterMark(
   const oneShare = 10n ** BigInt(vault.decimals);
   const managementFee = simulateManagementFees(
     {
-      proposedTotalAssets: newTotalAssets || vault.totalAssets,
+      proposedTotalAssets: newTotalAssets ?? vault.totalAssets,
     },
     {
       totalAssets: vault.totalAssets,
