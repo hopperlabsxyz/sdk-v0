@@ -1,5 +1,5 @@
-import { type Address, User, vaultAbi_v0_5_0 as vaultAbi } from "@lagoon-protocol/v0-core";
-import {  type Client } from "viem";
+import { type Address, User, tryCatch, vaultAbi_v0_5_0 as vaultAbi } from "@lagoon-protocol/v0-core";
+import {  type Client, parseAbi } from "viem";
 import type { FetchParameters } from "../types";
 import { readContract } from "viem/actions";
 import { convertToAssets, convertToShares, fetchEpochAndSettleIds, fetchLastDepositRequestId, fetchLastRedeemRequestId } from "./Vault";
@@ -140,6 +140,19 @@ export async function fetchMaxMint(
     functionName: "claimableDepositRequest",
     args: [0n, address]
   });
+  if (claimableDepositRequest > 0n && await chargesEntryAndExitFees(vault, client, parameters)) {
+    // Since v0.6.0 the vault takes the entry fee recorded at settlement out of the
+    // claimable shares, and its own maxMint applies that rate. It answers 0 while the
+    // vault is paused, so the conversion stays the fallback.
+    const netShares = await readContract(client, {
+      ...parameters,
+      address: vault,
+      abi: vaultAbi,
+      functionName: "maxMint",
+      args: [address]
+    });
+    if (netShares > 0n) return netShares;
+  }
   return convertToShares({ assets: claimableDepositRequest, epochId: lastRequestDepositId }, vault, client, parameters);
 }
 
@@ -188,7 +201,45 @@ export async function fetchMaxWithdraw(
     functionName: "claimableRedeemRequest",
     args: [0n, address]
   });
+  if (claimableRedeemRequest > 0n && await chargesEntryAndExitFees(vault, client, parameters)) {
+    // Since v0.6.0 the vault takes the exit fee recorded at settlement out of the
+    // claimable request, and its own maxWithdraw applies that rate. It answers 0 while
+    // the vault is paused, so the conversion stays the fallback. Only read when a
+    // request is claimable: with none, a closed vault's maxWithdraw is the share
+    // balance, which the position already counts.
+    const netAssets = await readContract(client, {
+      ...parameters,
+      address: vault,
+      abi: vaultAbi,
+      functionName: "maxWithdraw",
+      args: [address]
+    });
+    if (netAssets > 0n) return netAssets;
+  }
   return convertToAssets({ shares: claimableRedeemRequest, epochId: lastRequestRedeemId }, vault, client, parameters);
+}
+
+/**
+ * Whether the vault charges entry and exit fees on claims (v0.6.0 and later).
+ * Earlier versions charge neither, and v0.1.0 does not override maxMint, so they
+ * keep the plain conversion. A vault without version() is an early one.
+ */
+async function chargesEntryAndExitFees(
+  vault: Address,
+  client: Client,
+  parameters: FetchParameters = {}
+): Promise<boolean> {
+  const { data: version } = await tryCatch(
+    readContract(client, {
+      ...parameters,
+      address: vault,
+      abi: parseAbi(["function version() view returns (string)"]),
+      functionName: "version"
+    })
+  );
+  const match = version?.match(/^v(\d+)\.(\d+)\./);
+  if (!match) return false;
+  return Number(match[1]) > 0 || Number(match[2]) >= 6;
 }
 
 
