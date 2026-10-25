@@ -204,3 +204,11 @@ test("a proposed total assets of 0 is a proposal, not a missing value", () => {
     computeTotalAssetsAtHighWaterMark({ ...closingVault })
   );
 });
+
+test("computeTotalAssetsAtHighWaterMark leaves the vault it is given unchanged", () => {
+  const vault = { ...closingVault };
+  const highWaterMark = vault.highWaterMark;
+  const first = computeTotalAssetsAtHighWaterMark(vault);
+  expect(vault.highWaterMark).toBe(highWaterMark);
+  expect(computeTotalAssetsAtHighWaterMark(vault)).toBe(first);
+});

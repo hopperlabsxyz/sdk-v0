@@ -49,11 +49,11 @@ export function computeTotalAssetsAtHighWaterMark(
   });
 
   // by adding 1n we make sure we are reaching the value for assets at which performance will start
-  // to happen.
-  vault.highWaterMark += 1n;
+  // to happen. Kept local: the caller's vault object must not change.
+  const highWaterMark = vault.highWaterMark + 1n;
 
   const _totalSupply =
     vault.totalSupply + managementFeeInShares + 10n ** BigInt(decimalsOffset);
-  const nominator = vault.highWaterMark * _totalSupply;
+  const nominator = highWaterMark * _totalSupply;
   return nominator / oneShare - 1n;
 }
